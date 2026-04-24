@@ -11,6 +11,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
+import { writeSubscriptionByUserId } from '../_shared/subscription-write.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -139,13 +140,12 @@ serve(async (req: Request) => {
 
   console.log('complete-checkout: upserting subscription', { user_id: user.id, plan: planCode, sub_id: sub.id });
 
-  const { error: upsertErr } = await supabase
-    .from('subscriptions')
-    .upsert(subscriptionRow, { onConflict: 'user_id' });
-
-  if (upsertErr) {
-    console.error('complete-checkout: upsert failed', upsertErr);
-    return new Response(JSON.stringify({ error: 'DB error', detail: upsertErr.message }), {
+  try {
+    await writeSubscriptionByUserId(supabase, subscriptionRow);
+  } catch (upsertErr) {
+    const detail = upsertErr instanceof Error ? upsertErr.message : String(upsertErr);
+    console.error('complete-checkout: subscription write failed', upsertErr);
+    return new Response(JSON.stringify({ error: 'DB error', detail }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }

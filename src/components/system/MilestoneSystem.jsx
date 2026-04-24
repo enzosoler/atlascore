@@ -2,18 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { toast } from 'sonner';
 import {
   Trophy,
   Flame,
   Target,
-  Zap,
   Star,
   Calendar,
   CheckCircle,
   TrendingUp,
-  Award,
-  Medal,
   Crown,
   Sparkles,
   X,
@@ -381,7 +377,7 @@ export default function MilestoneSystem({ open, onClose }) {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes milestonePop {
           0% {
             transform: scale(0.5) rotate(-5deg);

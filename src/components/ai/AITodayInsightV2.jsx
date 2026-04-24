@@ -4,12 +4,10 @@
  * Built from scratch with the new design system
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Sparkles,
   Brain,
-  Target,
-  TrendingUp,
   AlertCircle,
   CheckCircle,
   ChevronRight,

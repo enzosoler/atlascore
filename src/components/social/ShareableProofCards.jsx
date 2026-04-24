@@ -7,7 +7,6 @@ import {
   Share2,
   Download,
   Trophy,
-  Flame,
   Scale,
   Dumbbell,
   CheckCircle,

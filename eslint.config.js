@@ -17,6 +17,15 @@ const V2_IMPORT_ALLOWLIST = [
 
 export default [
   {
+    ignores: [
+      ".claude/**",
+      "android/app/build/**",
+      "dist/**",
+      "coverage/**",
+      "reports/**",
+    ],
+  },
+  {
     files: [
       "src/components/**/*.{js,mjs,cjs,jsx}",
       "src/pages/**/*.{js,mjs,cjs,jsx}",
@@ -66,6 +75,7 @@ export default [
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
   {
@@ -80,7 +90,11 @@ export default [
         ecmaFeatures: { jsx: true },
       },
     },
+    plugins: {
+      "react-hooks": pluginReactHooks,
+    },
     rules: {
+      "react-hooks/exhaustive-deps": "warn",
       "no-restricted-imports": [
         "error",
         {

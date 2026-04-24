@@ -1,31 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import {
-  Target,
   TrendingUp,
   Calendar,
   Activity,
   UtensilsCrossed,
   Scale,
   Dumbbell,
-  Zap,
   AlertTriangle,
   CheckCircle,
-  Clock,
   Flame,
   Trophy,
   Share2,
   RefreshCw,
-  Plus,
-  ChevronRight,
   Brain,
   Heart,
   Star,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { 
   calculateReadinessScore, 
   generateTrainingRecommendation,

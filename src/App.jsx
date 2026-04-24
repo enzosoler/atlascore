@@ -933,6 +933,7 @@ function AppRoutes() {
         <Route path="/auth/signup"   element={<V3AuthSignup />} />
         <Route path="/auth/forgot"   element={<V3ForgotPassword />} />
         <Route path="/auth/reset"    element={<V3ResetPassword />} />
+        <Route path="/auth/update-password" element={<Navigate to="/auth/reset" replace />} />
         <Route path="/auth/magic"    element={<V3MagicLinkSent />} />
         <Route path="/auth/callback" element={<V3AuthCallback />} />
 

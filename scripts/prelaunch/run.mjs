@@ -127,8 +127,8 @@ const detectedCommands = {
   lint: packageJson.scripts?.lint ? 'npm run lint' : null,
   typecheck: packageJson.scripts?.typecheck ? 'npm run typecheck' : null,
   unit: packageJson.scripts?.test ? 'npm test' : null,
-  integration: null,
-  e2e: null,
+  integration: packageJson.scripts?.prelaunch ? 'npm run prelaunch' : null,
+  e2e: packageJson.scripts?.['test:e2e'] ? 'npm run test:e2e' : null,
 };
 
 const gitCommit = runCommand('git rev-parse HEAD').stdout;
@@ -195,7 +195,9 @@ const hasCspConfig =
 const hasTraceId =
   runCommand("rg -n \"trace_id|traceId\" src supabase").exitCode === 0;
 const hasRunbook =
-  fileExists('docs/runbooks/launch.md') || fileExists('src/docs/launch.md');
+  fileExists('docs/runbooks/launch.md') ||
+  fileExists('src/docs/launch.md') ||
+  fileExists('docs/LAUNCH_OPS.md');
 const hasPolicyDocs =
   runCommand("find . -maxdepth 3 -type f \\( -iname '*privacy*' -o -iname '*terms*' -o -iname '*consent*' \\)")
     .stdout
@@ -224,10 +226,12 @@ const checks = [
     'Functional',
     'P0',
     'BLOCKED',
-    'No staging smoke suite or E2E runner is configured, so signup/login/logout/reset and persistence flows were not executed end-to-end.',
+    detectedCommands.e2e
+      ? 'An E2E command is configured, but no staging smoke run was executed in this pass, so critical auth and billing flows remain unproven end-to-end.'
+      : 'No staging smoke suite or E2E runner is configured, so signup/login/logout/reset and persistence flows were not executed end-to-end.',
     [
       'staging_environment=not_configured_in_repo',
-      'e2e_command=not_detected',
+      `e2e_command=${detectedCommands.e2e ?? 'not_detected'}`,
       'critical_routes=src/App.jsx, src/pages/Auth.jsx, src/components/rbac/RouteGuard.jsx',
     ]
   ),
@@ -324,7 +328,9 @@ const checks = [
     hasTraceId && hasRunbook ? 'PASS' : 'FAIL',
     hasTraceId && hasRunbook
       ? 'Trace correlation and launch runbook were detected.'
-      : 'No launch runbook was found and trace_id correlation is not consistently present in the repo.',
+      : hasRunbook
+        ? 'A launch runbook exists, but trace_id correlation is not consistently present in the repo.'
+        : 'No launch runbook was found and trace_id correlation is not consistently present in the repo.',
     [
       `trace_id_detected=${hasTraceId}`,
       `runbook_detected=${hasRunbook}`,

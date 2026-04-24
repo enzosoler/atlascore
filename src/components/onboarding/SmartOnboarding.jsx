@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -6,17 +6,14 @@ import { toast } from 'sonner';
 import {
   User,
   Target,
-  Activity,
   UtensilsCrossed,
   TrendingUp,
   CheckCircle,
   ArrowRight,
   Calculator,
-  Calendar,
   Zap,
   Scale,
   Dumbbell,
-  Clock,
   Sparkles,
 } from 'lucide-react';
 import { 

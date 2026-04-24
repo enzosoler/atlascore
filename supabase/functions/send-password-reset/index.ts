@@ -12,17 +12,40 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { renderEmail } from '../_shared/templates.ts';
 
 const APP_URL = Deno.env.get('APP_URL') || 'https://useatlascore.com';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const SEND_EMAIL_URL = `${SUPABASE_URL}/functions/v1/send-email`;
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'atlas.core <noreply@useatlascore.com>';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+function sanitizeLogValue(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+
+  return value
+    .replace(/https?:\/\/\S+/gi, '[redacted-url]')
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [redacted]')
+    .replace(/\b(re_[A-Za-z0-9_-]+|sk_(?:live|test)_[A-Za-z0-9_-]+|sb_[A-Za-z0-9._-]+|eyJ[A-Za-z0-9._-]+)\b/g, '[redacted-token]');
+}
+
+function getClientIp(req: Request): string | null {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    const first = forwardedFor.split(',')[0]?.trim();
+    if (first) return first;
+  }
+
+  return req.headers.get('cf-connecting-ip') ||
+    req.headers.get('x-real-ip') ||
+    null;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -52,24 +75,49 @@ Deno.serve(async (req) => {
     });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+  const { data: rateLimitRows, error: rateLimitError } = await admin.rpc(
+    'consume_password_reset_rate_limit',
+    {
+      p_email: normalizedEmail,
+      p_ip: getClientIp(req),
+    },
+  );
+
+  if (rateLimitError) {
+    console.error('send-password-reset: rate limit check failed:', sanitizeLogValue(rateLimitError.message));
+    return new Response(JSON.stringify({ error: 'Password reset temporarily unavailable' }), {
+      status: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const rateLimit = Array.isArray(rateLimitRows) ? rateLimitRows[0] : rateLimitRows;
+  if (rateLimit?.allowed === false) {
+    const retryAfter = String(rateLimit.retry_after_seconds ?? 3600);
+    return new Response(JSON.stringify({ error: 'Too many password reset requests. Try again later.' }), {
+      status: 429,
+      headers: { ...CORS, 'Content-Type': 'application/json', 'Retry-After': retryAfter },
+    });
+  }
 
   // 1. Look up the user to get their name and preferred language
   const { data: userData } = await admin.auth.admin.listUsers();
-  const user = userData?.users?.find(u => u.email?.toLowerCase() === email.trim().toLowerCase());
+  const user = userData?.users?.find(u => u.email?.toLowerCase() === normalizedEmail);
 
-  const lang = 'en';
+  const lang = language?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en';
 
   const firstName = user?.user_metadata?.full_name
     ? (user.user_metadata.full_name as string).split(' ')[0]
-    : email.split('@')[0];
+    : normalizedEmail.split('@')[0];
 
   // 2. Generate the password recovery link
   let resetUrl: string;
   try {
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       options: { redirectTo: `${APP_URL}/auth/callback?mode=reset` },
     });
 
@@ -90,38 +138,67 @@ Deno.serve(async (req) => {
     });
   }
 
-  // 3. Send the email via send-email function
+  if (!RESEND_API_KEY) {
+    console.error('send-password-reset: RESEND_API_KEY not configured');
+    return new Response(JSON.stringify({ error: 'Email delivery not configured' }), {
+      status: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const rendered = renderEmail('reset_password', lang, {
+    first_name: firstName,
+    reset_password_url: resetUrl,
+    confirm_email_url: '',
+    trial_end_date: '',
+    trial_days_left: '',
+    retry_date: '',
+    access_end_date: '',
+    report_date_range: '',
+    weekly_report_url: APP_URL,
+  });
+
+  // 3. Send directly via Resend so password reset does not depend on cross-function auth.
   try {
-    const res = await fetch(SEND_EMAIL_URL, {
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
       },
       body: JSON.stringify({
-        type: 'reset_password',
-        to: email.trim().toLowerCase(),
-        language: lang,
-        userId: user?.id,
-        payload: { firstName, resetUrl, appUrl: APP_URL },
+        from: FROM_EMAIL,
+        to: [normalizedEmail],
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
       }),
     });
 
     if (!res.ok) {
       const text = await res.text();
-      console.error('send-password-reset: send-email failed:', res.status, text);
+      console.error('send-password-reset: resend failed:', {
+        status: res.status,
+        body: sanitizeLogValue(text),
+        email: normalizedEmail,
+      });
       return new Response(JSON.stringify({ error: 'Email delivery failed' }), {
         status: 502, headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
+
+    const data = await res.json();
+    console.log('send-password-reset: resend accepted', {
+      email: normalizedEmail,
+      resendId: data?.id ?? null,
+    });
   } catch (e) {
-    console.error('send-password-reset: send-email exception:', e);
+    console.error('send-password-reset: resend exception:', e);
     return new Response(JSON.stringify({ error: 'Email delivery failed' }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }
 
-  console.log(`send-password-reset: ✓ reset email sent to ${email}`);
+  console.log(`send-password-reset: ✓ reset email sent to ${normalizedEmail}`);
   return new Response(JSON.stringify({ success: true }), {
     status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
   });

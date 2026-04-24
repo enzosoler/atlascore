@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Calendar, Share2, TrendingUp, Trophy, ChevronRight } from 'lucide-react';
+import { Calendar, Share2, TrendingUp, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function getWeekDateRange() {

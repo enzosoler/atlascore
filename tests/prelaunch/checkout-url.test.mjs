@@ -22,6 +22,8 @@ const here = path.dirname(new URL(import.meta.url).pathname);
 const billingServicePath = path.resolve(here, '../../src/services/billingService.js');
 const purchaseSuccessPath = path.resolve(here, '../../src/redesign/v3/routes/V3WebPurchaseSuccess.jsx');
 const createCheckoutPath = path.resolve(here, '../../supabase/functions/create-checkout/index.ts');
+const createCustomerPortalPath = path.resolve(here, '../../supabase/functions/create-customer-portal/index.ts');
+const useCustomerPortalPath = path.resolve(here, '../../src/hooks/useCustomerPortal.js');
 
 test('billingService success_url contains {CHECKOUT_SESSION_ID}', () => {
   const source = readFileSync(billingServicePath, 'utf8');
@@ -62,5 +64,57 @@ test('create-checkout fallback URLs use current web billing routes', () => {
   assert.ok(
     source.includes('/webapp/billing/paywall'),
     'create-checkout fallback cancel_url must point at /webapp/billing/paywall.',
+  );
+});
+
+test('create-checkout resolves redirect origins through a server allowlist', () => {
+  const source = readFileSync(createCheckoutPath, 'utf8');
+  assert.ok(
+    source.includes('ALLOWED_REDIRECT_ORIGINS'),
+    'create-checkout must support a server-side redirect allowlist.',
+  );
+  assert.ok(
+    source.includes('resolveAllowedAppOrigin(appUrl, body.success_url || body.cancel_url)'),
+    'create-checkout must validate redirect origins before creating Stripe sessions.',
+  );
+  assert.ok(
+    !source.includes('success_url: body.success_url ||'),
+    'create-checkout must not trust success_url from the client directly.',
+  );
+  assert.ok(
+    !source.includes('cancel_url: body.cancel_url ||'),
+    'create-checkout must not trust cancel_url from the client directly.',
+  );
+});
+
+test('create-customer-portal resolves return_url through a server allowlist', () => {
+  const source = readFileSync(createCustomerPortalPath, 'utf8');
+  assert.ok(
+    source.includes('ALLOWED_REDIRECT_ORIGINS'),
+    'create-customer-portal must support a server-side redirect allowlist.',
+  );
+  assert.ok(
+    source.includes('resolveAllowedAppOrigin(appUrl, return_url)'),
+    'create-customer-portal must validate return_url before creating portal sessions.',
+  );
+  assert.ok(
+    source.includes('return_url: `${redirectOrigin}/webapp/billing`'),
+    'create-customer-portal must return users to the known billing route only.',
+  );
+  assert.ok(
+    !source.includes('return_url: return_url ||'),
+    'create-customer-portal must not trust return_url from the client directly.',
+  );
+});
+
+test('useCustomerPortal sends the same auth header required by create-customer-portal', () => {
+  const source = readFileSync(useCustomerPortalPath, 'utf8');
+  assert.ok(
+    source.includes("supabase.auth.getSession()"),
+    'useCustomerPortal must read the current session before invoking create-customer-portal.',
+  );
+  assert.ok(
+    source.includes('Authorization: `Bearer ${accessToken}`'),
+    'useCustomerPortal must send the bearer token required by create-customer-portal.',
   );
 });

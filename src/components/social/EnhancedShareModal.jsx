@@ -7,8 +7,6 @@ import {
   Instagram,
   Twitter,
   Facebook,
-  Link2,
-  Copy,
   Check,
   Trophy,
   Flame,
@@ -60,8 +58,6 @@ export default function EnhancedShareModal({ open, onClose, userData }) {
   const [copied, setCopied] = useState(false);
   const [customText, setCustomText] = useState('');
   const cardRef = useRef(null);
-
-  if (!open) return null;
 
   const displayName = user?.full_name || user?.email?.split('@')[0] || 'Athlete';
 
@@ -244,6 +240,8 @@ export default function EnhancedShareModal({ open, onClose, userData }) {
   }, [selectedTemplate, generateCardImage]);
 
   const selectedTemplateData = templates.find(t => t.id === selectedTemplate);
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>

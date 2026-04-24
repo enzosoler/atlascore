@@ -26,6 +26,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { writeSubscriptionByUserId } from '../_shared/subscription-write.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -287,11 +288,9 @@ async function grantSubscription(
     stripe_price_id: details.productId ?? null,
   };
 
-  const { error } = await supabase
-    .from('subscriptions')
-    .upsert(row, { onConflict: 'user_id' });
-
-  if (error) {
+  try {
+    await writeSubscriptionByUserId(supabase, row);
+  } catch (error) {
     console.error('revenuecat-webhook: Failed to grant subscription:', error);
     throw error;
   }

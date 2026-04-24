@@ -28,7 +28,7 @@ export function registerServiceWorker() {
       if (window.caches) {
         caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
       }
-      // eslint-disable-next-line no-console
+       
       console.log('[SW] Localhost detected — unregistered existing service workers and cleared caches.');
     } catch (err) {
       // ignore

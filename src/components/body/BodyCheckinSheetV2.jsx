@@ -4,17 +4,14 @@
  * Built from scratch with the new design system
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Scale,
   Ruler,
   Camera,
   TrendingUp,
   TrendingDown,
-  Plus,
-  Minus,
   CheckCircle,
-  AlertCircle,
   Calendar,
   Clock,
   Target,

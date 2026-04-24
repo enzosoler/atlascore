@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Info,
-  Loader2,
   XCircle,
 } from 'lucide-react';
 import {

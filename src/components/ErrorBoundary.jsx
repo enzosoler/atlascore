@@ -1,7 +1,5 @@
 import React from 'react';
-import { RefreshCw, ArrowLeft } from 'lucide-react';
 import { captureException } from '@/lib/sentry';
-import { DataState } from '@/components/shared/DataState';
 
 function isChunkLoadError(error) {
   const msg = error?.message || '';

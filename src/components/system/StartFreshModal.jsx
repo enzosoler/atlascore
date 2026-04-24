@@ -4,15 +4,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import {
   X,
-  AlertTriangle,
   RefreshCw,
   RotateCcw,
   Zap,
   Check,
   ArrowRight,
-  Calendar,
-  Target,
-  TrendingUp,
 } from 'lucide-react';
 
 const RESET_OPTIONS = [

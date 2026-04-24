@@ -8,7 +8,7 @@
  */
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Share2, Download, Loader2 } from 'lucide-react';
+import { X, Share2, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { track } from '@/lib/analytics';
 import StreakShareCard from './StreakShareCard';

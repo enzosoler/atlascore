@@ -25,6 +25,56 @@ interface PortalRequest {
   return_url?: string;
 }
 
+function buildAllowedOrigins(appUrl: string): string[] {
+  const configured = (Deno.env.get('ALLOWED_REDIRECT_ORIGINS') || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const defaults = [
+    appUrl,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+    'http://localhost:4174',
+    'http://127.0.0.1:4174',
+    'http://localhost:4175',
+    'http://127.0.0.1:4175',
+  ];
+
+  return Array.from(new Set(
+    [...configured, ...defaults]
+      .map((value) => {
+        try {
+          return new URL(value).origin;
+        } catch {
+          return null;
+        }
+      })
+      .filter((value): value is string => Boolean(value))
+  ));
+}
+
+function resolveAllowedAppOrigin(appUrl: string, candidateUrl?: string): string {
+  const allowedOrigins = buildAllowedOrigins(appUrl);
+
+  if (!candidateUrl) {
+    return new URL(appUrl).origin;
+  }
+
+  try {
+    const candidateOrigin = new URL(candidateUrl).origin;
+    if (allowedOrigins.includes(candidateOrigin)) {
+      return candidateOrigin;
+    }
+  } catch {
+    // Fall back to the canonical app URL when the client sends an invalid URL.
+  }
+
+  return new URL(appUrl).origin;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
@@ -93,7 +143,7 @@ serve(async (req) => {
   }
 
   const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
-  const origin = req.headers.get('origin') || appUrl;
+  const redirectOrigin = resolveAllowedAppOrigin(appUrl, return_url);
 
   try {
     // supabaseAdmin was already created above for JWT validation — reuse it
@@ -140,7 +190,7 @@ serve(async (req) => {
     // Create customer portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: return_url || `${origin}/Settings`,
+      return_url: `${redirectOrigin}/webapp/billing`,
     });
 
     console.log(`create-customer-portal: session=${session.id} user=${user_id}`);

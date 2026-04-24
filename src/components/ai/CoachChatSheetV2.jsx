@@ -15,11 +15,9 @@ import {
   Bot,
   Sparkles,
   CheckCircle,
-  Clock,
   TrendingUp,
   Target,
   Zap,
-  ChevronDown,
   X,
   Phone,
   Video

@@ -447,3 +447,261 @@ App-like web routes for dev/QA/design review must not be treated as public produ
 - Web is support/conversion/billing
 - Real users should not use atlas.core through web routes
 - The web must push users toward the mobile app, not replace it
+
+---
+
+## 17. Launch Gate Session Context (2026-04-23)
+
+This section is session context, not a replacement for the core product/design rules above.
+
+### Role / Agent Context
+
+Best label for the work done in this session:
+- `atlas-launch-gate-staff-engineer`
+
+Scope covered:
+- principal-engineer style launch audit
+- full-stack repo cleanup
+- launch QA / systems audit
+- i18n and platform-separation enforcement
+- auth/email flow normalization
+
+### What was audited
+
+The session was a launch-readiness sweep across:
+- product truth
+- core loop integrity
+- AI truth
+- input friction
+- progress visibility / gamification
+- design-system consistency
+- platform separation
+- i18n correctness
+- route/navigation integrity
+- backend / infra truth
+- brand consistency outside the app
+
+### Canonical launch rules established in this session
+
+- Mobile is the execution product.
+- Web is utility-only: account, billing, export, settings, legal, help.
+- If pt-BR is exposed anywhere, it must be complete. Mixed EN/PT is a launch bug.
+- Fake or placeholder behavior on launch-critical paths is not acceptable.
+- Passing build is not sufficient evidence of launch readiness.
+
+### High-confidence fixes already implemented
+
+- Hardened platform gating so public users cannot bypass mobile/web separation with `?dev=1` unless an explicit internal env flag is enabled.
+- Disabled fake standalone insights behavior and removed the nonexistent `generate-holistic-insight` dependency from the live path.
+- Rewired password reset UI to the branded email flow.
+- Updated checkout success/cancel routing and repaired the checkout prelaunch contract test.
+- Removed exposed hardcoded `service_role` usage from repo scripts/tests that were patched in this session.
+- Cleaned visible PT-BR launch-path leakage on:
+  - `src/App.jsx`
+  - `src/redesign/v3/routes/V3ActiveWorkout.jsx`
+  - `src/redesign/v3/routes/V3NutritionSearch.jsx`
+  - `src/redesign/v3/routes/V3SharePR.jsx`
+  - `src/redesign/v3/routes/V3Today.jsx`
+- Consolidated auth/email architecture toward:
+  - canonical auth path: `supabase/functions/auth-webhook`
+  - canonical transactional renderer: `supabase/functions/send-email`
+- Converted legacy paths into compatibility wrappers/shims instead of parallel systems:
+  - `supabase/functions/on-auth-user-created/index.ts`
+  - `supabase/functions/send-welcome-email/index.ts`
+- Repaired the broken prelaunch runner so it emits artifacts again instead of crashing on malformed code.
+- Converted the dead `shared/tbbm` dependency from a crash into an explicit blocked/retired prelaunch gate.
+
+### Important findings still true
+
+- Launch is still `NO_GO`.
+- Supabase key rotation was intentionally deferred because live edge functions still depended on the legacy JWT verification path at the time of review.
+- Real end-to-end staging verification is still missing for:
+  - signup
+  - login
+  - forgot password
+  - checkout completion
+  - billing portal
+  - reload/persistence loop
+- Accessibility gate is still missing.
+- Bundle size is still too large.
+- Repo still has unrelated lint/typecheck debt outside the changes made in this session.
+
+### Commits produced during this session
+
+- `d5275d6` — `Harden launch paths and normalize account flows`
+- `51c3740` — `Consolidate auth email paths and repair prelaunch gate`
+
+Current expectation:
+- `origin/main` should include both of the commits above.
+
+### Files that became important launch touchpoints
+
+- `src/redesign/v3/lib/PlatformGate.jsx`
+- `src/redesign/v3/routes/V3Insights.jsx`
+- `src/services/aiInsightsService.js`
+- `src/App.jsx`
+- `src/i18n/messages/en.json`
+- `src/i18n/messages/pt-BR.json`
+- `src/lib/emailService.js`
+- `supabase/functions/auth-webhook/index.ts`
+- `supabase/functions/send-email/index.ts`
+- `supabase/functions/send-password-reset/index.ts`
+- `supabase/functions/on-auth-user-created/index.ts`
+- `supabase/functions/send-welcome-email/index.ts`
+- `supabase/functions/create-checkout/index.ts`
+- `tests/prelaunch/checkout-url.test.mjs`
+- `tests/prelaunch/tbbm.test.mjs`
+- `scripts/prelaunch/run.mjs`
+
+### Operational guidance for future agents
+
+- Do not rotate Supabase JWT / legacy keys casually; first verify which live edge functions still depend on legacy verification.
+- Treat `auth-webhook` as the owner of signup / confirmation / recovery auth-email behavior unless the deployment proves otherwise.
+- Prefer adding distilled session context like this instead of dumping raw chat transcripts into agent context files.
+- If updating this section later, append a new dated subsection rather than rewriting history.
+
+---
+
+## 17. Email System Context
+
+Lifecycle and transactional email work has already been reviewed in detail.
+
+Current direction:
+- use the shared email renderer as the source of truth
+- avoid creating new duplicate email systems
+- keep branding aligned with the approved atlas.core visual language
+- treat email as part of the product system, not as generic SaaS marketing output
+
+Primary files:
+- `supabase/functions/_shared/templates.ts`
+- `supabase/functions/_shared/email-service.ts`
+- `supabase/functions/send-test-emails/index.ts`
+- `docs/email-rebuild/email-approval-preview.html`
+
+Rules:
+- DO NOT create a second template system if the shared renderer can be extended
+- DO NOT ship placeholder or generic transactional copy
+- DO NOT use default vendor-looking email styling
+- ALWAYS review copy and rendering together
+- ALWAYS preserve desktop and mobile previewability for approval
+
+---
+
+## 18. Email Brand Direction
+
+atlas.core emails should follow the same approved system used in the design work:
+
+- paper + ink + sulfur
+- lower-case `atlas.core`
+- stronger editorial hierarchy
+- functional, deliberate spacing
+- brand moments can be bold, but the layout must stay readable
+
+Typography direction:
+- brand/headline moments should feel assertive
+- system/supporting lines can feel operational and restrained
+- avoid anonymous SaaS tone
+
+Avoid:
+- overdesigned marketing-email tricks
+- loud gradient-heavy email aesthetics
+- generic startup copy
+- hollow hype language
+
+Prefer:
+- calm clarity
+- strong structure
+- direct language
+- credible product tone
+
+---
+
+## 19. Email Copy Rules
+
+Transactional email copy must be:
+
+- clear
+- useful
+- trustworthy
+- specific
+
+It must not sound like:
+- placeholder copy
+- vague conversion copy
+- forced motivational writing
+- generic wellness marketing
+
+Every lifecycle email should answer:
+1. What happened?
+2. What does it mean for the user?
+3. What should they do next?
+
+Good examples of intent:
+- welcome → orient the user and get them into a real first action
+- confirm email → explain why confirmation matters and remove friction
+- reset password → be calm, secure, and immediate
+- trial ending / ended → be explicit, not manipulative
+- founder email → feel personal, specific, and signed by a real person
+
+---
+
+## 20. Founder Email Rules
+
+Founder emails are part of the lifecycle system and must feel human.
+
+Requirements:
+- include a real founder sign-off
+- include a founder name
+- include role/title
+- sound like a real note, not a campaign automation pretending to be personal
+
+Current founder signature standard:
+- `Enzo Soler`
+- `Founder, atlas.core`
+
+Founder emails should:
+- explain why the product exists
+- invite direct feedback
+- acknowledge early-stage product reality honestly
+- avoid fake intimacy or manipulative familiarity
+
+Weekly founder follow-ups:
+- should feel like promised check-ins, not spam
+- should invite honest product feedback
+- should be easy to stop by replying
+
+---
+
+## 21. Email Review Workflow
+
+The approval artifact for this work is:
+- `docs/email-rebuild/email-approval-preview.html`
+
+That file must remain useful for review:
+- render actual email HTML, not abstract descriptions
+- show subject + preheader
+- show desktop preview
+- show mobile preview
+- allow quick approve / needs work / hold review behavior
+
+When updating email templates:
+1. change the shared source templates first
+2. keep the approval preview aligned with the latest drafts
+3. review both copy and rendering
+4. do not treat a template as done until it reads well and previews well
+
+---
+
+## 22. Known Email State
+
+Known facts from prior work:
+- founder lifecycle templates were added to the shared system
+- founder signature support was added
+- the approval preview exists
+- desktop + mobile preview were explicitly requested and added
+- a hardcoded `Resend` API key was removed from the local test script
+
+Still true:
+- the repo still contains duplicate / older email paths
+- the shared renderer should become the canonical path
+- full consolidation is still a remaining task

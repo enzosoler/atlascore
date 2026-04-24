@@ -130,7 +130,7 @@ export const SCREENS: ScreenEntry[] = [
   },
   {
     id: 'update-password',
-    path: '/auth/update-password',
+    path: '/auth/reset',
     domain: 'auth',
     access: 'public',
     roles: ALL_ROLES,

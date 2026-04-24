@@ -19,6 +19,9 @@ verify_jwt = false
 [functions.send-email-v2]
 verify_jwt = true
 
+[functions.send-password-reset]
+verify_jwt = false
+
 [functions.log-food-text]
 verify_jwt = false
 

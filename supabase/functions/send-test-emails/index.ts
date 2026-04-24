@@ -7,41 +7,12 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { renderEmail, templates } from '../_shared/templates.ts';
+import { previewVariables, renderEmail, templates } from '../_shared/templates.ts';
 
 type Locale = 'pt-BR' | 'en';
 
 const APP = Deno.env.get('APP_URL') || 'https://www.useatlascore.com';
 const LOCALES: Locale[] = ['pt-BR', 'en'];
-
-const SAMPLE_VARS: Record<string, Record<string, string>> = {
-  confirm_email: { confirm_email_url: `${APP}/auth?confirm=preview_token` },
-  reset_password: { reset_password_url: `${APP}/auth/update-password?token=preview` },
-  trial_started: { trial_end_date: '3 de abril de 2026' },
-  trial_ending: {},
-  payment_success: { receipt_id: 'RCP-001-PREVIEW' },
-  payment_failed: { retry_date: '2 de abril de 2026' },
-  subscription_canceled: { access_end_date: '30 de abril de 2026' },
-  weekly_report: {
-    report_date_range: '17–23 mar',
-    weekly_report_url: `${APP}/insights`,
-  },
-  invite_beta: {
-    first_name: 'Enzo',
-    invite_url: `${APP}/invite?token=preview_token`,
-    invite_expiry_date: '3 de abril de 2026',
-  },
-  founder_welcome: {
-    first_name: 'Alex',
-    reply_email: 'enzo@useatlascore.com',
-  },
-  founder_check_in: {
-    first_name: 'Alex',
-    week_label: '2',
-    feedback_url: `${APP}/feedback?source=founder-email`,
-    reply_email: 'enzo@useatlascore.com',
-  },
-};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -71,7 +42,7 @@ serve(async (req) => {
 
   for (const locale of locales) {
     for (const key of Object.keys(templates)) {
-      const vars = SAMPLE_VARS[key] ?? {};
+      const vars = previewVariables[key] ?? { app_url: APP };
       const { subject, html } = renderEmail(key, locale, vars);
 
       const res = await fetch('https://api.resend.com/emails', {

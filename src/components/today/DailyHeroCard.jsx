@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Activity, Dumbbell, UtensilsCrossed, Scale } from 'lucide-react';
+import { Dumbbell, UtensilsCrossed, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function CompletionRing({ size = 120, strokeWidth = 10, pct, children }) {

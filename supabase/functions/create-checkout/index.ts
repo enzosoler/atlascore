@@ -91,6 +91,56 @@ function successResponse(data: Omit<CheckoutResponse, 'success' | 'error'>): Res
   );
 }
 
+function buildAllowedOrigins(appUrl: string): string[] {
+  const configured = (Deno.env.get('ALLOWED_REDIRECT_ORIGINS') || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const defaults = [
+    appUrl,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+    'http://localhost:4174',
+    'http://127.0.0.1:4174',
+    'http://localhost:4175',
+    'http://127.0.0.1:4175',
+  ];
+
+  return Array.from(new Set(
+    [...configured, ...defaults]
+      .map((value) => {
+        try {
+          return new URL(value).origin;
+        } catch {
+          return null;
+        }
+      })
+      .filter((value): value is string => Boolean(value))
+  ));
+}
+
+function resolveAllowedAppOrigin(appUrl: string, candidateUrl?: string): string {
+  const allowedOrigins = buildAllowedOrigins(appUrl);
+
+  if (!candidateUrl) {
+    return new URL(appUrl).origin;
+  }
+
+  try {
+    const candidateOrigin = new URL(candidateUrl).origin;
+    if (allowedOrigins.includes(candidateOrigin)) {
+      return candidateOrigin;
+    }
+  } catch {
+    // Fall back to the canonical app URL when the client sends an invalid URL.
+  }
+
+  return new URL(appUrl).origin;
+}
+
 // ── MAIN HANDLER ──────────────────────────────────────────────────
 serve(async (req: Request) => {
   const requestId = crypto.randomUUID();
@@ -291,14 +341,14 @@ serve(async (req: Request) => {
     log('STRIPE', 'Creating checkout session...');
     
     const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
-    const origin = req.headers.get('origin') || appUrl;
+    const redirectOrigin = resolveAllowedAppOrigin(appUrl, body.success_url || body.cancel_url);
 
     checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: body.success_url || `${origin}/webapp/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: body.cancel_url || `${origin}/webapp/billing/paywall`,
+      success_url: `${redirectOrigin}/webapp/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${redirectOrigin}/webapp/billing/paywall`,
       metadata: {
         user_id: userId,
         plan: body.plan,

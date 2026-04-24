@@ -18,6 +18,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
+import { writeSubscriptionByUserId } from '../_shared/subscription-write.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -282,14 +283,11 @@ serve(async (req) => {
         };
 
         // Upsert subscription
-        const { error } = await supabaseAdmin
-          .from('subscriptions')
-          .upsert(subscriptionData, { onConflict: 'user_id' });
-
-        if (error) {
-          console.error('stripe-webhook: Failed to upsert subscription:', error);
-        } else {
+        try {
+          await writeSubscriptionByUserId(supabaseAdmin, subscriptionData);
           console.log(`stripe-webhook: Subscription created/updated for user=${userId}`);
+        } catch (error) {
+          console.error('stripe-webhook: Failed to write subscription:', error);
         }
         break;
       }

@@ -21,11 +21,7 @@ import {
   Menu,
   X,
   ChevronDown,
-  LogOut,
   User,
-  Home,
-  Database,
-  Zap,
   Target,
   Crown
 } from 'lucide-react';

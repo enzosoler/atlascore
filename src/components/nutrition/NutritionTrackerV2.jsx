@@ -4,27 +4,17 @@
  * Built from scratch with the new design system
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   UtensilsCrossed,
   Plus,
   Search,
   Camera,
-  TrendingUp,
-  TrendingDown,
   Flame,
-  Target,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  BarChart3,
-  PieChart,
   Calendar,
-  Zap,
   X,
   Edit2,
-  Trash2,
-  Save
+  Trash2
 } from 'lucide-react';
 
 // Import design system classes

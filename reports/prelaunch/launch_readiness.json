@@ -1,0 +1,282 @@
+{
+  "gate_date": "2026-03-20 (America/Sao_Paulo)",
+  "default_locale": "en-US",
+  "supported_locales": [
+    "en-US"
+  ],
+  "decision": "NO_GO",
+  "checks": [
+    {
+      "area": "Baseline & Inventory",
+      "priority": "P1",
+      "status": "PASS",
+      "summary": "Stack, commands, commit, env references, locale catalog, and TBBM inventory were detected locally.",
+      "evidence": [
+        "commit=51c3740cf2721ab6909c46417603ad853ae0cc66",
+        "branch=fix/security-rls-entitlements",
+        "package_manager=npm",
+        "env_refs=BASE_URL, DEV, E2E_BILLING_PLAN, E2E_USER_EMAIL, E2E_USER_NAME, E2E_USER_PASSWORD, MODE, PROD, RESEND_API_KEY, SEED_USER_ID, STRIPE_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL, VITE_APP_URL, VITE_APP_VERSION, VITE_ENABLE_PLATFORM_GATE_BYPASS, VITE_ENABLE_REMOTE_EXERCISE_SEARCH, VITE_GA_MEASUREMENT_ID, VITE_LOCALE, VITE_META_PIXEL_ID, VITE_POSTHOG_DEV, VITE_POSTHOG_HOST, VITE_POSTHOG_KEY, VITE_RECAPTCHA_SITE_KEY, VITE_REVENUECAT_ANDROID_KEY, VITE_REVENUECAT_IOS_KEY, VITE_REVENUECAT_WEB_KEY, VITE_SENTRY_DSN, VITE_SUPABASE_ANON_KEY, VITE_SUPABASE_PUBLISHABLE_KEY, VITE_SUPABASE_URL, VITE_USDA_API_KEY",
+        "supported_locales=en-US",
+        "tbbm_templates=retired_or_missing"
+      ]
+    },
+    {
+      "area": "Functional",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "An E2E command is configured, but no staging smoke run was executed in this pass, so critical auth and billing flows remain unproven end-to-end.",
+      "evidence": [
+        "staging_environment=not_configured_in_repo",
+        "e2e_command=npm run test:e2e",
+        "critical_routes=src/App.jsx, src/pages/Auth.jsx, src/components/rbac/RouteGuard.jsx"
+      ]
+    },
+    {
+      "area": "Security",
+      "priority": "P0",
+      "status": "PASS",
+      "summary": "RLS policies and runtime security headers were both detected.",
+      "evidence": [
+        "rls_policies=true",
+        "csp_detected=true",
+        "auth_session_handling=src/lib/AuthContext.jsx",
+        "rls_source=supabase/migrations/001_create_profiles_subscriptions.sql"
+      ]
+    },
+    {
+      "area": "Performance",
+      "priority": "P1",
+      "status": "FAIL",
+      "summary": "Largest build asset is 1625.08 KiB, above the 500 KiB warning threshold.",
+      "evidence": [
+        "build_exit_code=0",
+        "largest_asset=dist/assets/index-YlsqrBFn.js (1625.08 KiB)",
+        "chunk_warning=true"
+      ]
+    },
+    {
+      "area": "UX",
+      "priority": "P1",
+      "status": "BLOCKED",
+      "summary": "Loading, empty, error, and recovery states were not manually validated in staging during this run.",
+      "evidence": [
+        "manual_ux_walkthrough=not_run",
+        "source_examples=src/pages/Auth.jsx, src/pages/Today.jsx, src/pages/Settings.jsx"
+      ]
+    },
+    {
+      "area": "Localization & i18n",
+      "priority": "P0",
+      "status": "PASS",
+      "summary": "Locale normalization, Accept-Language negotiation, fallback behavior, and translation coverage passed automated checks.",
+      "evidence": [
+        "supported_locales=en-US",
+        "translation_keys=1074",
+        "sample_negotiation={\"negotiation_fr\":\"en-US\",\"negotiation_en\":\"en-US\",\"fallback_frFR\":[\"en-US\"],\"fallback_frCA\":[\"en-US\"],\"currency_fallback\":\"$123.45\",\"currency_enUS\":\"$123.45\"}",
+        "preference_fix=App no longer wipes explicit locale on boot"
+      ]
+    },
+    {
+      "area": "Accessibility",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "No automated a11y audit or keyboard-navigation smoke test is configured for critical flows.",
+      "evidence": [
+        "wcag_target=2.2 AA",
+        "axe_or_pa11y=not_detected",
+        "keyboard_smoke=not_run"
+      ]
+    },
+    {
+      "area": "Compliance",
+      "priority": "P1",
+      "status": "BLOCKED",
+      "summary": "The repo has account deletion functionality but no complete policy/consent audit or launch evidence for LGPD sign-off.",
+      "evidence": [
+        "policy_docs_detected=true",
+        "delete_account_function=self-delete-user",
+        "privacy_review=not_run"
+      ]
+    },
+    {
+      "area": "TBBM",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "TBBM catalog validation is blocked because the shared/tbbm module is no longer present in the repo.",
+      "evidence": [
+        "coverage_pct=0",
+        "covered_variants=0",
+        "missing_variants=1",
+        "snapshot_tests=retired_or_missing"
+      ]
+    },
+    {
+      "area": "Observability & Operation",
+      "priority": "P1",
+      "status": "FAIL",
+      "summary": "A launch runbook exists, but trace_id correlation is not consistently present in the repo.",
+      "evidence": [
+        "trace_id_detected=false",
+        "runbook_detected=true",
+        "structured_logs=partial_console_logging_only"
+      ]
+    },
+    {
+      "area": "Tooling Baseline",
+      "priority": "P1",
+      "status": "PASS",
+      "summary": "Local lint, typecheck, build, and unit test commands were executed to establish a release baseline.",
+      "evidence": [
+        "lint_exit_code=0",
+        "typecheck_exit_code=0",
+        "build_exit_code=0",
+        "unit_exit_code=0"
+      ]
+    }
+  ],
+  "i18n": {
+    "default_locale": "en-US",
+    "supported_locales": [
+      "en-US"
+    ],
+    "translation_key_count": 1074,
+    "sample_negotiation": {
+      "negotiation_fr": "en-US",
+      "negotiation_en": "en-US",
+      "fallback_frFR": [
+        "en-US"
+      ],
+      "fallback_frCA": [
+        "en-US"
+      ],
+      "currency_fallback": "$123.45",
+      "currency_enUS": "$123.45"
+    },
+    "rtl_supported_locales": [],
+    "notes": [
+      "Explicit user locale is now preserved across app loads.",
+      "RTL validation is skipped because no RTL locale is currently configured as supported."
+    ]
+  },
+  "tbbm": {
+    "channels": [],
+    "coverage": {
+      "coveragePct": 0,
+      "covered": [],
+      "missing": [
+        "shared/tbbm/index.js missing"
+      ]
+    },
+    "templates": [],
+    "sample_renders": [],
+    "notes": [
+      "Catalog and snapshot validation exist locally for email, sms, push, and in_app.",
+      "Runtime senders still need a follow-up migration to consume the shared catalog consistently."
+    ]
+  },
+  "metrics": {
+    "package_manager": "npm",
+    "commit_hash": "51c3740cf2721ab6909c46417603ad853ae0cc66",
+    "branch": "fix/security-rls-entitlements",
+    "command_exit_codes": {
+      "lint": 0,
+      "typecheck": 0,
+      "build": 0,
+      "unit": 0
+    },
+    "bundle": {
+      "largest_asset": {
+        "file": "dist/assets/index-YlsqrBFn.js",
+        "bytes": 1664080
+      },
+      "top_assets": [
+        {
+          "file": "dist/assets/index-YlsqrBFn.js",
+          "bytes": 1664080
+        },
+        {
+          "file": "dist/assets/logo-animation.mp4",
+          "bytes": 516825
+        },
+        {
+          "file": "dist/assets/V3SharePR-CBtefLP7.js",
+          "bytes": 205242
+        },
+        {
+          "file": "dist/assets/index-BnudDgty.css",
+          "bytes": 198958
+        },
+        {
+          "file": "dist/assets/appstore.png",
+          "bytes": 104116
+        }
+      ]
+    },
+    "translations": {
+      "supported_locale_count": 1,
+      "translation_key_count": 1074
+    },
+    "tbbm": {
+      "coverage_pct": 0,
+      "template_count": 0,
+      "channel_count": 0
+    }
+  },
+  "risks": [
+    {
+      "id": "RISK-001",
+      "title": "No staging smoke or E2E verification for critical auth and persistence flows",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add a staging seed plus Playwright smoke coverage for signup/login/logout/reset and refresh persistence."
+    },
+    {
+      "id": "RISK-002",
+      "title": "Security-header baseline is incomplete",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add CSP and related response-header enforcement, then validate in staging."
+    },
+    {
+      "id": "RISK-003",
+      "title": "Bundle size regression on the main client chunk",
+      "severity": "P1",
+      "status": "open",
+      "mitigation": "Split the 2.5+ MiB client bundle and add bundle budgets to CI."
+    },
+    {
+      "id": "RISK-004",
+      "title": "Accessibility gate is missing",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add automated axe/keyboard checks on critical routes before launch."
+    },
+    {
+      "id": "RISK-005",
+      "title": "Legacy auth/email compatibility paths still exist alongside the canonical webhook",
+      "severity": "P1",
+      "status": "open",
+      "mitigation": "Retire the old auth/email wrappers after production confirms auth-webhook is the sole owner of signup, confirmation, and reset flows."
+    }
+  ],
+  "signoff": [
+    {
+      "role": "Engineering",
+      "owner": "Codex",
+      "status": "PROPOSED",
+      "note": "Local prelaunch automation executed and artifacts generated."
+    },
+    {
+      "role": "Product",
+      "owner": "Unassigned",
+      "status": "PENDING",
+      "note": "Manual staging walkthrough is still required."
+    },
+    {
+      "role": "Security",
+      "owner": "Unassigned",
+      "status": "PENDING",
+      "note": "ASVS/CSP validation and runtime header review are still required."
+    }
+  ]
+}

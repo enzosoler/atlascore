@@ -4,7 +4,7 @@
  * Built from scratch with the new design system
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
@@ -18,12 +18,9 @@ import {
   Plus,
   Search,
   Bell,
-  ChevronLeft,
   ChevronRight,
   Activity,
-  Flame,
   Target,
-  Zap,
   LogOut
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';

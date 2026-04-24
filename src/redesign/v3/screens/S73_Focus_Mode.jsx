@@ -112,7 +112,7 @@ const safe = (fn, ...args) => { if (typeof fn === 'function') fn(...args); };
 
 /* ── main component ────────────────────────────────────────── */
 export default function S73_Focus_Mode({
-  dark = true,  // eslint-disable-line no-unused-vars
+  dark = true,   
   task,
   onEnd,
 }) {

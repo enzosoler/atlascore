@@ -23,6 +23,8 @@
     "seed:enzo": "node scripts/demo/seed-enzo.mjs",
     "seed:enzo:dry-run": "node scripts/demo/seed-enzo.mjs --dry-run",
     "find:user": "node scripts/demo/find-user-id.mjs",
+    "env:split-local": "node scripts/env/split-local.mjs",
+    "env:rebuild-local": "node scripts/env/rebuild-local.mjs",
     "test": "node --test tests/prelaunch/*.test.mjs",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",

@@ -12,10 +12,11 @@ import { Page } from '@playwright/test';
  */
 export async function loginAs(page: Page, email: string, password: string) {
   await page.goto('/auth?mode=login');
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(password);
+  await page.getByRole('button', { name: /password/i }).click();
+  await page.getByPlaceholder(/you@email\.com/i).fill(email);
+  await page.getByPlaceholder(/•+|\*+/i).fill(password);
   await page.getByRole('button', { name: /sign in|log in|entrar/i }).click();
-  await page.waitForURL(/Today|\/today/i, { timeout: 15_000 });
+  await page.waitForURL(/\/app\/today|\/onboarding/i, { timeout: 15_000 });
 }
 
 /**
