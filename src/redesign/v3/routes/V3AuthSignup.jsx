@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S36_Auth from '../screens/S36_Auth.jsx';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/i18nContext';
 import { ACBrand } from '../lib/paper.jsx';
+import { signInWithOAuth } from '@/lib/googleSignIn';
 
 function friendlyOAuthError(provider, err, t) {
   return err?.message || t(provider === 'apple' ? 'auth.signup.appleStartFailed' : 'auth.signup.googleStartFailed');
@@ -60,11 +60,7 @@ export default function V3AuthSignup() {
   const onOAuth = async (provider) => {
     setError('');
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (oauthError) throw oauthError;
+      await signInWithOAuth(provider);
     } catch (err) {
       setError(friendlyOAuthError(provider, err, t));
     }

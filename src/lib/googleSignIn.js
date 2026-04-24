@@ -8,17 +8,20 @@ import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
 /**
- * Sign in with Google
+ * Start OAuth sign-in.
  * On native iOS/Android: opens an in-app browser and redirects back via atlascore:// deep link
  * On web: standard redirect flow
  */
-export const signInWithGoogle = async (redirectUrl = `${window.location.origin}/auth/callback`) => {
+export const signInWithOAuth = async (
+  provider,
+  redirectUrl = `${window.location.origin}/auth/callback`
+) => {
   try {
     const isNative = Capacitor.isNativePlatform();
 
     if (isNative) {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
           redirectTo: 'atlascore://auth/callback',
           skipBrowserRedirect: true,
@@ -30,13 +33,17 @@ export const signInWithGoogle = async (redirectUrl = `${window.location.origin}/
     }
 
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider,
       options: {
         redirectTo: redirectUrl,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
+        ...(provider === 'google'
+          ? {
+              queryParams: {
+                access_type: 'offline',
+                prompt: 'consent',
+              },
+            }
+          : {}),
       },
     });
 
@@ -51,6 +58,9 @@ export const signInWithGoogle = async (redirectUrl = `${window.location.origin}/
     throw error;
   }
 };
+
+export const signInWithGoogle = async (redirectUrl = `${window.location.origin}/auth/callback`) =>
+  signInWithOAuth('google', redirectUrl);
 
 /**
  * Sign out

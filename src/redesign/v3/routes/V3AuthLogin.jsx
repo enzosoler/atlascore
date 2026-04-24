@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { signInWithOAuth } from '@/lib/googleSignIn';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S36_Auth from '../screens/S36_Auth.jsx';
 import { useTheme } from '@/lib/ThemeContext';
@@ -79,11 +80,7 @@ export default function V3AuthLogin() {
   const onOAuth = async (provider) => {
     setError('');
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (oauthError) throw oauthError;
+      await signInWithOAuth(provider);
     } catch (err) {
       setError(friendlyOAuthError(provider, err, t));
     }
