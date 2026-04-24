@@ -132,7 +132,7 @@ export default function V3AuthSignup() {
           </>
         )}
         description={signupSource === 'intent'
-          ? 'Your first week is ready. Create your account to unlock it and continue setup.'
+          ? t('auth.signup.intentDescription')
           : t('auth.signup.description')}
         submitLabel={t('auth.signup.submit')}
         showModeSwitch={false}
@@ -143,9 +143,11 @@ export default function V3AuthSignup() {
         onGoogle={() => onOAuth('google')}
         onClose={() => navigate(signupSource === 'intent' ? '/?quiz=start' : '/welcome/manifesto')}
         loading={loading}
-        error={rateLimitRemaining > 0 ? `Too many attempts. Try again in ${formatCountdown(rateLimitRemaining)}` : error}
+        error={rateLimitRemaining > 0
+          ? t('auth.signup.rateLimitedCountdown', { time: formatCountdown(rateLimitRemaining) })
+          : error}
         submitDisabled={loading || rateLimitRemaining > 0}
-        hint={signupSource === 'intent' && !error ? 'We saved your goal, experience, and equipment. Finish signup to unlock the plan.' : hint}
+        hint={signupSource === 'intent' && !error ? t('auth.signup.intentHint') : hint}
       />
     </V3StandaloneLayout>
   );

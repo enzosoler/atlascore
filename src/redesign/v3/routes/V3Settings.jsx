@@ -84,10 +84,10 @@ export default function V3Settings() {
     try {
       const persisted = await updateUserPreferences(user?.id, { dailyCheckinRequired: nextValue });
       setPreferences(persisted);
-      toast(nextValue ? 'Daily check-in is now required by default.' : 'Daily check-in is now optional on Today.');
+      toast(nextValue ? t('settings.v3.toasts.dailyCheckinRequiredOn') : t('settings.v3.toasts.dailyCheckinRequiredOff'));
     } catch (error) {
       setPreferences(preferences);
-      toast.error(error?.message || 'Could not update your daily check-in preference.');
+      toast.error(error?.message || t('settings.v3.toasts.dailyCheckinRequiredError'));
     } finally {
       setPrefsSaving(false);
     }
@@ -134,14 +134,14 @@ export default function V3Settings() {
       rows: [
         {
           k: 'daily-checkin-required',
-          t: 'Daily check-in required',
+          t: t('settings.v3.rows.dailyCheckinRequired'),
           d: dailyCheckinRequired
-            ? 'Today stays gated until you finish the daily check-in.'
-            : 'Today shows your readiness first and leaves check-in optional.',
+            ? t('settings.v3.rows.dailyCheckinRequiredDescOn')
+            : t('settings.v3.rows.dailyCheckinRequiredDescOff'),
           toggle: {
             checked: dailyCheckinRequired,
             disabled: prefsLoading || prefsSaving,
-            ariaLabel: 'Toggle daily check-in requirement',
+            ariaLabel: t('settings.v3.rows.dailyCheckinRequiredAriaLabel'),
           },
         },
         { k: 'theme',    t: t('settings.v3.rows.appearance'),    d: t('settings.v3.rows.appearanceDesc', { theme: currentThemeLabel }), chevron: true },

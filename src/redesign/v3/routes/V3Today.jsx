@@ -98,7 +98,7 @@ function buildEstimatedReadiness(t, reason) {
     score: 60,
     level: 'medium',
     label: t('today.system.reveal.consequenceMedium'),
-    reasons: [reason || 'Estimated until today\'s check-in is complete.'],
+    reasons: [reason || t('today.system.estimatedDefault')],
     estimated: true,
   };
 }
@@ -265,7 +265,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
             border: `1px solid ${c.hair}`,
           }}>
             <ACMono size={10} color={c.dim} style={{ fontWeight: 600, letterSpacing: 0.4 }}>
-              {readiness.reasons?.[0] || 'Estimated until today\'s check-in is complete.'}
+              {readiness.reasons?.[0] || t('today.system.estimatedDefault')}
             </ACMono>
           </div>
         ) : null}
@@ -619,7 +619,7 @@ function OptionalCheckInCard({ dark, onSubmit }) {
       border: `1px solid ${c.hair}`,
     }}>
       <ACMono size={10} color={c.accent} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
-        Optional check-in
+        {t('today.system.optionalCheckIn.eyebrow')}
       </ACMono>
       <div style={{
         marginTop: 8,
@@ -629,10 +629,10 @@ function OptionalCheckInCard({ dark, onSubmit }) {
         letterSpacing: -0.5,
         color: c.fg,
       }}>
-        Refine today&apos;s readiness
+        {t('today.system.optionalCheckIn.title')}
       </div>
       <div style={{ marginTop: 6, fontSize: 13, color: c.dim, lineHeight: 1.5 }}>
-        Your score is estimated until you complete today&apos;s check-in.
+        {t('today.system.optionalCheckIn.body')}
       </div>
 
       <ScaleRow label={t('today.system.checkIn.sleep')} value={sleep} onChange={setSleep} />
@@ -666,7 +666,7 @@ function OptionalCheckInCard({ dark, onSubmit }) {
           opacity: saving ? 0.6 : 1,
         }}
       >
-        {saving ? t('today.system.checkIn.submit') : 'Complete check-in'}
+        {saving ? t('today.system.checkIn.submit') : t('today.system.optionalCheckIn.cta')}
       </button>
     </div>
   );
@@ -860,7 +860,7 @@ export default function V3Today() {
       return calculateReadiness(scales.sleep, scales.recovery, scales.soreness, modifier);
     }
     if (daily.isLoading || daily.profileLoading) {
-      return buildEstimatedReadiness(t, 'Loading your readiness inputs...');
+      return buildEstimatedReadiness(t, t('today.system.loadingReadiness'));
     }
     return buildEstimatedReadiness(t);
   }, [daily.checkin, daily.isLoading, daily.profileLoading, modifier, t]);

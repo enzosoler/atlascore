@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { fetchProfileRole, normalizeAtlasRole } from '@/hooks/useRole';
 import { sendWelcomeEmailAsync } from '@/lib/emailService';
+import { t as translate } from '@/lib/i18n';
 import { setSentryUser, trackEvent } from '@/lib/sentry';
 
 const AuthContext = createContext(null);
@@ -94,6 +95,8 @@ function buildAuthError(type, message) {
   };
 }
 
+const MAX_RETRY_AFTER_SECONDS = 300;
+
 function parseRetryAfterSeconds(error) {
   const candidates = [
     error?.response?.headers?.get?.('retry-after'),
@@ -108,14 +111,14 @@ function parseRetryAfterSeconds(error) {
     if (candidate == null || candidate === '') continue;
     const seconds = Number(candidate);
     if (Number.isFinite(seconds) && seconds > 0) {
-      return Math.ceil(seconds);
+      return Math.min(Math.ceil(seconds), MAX_RETRY_AFTER_SECONDS);
     }
 
     const retryDate = Date.parse(String(candidate));
     if (!Number.isNaN(retryDate)) {
       const diffSeconds = Math.ceil((retryDate - Date.now()) / 1000);
       if (diffSeconds > 0) {
-        return diffSeconds;
+        return Math.min(diffSeconds, MAX_RETRY_AFTER_SECONDS);
       }
     }
   }
@@ -126,7 +129,8 @@ function parseRetryAfterSeconds(error) {
     const amount = Number(match[1]);
     if (!Number.isFinite(amount) || amount <= 0) return null;
     const unit = match[2].toLowerCase();
-    return unit.startsWith('m') ? amount * 60 : amount;
+    const total = unit.startsWith('m') ? amount * 60 : amount;
+    return Math.min(total, MAX_RETRY_AFTER_SECONDS);
   }
 
   return null;
@@ -137,18 +141,18 @@ function normalizeAuthError(error, fallbackMessage) {
 
   if (error?.status === 429 || /rate limit|too many requests|too many attempts/i.test(rawMessage)) {
     return {
-      ...buildAuthError('rate_limited', 'Too many attempts. Wait a moment and try again.'),
+      ...buildAuthError('rate_limited', translate('auth.errors.rateLimited')),
       retryAfterSeconds: parseRetryAfterSeconds(error) ?? 60,
       status: 429,
     };
   }
 
   if (/hook within maximum time|timeout/i.test(rawMessage)) {
-    return buildAuthError('timeout', 'The auth service is taking too long to respond. Please try again.');
+    return buildAuthError('timeout', translate('auth.errors.timeout'));
   }
 
   if (/network|failed to fetch/i.test(rawMessage)) {
-    return buildAuthError('network', 'Network issue while contacting auth. Check your connection and retry.');
+    return buildAuthError('network', translate('auth.errors.network'));
   }
 
   return buildAuthError('auth_failed', rawMessage || fallbackMessage);

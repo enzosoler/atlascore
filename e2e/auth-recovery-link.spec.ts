@@ -27,7 +27,10 @@ async function provisionRecoveryUser(password: string) {
     throw error || new Error('Recovery user was not created');
   }
 
-  return recoveryEmail;
+  return {
+    email: recoveryEmail,
+    userId: data.user.id,
+  };
 }
 
 async function generateRecoveryLink(baseURL: string, targetEmail: string) {
@@ -60,12 +63,24 @@ async function waitForResetCompletion(page: Page) {
 }
 
 test.describe('Auth recovery link gate', () => {
+  const provisionedUserIds = new Set<string>();
+
   test.skip(!email, 'Set E2E_USER_EMAIL to run auth recovery-link gate');
   test.skip(!supabaseUrl || !serviceRoleKey, 'Set Supabase URL + service role to generate recovery links');
 
+  test.afterEach(async () => {
+    const admin = createAdminClient();
+    for (const userId of provisionedUserIds) {
+      await admin.auth.admin.deleteUser(userId);
+      provisionedUserIds.delete(userId);
+    }
+  });
+
   test('recovery link opens reset screen and the new password can log in', async ({ page, baseURL }) => {
     const currentPassword = `AtlasAuth#${Date.now()}-start`;
-    const targetEmail = await provisionRecoveryUser(currentPassword);
+    const recoveryUser = await provisionRecoveryUser(currentPassword);
+    provisionedUserIds.add(recoveryUser.userId);
+    const targetEmail = recoveryUser.email;
     const nextPassword = `AtlasAuth#${Date.now()}-next`;
 
     // Use a disposable account so this recovery flow cannot invalidate shared login credentials mid-suite.

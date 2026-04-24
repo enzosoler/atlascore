@@ -43,6 +43,10 @@ function resolveStripeMode() {
   const derivedTestMode = defaultSecretKey.startsWith('sk_test_');
   const testMode = configuredTestMode || derivedTestMode;
 
+  if (configuredTestMode && !Deno.env.get('STRIPE_TEST_SECRET_KEY')) {
+    throw new Error('STRIPE_TEST_MODE is enabled but STRIPE_TEST_SECRET_KEY is missing.');
+  }
+
   const secretKey = testMode
     ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
     : defaultSecretKey;
@@ -281,7 +285,16 @@ serve(async (req: Request) => {
   }
 
   // ── 6. VERIFICAR CONFIG STRIPE ────────────────────────────────
-  const { testMode, secretKey: resolvedStripeSecretKey, publishableKey } = resolveStripeMode();
+  let testMode: boolean;
+  let resolvedStripeSecretKey: string;
+  let publishableKey: string;
+  try {
+    ({ testMode, secretKey: resolvedStripeSecretKey, publishableKey } = resolveStripeMode());
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : 'Invalid Stripe mode configuration';
+    log('CONFIG', errorMsg);
+    return errorResponse(errorMsg, 500);
+  }
 
   if (!resolvedStripeSecretKey) {
     log('CONFIG', 'Missing Stripe secret key', { testMode });
@@ -291,6 +304,11 @@ serve(async (req: Request) => {
   if (!publishableKey) {
     log('CONFIG', 'Missing Stripe publishable key', { testMode });
     return errorResponse('Server configuration error: Stripe publishable key missing', 500);
+  }
+
+  if (!publishableKey.startsWith('pk_')) {
+    log('CONFIG', 'Invalid Stripe publishable key prefix', { testMode });
+    return errorResponse('Server configuration error: invalid Stripe publishable key', 500);
   }
 
   const stripe = new Stripe(resolvedStripeSecretKey, {

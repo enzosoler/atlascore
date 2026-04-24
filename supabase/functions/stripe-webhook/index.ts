@@ -33,7 +33,14 @@ function isTruthy(value: string | undefined | null): boolean {
 
 function resolveStripeMode() {
   const defaultSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
-  const testMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE')) || defaultSecretKey.startsWith('sk_test_');
+  const configuredTestMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE'));
+  const testMode = configuredTestMode || defaultSecretKey.startsWith('sk_test_');
+  if (configuredTestMode && !Deno.env.get('STRIPE_TEST_SECRET_KEY')) {
+    throw new Error('STRIPE_TEST_MODE is enabled but STRIPE_TEST_SECRET_KEY is missing.');
+  }
+  if (testMode && !Deno.env.get('STRIPE_WEBHOOK_SECRET_TEST')) {
+    throw new Error('Stripe test mode requires STRIPE_WEBHOOK_SECRET_TEST.');
+  }
   const stripeSecretKey = testMode
     ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
     : defaultSecretKey;
@@ -46,28 +53,34 @@ function resolveStripeMode() {
 
 // Map Stripe price IDs to plan codes.
 // Env var names must match create-checkout/index.ts (ATHLETE_PRO, ATHLETE_PERFORMANCE).
-const PRICE_TO_PLAN: Record<string, string> = {
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE') || '']: 'performance',
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_COACH') || '']: 'coach',
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_NUTRITIONIST') || '']: 'nutritionist',
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_CLINICIAN') || '']: 'clinician',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE') || '']: 'performance',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_COACH') || '']: 'coach',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_NUTRITIONIST') || '']: 'nutritionist',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_CLINICIAN') || '']: 'clinician',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE') || '']: 'performance',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_COACH') || '']: 'coach',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_NUTRITIONIST') || '']: 'nutritionist',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_CLINICIAN') || '']: 'clinician',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE') || '']: 'performance',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_COACH') || '']: 'coach',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_NUTRITIONIST') || '']: 'nutritionist',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_CLINICIAN') || '']: 'clinician',
-};
+function buildPriceToPlanMap(): Record<string, string> {
+  const entries: Array<[string | undefined, string]> = [
+    [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO') || undefined, 'pro'],
+    [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE') || undefined, 'performance'],
+    [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_COACH') || undefined, 'coach'],
+    [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_NUTRITIONIST') || undefined, 'nutritionist'],
+    [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_CLINICIAN') || undefined, 'clinician'],
+    [Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO') || undefined, 'pro'],
+    [Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE') || undefined, 'performance'],
+    [Deno.env.get('STRIPE_PRICE_BR_YEARLY_COACH') || undefined, 'coach'],
+    [Deno.env.get('STRIPE_PRICE_BR_YEARLY_NUTRITIONIST') || undefined, 'nutritionist'],
+    [Deno.env.get('STRIPE_PRICE_BR_YEARLY_CLINICIAN') || undefined, 'clinician'],
+    [Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO') || undefined, 'pro'],
+    [Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE') || undefined, 'performance'],
+    [Deno.env.get('STRIPE_PRICE_US_MONTHLY_COACH') || undefined, 'coach'],
+    [Deno.env.get('STRIPE_PRICE_US_MONTHLY_NUTRITIONIST') || undefined, 'nutritionist'],
+    [Deno.env.get('STRIPE_PRICE_US_MONTHLY_CLINICIAN') || undefined, 'clinician'],
+    [Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PRO') || undefined, 'pro'],
+    [Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE') || undefined, 'performance'],
+    [Deno.env.get('STRIPE_PRICE_US_YEARLY_COACH') || undefined, 'coach'],
+    [Deno.env.get('STRIPE_PRICE_US_YEARLY_NUTRITIONIST') || undefined, 'nutritionist'],
+    [Deno.env.get('STRIPE_PRICE_US_YEARLY_CLINICIAN') || undefined, 'clinician'],
+    [Deno.env.get('STRIPE_TEST_PRICE_MONTHLY') || undefined, 'pro'],
+    [Deno.env.get('STRIPE_TEST_PRICE_ANNUAL') || undefined, 'pro'],
+  ];
+
+  return Object.fromEntries(entries.filter(([priceId]) => Boolean(priceId))) as Record<string, string>;
+}
 
 // Normalize plan names from checkout metadata to internal tier codes.
 // create-checkout uses 'athlete_pro'/'athlete_performance'; the DB uses 'pro'/'performance'.
@@ -93,7 +106,7 @@ const STATUS_MAP: Record<string, string> = {
 };
 
 function getPlanFromPriceId(priceId: string): string | null {
-  return PRICE_TO_PLAN[priceId] || null;
+  return buildPriceToPlanMap()[priceId] || null;
 }
 
 async function getUserProfile(
@@ -183,7 +196,18 @@ serve(async (req) => {
     });
   }
 
-  const { stripeSecretKey, webhookSecret, testMode } = resolveStripeMode();
+  let stripeSecretKey = '';
+  let webhookSecret = '';
+  let testMode = false;
+  try {
+    ({ stripeSecretKey, webhookSecret, testMode } = resolveStripeMode());
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Stripe configuration error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
 
   if (!stripeSecretKey || !webhookSecret) {
     return new Response(JSON.stringify({ error: 'Stripe not configured' }), {

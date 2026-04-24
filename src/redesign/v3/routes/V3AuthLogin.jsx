@@ -38,17 +38,7 @@ export default function V3AuthLogin() {
   const isConfigured = import.meta.env.VITE_SUPABASE_URL &&
     (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
-  if (!isConfigured && !isAuthBypassEnabled) {
-    return (
-      <V3StandaloneLayout>
-        <div style={{ padding: 24, maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{t('auth.login.unavailableTitle')}</div>
-          <div>{t('auth.login.unavailableBody')}</div>
-        </div>
-      </V3StandaloneLayout>
-    );
-  }
-
+  // Hooks must always run in the same order — declare them before any early return.
   useEffect(() => {
     if (authState !== 'authenticated' || !user) return;
     navigate(user.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
@@ -68,6 +58,17 @@ export default function V3AuthLogin() {
 
     return () => window.clearInterval(timerId);
   }, [rateLimitRemaining]);
+
+  if (!isConfigured && !isAuthBypassEnabled) {
+    return (
+      <V3StandaloneLayout>
+        <div style={{ padding: 24, maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{t('auth.login.unavailableTitle')}</div>
+          <div>{t('auth.login.unavailableBody')}</div>
+        </div>
+      </V3StandaloneLayout>
+    );
+  }
 
   const onSubmit = async (e) => {
     // Accept being called without a DOM event (some child components call onSubmit())
@@ -99,7 +100,14 @@ export default function V3AuthLogin() {
           email: em,
           options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
         });
-        if (otpError) throw otpError;
+        if (otpError) {
+          // Normalize OTP 429s into the same rate-limit shape the password path uses
+          if (otpError.status === 429 || /rate limit|too many/i.test(otpError.message || '')) {
+            const err = { type: 'rate_limited', status: 429, message: otpError.message, retryAfterSeconds: 60 };
+            throw err;
+          }
+          throw otpError;
+        }
         navigate(`/auth/magic?email=${encodeURIComponent(em)}`);
       }
     } catch (err) {

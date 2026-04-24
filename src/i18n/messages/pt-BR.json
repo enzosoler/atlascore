@@ -26,6 +26,11 @@
     }
   },
   "auth": {
+    "errors": {
+      "rateLimited": "Muitas tentativas. Aguarde um momento e tente novamente.",
+      "timeout": "O serviço de autenticação está demorando para responder. Tente novamente.",
+      "network": "Problema de rede ao contatar a autenticação. Verifique sua conexão e tente novamente."
+    },
     "kicker": "Sistema de evolução pessoal",
     "title": {
       "line1": "Seus dados.",
@@ -70,6 +75,9 @@
       "headlineLine1": "crie sua",
       "headlineAccent": "conta.",
       "description": "Comece com e-mail e senha. O restante da configuração acontece dentro do atlas.core.",
+      "intentDescription": "Sua primeira semana está pronta. Crie sua conta para desbloqueá-la e continuar a configuração.",
+      "intentHint": "Salvamos seu objetivo, experiência e equipamento. Finalize o cadastro para desbloquear o plano.",
+      "rateLimitedCountdown": "Muitas tentativas. Tente novamente em {time}",
       "submit": "Criar conta →"
     },
     "forgot": {
@@ -1340,6 +1348,8 @@
         "adherenceDeclining": "Aderência caindo",
         "systemPrefix": "Sistema: {list}"
       },
+      "estimatedDefault": "Estimado até o check-in de hoje ser concluído.",
+      "loadingReadiness": "Carregando seus sinais de prontidão...",
       "status": {
         "allDone": "Sistema verde. Execução total.",
         "anchorsDone": "Âncoras concluídas. Finalize as ações restantes.",
@@ -1353,6 +1363,12 @@
       "proteinProgress": "Proteína: {consumed}g / {target}g",
       "remaining": "{amount}g restantes",
       "anchorBadge": "chave",
+      "optionalCheckIn": {
+        "eyebrow": "Check-in opcional",
+        "title": "Refine a prontidão de hoje",
+        "body": "Sua pontuação é estimada até você concluir o check-in de hoje.",
+        "cta": "Concluir check-in"
+      },
       "firstWin": "Sistema ativo. Continue.",
       "reveal": {
         "building": "Construindo o sistema de hoje...",
@@ -1514,6 +1530,10 @@
         "subscription": "Assinatura",
         "connectedServices": "Serviços conectados",
         "connectedServicesDesc": "Apple Health, wearables · melhora a precisão da prontidão",
+        "dailyCheckinRequired": "Check-in diário obrigatório",
+        "dailyCheckinRequiredDescOn": "Hoje fica bloqueado até você concluir o check-in diário.",
+        "dailyCheckinRequiredDescOff": "Hoje mostra sua prontidão primeiro e deixa o check-in opcional.",
+        "dailyCheckinRequiredAriaLabel": "Alternar obrigatoriedade do check-in diário",
         "appearance": "Aparência",
         "appearanceDesc": "Atualmente {theme} · toque para alternar",
         "language": "Idioma",
@@ -1547,7 +1567,10 @@
         "themeSwitch": "Alternado para modo {theme}",
         "languagePT": "Idioma: Português",
         "languageEN": "Idioma: Inglês",
-        "comingSoon": "Esta funcionalidade estará disponível em breve"
+        "comingSoon": "Esta funcionalidade estará disponível em breve",
+        "dailyCheckinRequiredOn": "O check-in diário agora é obrigatório por padrão.",
+        "dailyCheckinRequiredOff": "O check-in diário agora é opcional no Hoje.",
+        "dailyCheckinRequiredError": "Não foi possível atualizar sua preferência de check-in diário."
       }
     }
   },

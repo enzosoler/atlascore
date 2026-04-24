@@ -2,25 +2,42 @@ const DEFAULT_ALLOWED_ORIGIN = 'https://useatlascore.com';
 
 const STATIC_ALLOWED_ORIGINS = new Set([
   DEFAULT_ALLOWED_ORIGIN,
+  // Capacitor native app origins (iOS)
+  'capacitor://localhost',
+  'atlascore://localhost',
+  // Local dev
   'http://localhost:5173',
   'http://localhost:5174',
+  'http://localhost:3000',
+  'http://localhost:8080',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
 ]);
 
+/** Extra origins from APP_URLS env var (comma-separated). */
+function getEnvOrigins(): string[] {
+  const raw = Deno.env.get('APP_URLS') || '';
+  return raw.split(',').map((u) => u.trim()).filter(Boolean);
+}
+
 function isAllowedVercelPreviewOrigin(origin: string): boolean {
   try {
     const parsed = new URL(origin);
-    return parsed.protocol === 'https:' && parsed.hostname.endsWith('.vercel.app');
+    // Scope to atlas project slugs only — bare *.vercel.app is too broad
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.hostname.endsWith('.vercel.app') &&
+      parsed.hostname.startsWith('atlas')
+    );
   } catch {
     return false;
   }
 }
 
 export function getAllowedOrigin(requestOrigin: string): string {
-  if (STATIC_ALLOWED_ORIGINS.has(requestOrigin) || isAllowedVercelPreviewOrigin(requestOrigin)) {
-    return requestOrigin;
-  }
+  if (STATIC_ALLOWED_ORIGINS.has(requestOrigin)) return requestOrigin;
+  if (getEnvOrigins().includes(requestOrigin)) return requestOrigin;
+  if (isAllowedVercelPreviewOrigin(requestOrigin)) return requestOrigin;
 
   if (requestOrigin) {
     console.warn('[cors] blocked origin:', requestOrigin);

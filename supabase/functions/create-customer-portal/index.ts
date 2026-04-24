@@ -25,7 +25,11 @@ function isTruthy(value: string | undefined | null): boolean {
 
 function resolveStripeSecretKey() {
   const defaultSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
-  const testMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE')) || defaultSecretKey.startsWith('sk_test_');
+  const configuredTestMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE'));
+  const testMode = configuredTestMode || defaultSecretKey.startsWith('sk_test_');
+  if (configuredTestMode && !Deno.env.get('STRIPE_TEST_SECRET_KEY')) {
+    throw new Error('STRIPE_TEST_MODE is enabled but STRIPE_TEST_SECRET_KEY is missing.');
+  }
   return testMode
     ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
     : defaultSecretKey;
@@ -122,7 +126,16 @@ serve(async (req) => {
     });
   }
 
-  const stripeSecretKey = resolveStripeSecretKey();
+  let stripeSecretKey = '';
+  try {
+    stripeSecretKey = resolveStripeSecretKey();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Stripe configuration error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
   if (!stripeSecretKey) {
     return new Response(JSON.stringify({ error: 'Stripe not configured' }), {
       status: 503,
