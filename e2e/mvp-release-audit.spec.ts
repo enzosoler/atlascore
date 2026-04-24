@@ -164,13 +164,11 @@ test.describe('MVP release route audit', () => {
 
   test.describe('authenticated route sweep', () => {
     test.skip(!email || !password, 'Set E2E_USER_EMAIL + E2E_USER_PASSWORD to run authenticated release route audit');
-
-    test.beforeEach(async ({ page }) => {
-      await loginAs(page, email!, password!);
-    });
+    test.describe.configure({ mode: 'serial' });
 
     for (const route of AUTHED_ROUTES) {
       test(`authed route renders: ${route}`, async ({ page }) => {
+        await loginAs(page, email!, password!);
         const audit = await installAuditors(page);
         await page.goto(route);
         await expect(page).not.toHaveURL(/\/auth\/login/i, { timeout: 10_000 });
@@ -191,26 +189,29 @@ test.describe('MVP release route audit', () => {
       });
     }
 
-    test.skip(!email || !password, 'Set E2E_USER_EMAIL + E2E_USER_PASSWORD to run authenticated keyboard smoke');
+    test.describe('authenticated keyboard smoke', () => {
+      test.skip(!email || !password, 'Set E2E_USER_EMAIL + E2E_USER_PASSWORD to run authenticated keyboard smoke');
+      test.describe.configure({ mode: 'serial' });
 
-    for (const route of ['/app/today', '/webapp/billing/paywall']) {
-      test(`authenticated keyboard focus reaches an interactive control: ${route}`, async ({ page }) => {
-        await loginAs(page, email!, password!);
-        await page.goto(route);
-        await expect(page.getByText(/initializing/i)).toHaveCount(0, { timeout: 15_000 });
-        for (let i = 0; i < 3; i += 1) {
-          await page.keyboard.press('Tab');
-          const hasFocusedControl = await page.evaluate(() => {
-            const el = document.activeElement;
-            if (!el || el === document.body) return false;
-            return ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) ||
-              el.getAttribute('role') === 'button' ||
-              el.hasAttribute('tabindex');
-          });
-          if (hasFocusedControl) return;
-        }
-        throw new Error(`No keyboard-focusable control reached on ${route}`);
-      });
-    }
+      for (const route of ['/app/today', '/webapp/billing/paywall']) {
+        test(`authenticated keyboard focus reaches an interactive control: ${route}`, async ({ page }) => {
+          await loginAs(page, email!, password!);
+          await page.goto(route);
+          await expect(page.getByText(/initializing/i)).toHaveCount(0, { timeout: 15_000 });
+          for (let i = 0; i < 3; i += 1) {
+            await page.keyboard.press('Tab');
+            const hasFocusedControl = await page.evaluate(() => {
+              const el = document.activeElement;
+              if (!el || el === document.body) return false;
+              return ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) ||
+                el.getAttribute('role') === 'button' ||
+                el.hasAttribute('tabindex');
+            });
+            if (hasFocusedControl) return;
+          }
+          throw new Error(`No keyboard-focusable control reached on ${route}`);
+        });
+      }
+    });
   });
 });

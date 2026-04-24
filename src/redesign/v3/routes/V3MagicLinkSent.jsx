@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
 import { useT } from '@/lib/i18nContext';
@@ -7,15 +9,15 @@ import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACFonts, useACT, ACLabel, ACBtn, ACBrand } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
-function mailClientUrl(email) {
-  if (!email) return 'mailto:';
+function getMailLaunchTarget(email) {
   const domain = email.split('@')[1]?.toLowerCase();
   if (domain?.includes('gmail')) return 'https://mail.google.com';
   if (domain?.includes('outlook') || domain?.includes('hotmail') || domain?.includes('live')) return 'https://outlook.live.com';
   if (domain?.includes('icloud') || domain?.includes('me.com')) return 'https://www.icloud.com/mail';
   if (domain?.includes('proton')) return 'https://mail.proton.me';
   if (domain?.includes('yahoo')) return 'https://mail.yahoo.com';
-  return 'mailto:';
+  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') return 'message://';
+  return null;
 }
 
 function MagicLinkState() {
@@ -28,6 +30,18 @@ function MagicLinkState() {
   const [resent, setResent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const mailLaunchTarget = getMailLaunchTarget(email);
+
+  const openInbox = async () => {
+    if (!mailLaunchTarget) return;
+
+    if (/^https?:/i.test(mailLaunchTarget) && Capacitor.isNativePlatform()) {
+      await Browser.open({ url: mailLaunchTarget });
+      return;
+    }
+
+    window.location.assign(mailLaunchTarget);
+  };
 
   const resend = async () => {
     if (!email) return;
@@ -87,7 +101,15 @@ function MagicLinkState() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={() => { window.location.href = mailClientUrl(email); }}>
+        <ACBtn
+          primary
+          block
+          dark={dark}
+          size="lg"
+          pill
+          onClick={openInbox}
+          style={{ opacity: mailLaunchTarget ? 1 : 0.5 }}
+        >
           {t('magicLink.openMailApp')}
         </ACBtn>
         <ACBtn block dark={dark} size="lg" pill onClick={resend} style={{ opacity: !email || sending || resent ? 0.5 : 1 }}>

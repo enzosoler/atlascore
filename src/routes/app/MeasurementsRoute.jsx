@@ -15,7 +15,7 @@ export default function MeasurementsRoute() {
   return (
     <S17_Measurements_Entry
       dark={theme === 'dark'}
-      onClose={() => navigate(-1)}
+      onClose={() => navigate('/app/body', { replace: true })}
       onSave={async (measurements) => {
         try {
           await createMeasurement(user.id, measurements);

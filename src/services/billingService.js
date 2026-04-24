@@ -5,6 +5,21 @@ function getOrigin() {
   return typeof window !== 'undefined' ? window.location.origin : 'https://useatlascore.com';
 }
 
+export function isIgnorableSubscriptionError(error) {
+  const code = String(error?.code || '').toUpperCase();
+  const status = Number(error?.status || error?.response?.status);
+  const message = String(error?.message || '').toLowerCase();
+
+  return (
+    status === 401 ||
+    status === 403 ||
+    code === '42501' ||
+    message.includes('permission denied') ||
+    message.includes('row-level security') ||
+    message.includes('jwt')
+  );
+}
+
 async function getAccessToken() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
@@ -107,6 +122,10 @@ export async function completeWebCheckout(sessionId) {
 
 export async function listBillingSubscriptions(userId) {
   if (!userId) return [];
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    return [];
+  }
 
   const { data, error } = await supabase
     .from('subscriptions')
@@ -115,6 +134,9 @@ export async function listBillingSubscriptions(userId) {
     .order('created_at', { ascending: false });
 
   if (error) {
+    if (isIgnorableSubscriptionError(error)) {
+      return [];
+    }
     throw error;
   }
 

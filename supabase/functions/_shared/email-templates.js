@@ -774,17 +774,17 @@ export const previewVariables = {
   },
   reset_password: {
     reset_password_url: `${brand.siteUrl}/auth/update-password?token=preview`,
-    email_address: 'alex@useatlascore.com',
+    email_address: 'member@useatlascore.com',
     expires_at: 'April 23, 2026 · 8:45 PM',
   },
   email_confirmation: {
     confirm_email_url: `${brand.siteUrl}/auth/callback?mode=confirm&token=preview`,
-    email_address: 'alex@useatlascore.com',
+    email_address: 'member@useatlascore.com',
     expires_at: 'April 23, 2026 · 8:45 PM',
   },
   magic_login: {
     magic_login_url: `${brand.siteUrl}/auth/login?token=preview`,
-    email_address: 'alex@useatlascore.com',
+    email_address: 'member@useatlascore.com',
     expires_at: 'April 23, 2026 · 8:45 PM',
   },
   security_alert: {
@@ -841,7 +841,7 @@ export const previewVariables = {
   },
   invite_beta: {
     invite_url: `${brand.siteUrl}/invite?token=preview`,
-    first_name: 'Alex',
+    first_name: 'Member',
     invite_expiry_date: 'April 30, 2026',
   },
   founder_welcome: {
@@ -852,7 +852,7 @@ export const previewVariables = {
   },
   confirm_email: {
     confirm_email_url: `${brand.siteUrl}/auth/callback?mode=confirm&token=preview`,
-    email_address: 'alex@useatlascore.com',
+    email_address: 'member@useatlascore.com',
     expires_at: 'April 23, 2026 · 8:45 PM',
   },
   trial_expired: {
@@ -861,4 +861,3 @@ export const previewVariables = {
 };
 
 export const templates = canonicalTemplates;
-

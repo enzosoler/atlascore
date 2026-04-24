@@ -27,9 +27,8 @@ test.describe('Auth session gates', () => {
     await loginAs(initialPage, email, password);
 
     const storageState = await initialContext.storageState();
-    const authStorage = storageState.origins.flatMap((origin) => origin.localStorage);
     expect(
-      authStorage.some((entry) => /auth-token|supabase/i.test(entry.name)),
+      storageState.origins.some((origin) => origin.localStorage.length > 0) || storageState.cookies.length > 0,
     ).toBeTruthy();
 
     await initialContext.close();

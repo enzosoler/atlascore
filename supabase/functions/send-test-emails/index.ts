@@ -14,6 +14,24 @@ type Locale = 'pt-BR' | 'en';
 const APP = Deno.env.get('APP_URL') || 'https://www.useatlascore.com';
 const LOCALES: Locale[] = ['pt-BR', 'en'];
 
+function derivePreviewRecipient(to: string, locale: Locale) {
+  const localPart = to.split('@')[0] ?? '';
+  const segments = localPart
+    .split(/[^a-zA-Z]+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+  const firstName = segments[0]
+    ? segments[0].charAt(0).toUpperCase() + segments[0].slice(1).toLowerCase()
+    : locale === 'pt-BR'
+      ? 'Membro'
+      : 'Member';
+
+  return {
+    email_address: to,
+    first_name: firstName,
+  };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -42,7 +60,10 @@ serve(async (req) => {
 
   for (const locale of locales) {
     for (const key of Object.keys(templates)) {
-      const vars = previewVariables[key] ?? { app_url: APP };
+      const vars = {
+        ...(previewVariables[key] ?? { app_url: APP }),
+        ...derivePreviewRecipient(to, locale),
+      };
       const { subject, html } = renderEmail(key, locale, vars);
 
       const res = await fetch('https://api.resend.com/emails', {

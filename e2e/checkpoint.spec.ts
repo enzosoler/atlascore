@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { getRuntimeContext } from './helpers/runtime-context';
-import { loginAs } from './helpers/auth';
+import { E2E_AUTH_STORAGE_PATH, loginAs } from './helpers/auth';
 
 /**
  * Checkpoint creation flow — /app/body + /app/body/measurements.
@@ -10,12 +10,18 @@ import { loginAs } from './helpers/auth';
 const email = process.env.E2E_USER_EMAIL;
 const password = process.env.E2E_USER_PASSWORD;
 
+async function ensureCheckpointSession(page) {
+  await loginAs(page, email!, password!);
+  await page.goto('/app/body');
+  await expect(page).toHaveURL(/\/app\/body$/);
+}
+
 test.describe('Checkpoint flow', () => {
   test.skip(!email || !password, 'Set E2E_USER_EMAIL + E2E_USER_PASSWORD to run checkpoint flow');
+  test.use({ storageState: E2E_AUTH_STORAGE_PATH });
 
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, email!, password!);
-    await page.goto('/app/body');
+    await ensureCheckpointSession(page);
   });
 
   test('Body page loads and shows the checkpoint CTA', async ({ page }) => {
@@ -25,6 +31,7 @@ test.describe('Checkpoint flow', () => {
 
   test('navigating to /app/body/measurements shows the form', async ({ page }) => {
     await page.goto('/app/body/measurements');
+    await expect(page).toHaveURL(/\/app\/body\/measurements$/);
 
     await expect(page.getByText(/measurements/i).first()).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: /waist/i })).toBeVisible();
@@ -55,6 +62,14 @@ test.describe('Checkpoint flow', () => {
 
     // Should not throw — if something is on top the click won't reach it
     await saveBtn.click({ trial: true });
+  });
+
+  test('direct entry close returns to /app/body instead of /app/today', async ({ page }) => {
+    await page.goto('/app/body/measurements');
+    await expect(page).toHaveURL(/\/app\/body\/measurements$/);
+
+    await page.getByRole('button', { name: /close measurements/i }).click();
+    await expect(page).toHaveURL(/\/app\/body$/);
   });
 
   test('form fields accept input', async ({ page }) => {

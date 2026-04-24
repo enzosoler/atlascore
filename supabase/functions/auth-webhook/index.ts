@@ -262,7 +262,7 @@ serve(async (req) => {
     });
 
     results.emailSent = await sendEmail(email, rendered.subject, rendered.html);
-  } else if (actionType === 'magic_link') {
+  } else if (actionType === 'magic_link' || actionType === 'magiclink') {
     const magicUrl = buildMagicLinkUrl(siteUrl, tokenHash, redirectTo);
     const rendered = renderMagicLinkEmail(locale, magicUrl);
     results.emailSent = await sendEmail(email, rendered.subject, rendered.html);

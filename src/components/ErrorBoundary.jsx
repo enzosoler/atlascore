@@ -25,9 +25,23 @@ export default class ErrorBoundary extends React.Component {
       const key = 'atlas_chunk_reload';
       if (!sessionStorage.getItem(key)) {
         sessionStorage.setItem(key, '1');
+        try {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations()
+              .then((regs) => Promise.all(regs.map((r) => r.unregister().catch(() => {}))))
+              .catch(() => {});
+          }
+          if (window.caches) {
+            caches.keys()
+              .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+              .catch(() => {});
+          }
+        } catch {}
         window.location.reload();
         return;
       }
+      captureException(error, { componentStack: errorInfo?.componentStack });
+      return;
     }
     console.error('[ErrorBoundary]', error, errorInfo);
     captureException(error, { componentStack: errorInfo?.componentStack });

@@ -11,6 +11,7 @@ import {
   presentCustomerCenter as rcPresentCustomerCenter,
   restorePurchases as rcRestorePurchases,
 } from '@/lib/revenueCat';
+import { isIgnorableSubscriptionError } from '@/services/billingService';
 
 const SubscriptionContext = createContext(null);
 
@@ -102,6 +103,8 @@ export function SubscriptionProvider({ children }) {
     queryKey: ['subscription-supabase', user?.id],
     queryFn: async () => {
       if (!useSupabaseSubscriptions || !user?.id) return [];
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return [];
 
       const { data, error } = await supabase
         .from('subscriptions')
@@ -110,7 +113,9 @@ export function SubscriptionProvider({ children }) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('[SubscriptionContext] Supabase subscription query failed:', error.message);
+        if (!isIgnorableSubscriptionError(error)) {
+          console.warn('[SubscriptionContext] Supabase subscription query failed:', error.message);
+        }
         return [];
       }
 
