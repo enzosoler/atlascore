@@ -11,6 +11,20 @@
     { "source": "/en/:path*", "destination": "/index.html" },
     { "source": "/:path*", "destination": "/index.html" }
   ],
+  "redirects": [
+    {
+      "source": "/admin/:path*",
+      "has": [{ "type": "host", "value": "(?!admin\\.).*useatlascore\\.com" }],
+      "destination": "https://admin.useatlascore.com/admin/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/:path((?!admin|_next|api|assets|favicon|branding|sw|workbox).*)",
+      "has": [{ "type": "host", "value": "admin.useatlascore.com" }],
+      "destination": "https://useatlascore.com/:path",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

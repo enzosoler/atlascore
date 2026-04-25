@@ -43,6 +43,12 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { trackPageView, initAnalytics } from '@/lib/analytics';
 import { LEGACY_ROUTE_REDIRECTS } from '@/lib/routes';
 
+/** True when running on admin.useatlascore.com (or admin.localhost for dev). */
+function isAdminSubdomain() {
+  if (typeof window === 'undefined') return false;
+  return window.location.hostname.startsWith('admin.');
+}
+
 const lazyOnboardingRoute = (name) =>
   lazy(() =>
     import('@/redesign/v3/routes/V3OnboardingRoutes.jsx').then((module) => ({
@@ -226,6 +232,11 @@ function AppRoutes() {
   const isAuthed = !!user;
   const hasCompletedOnboarding = !!user?.onboarding_completed;
   const postAuthRoute = hasCompletedOnboarding ? '/app/today' : '/onboarding';
+
+  // On admin subdomain, redirect root to /admin
+  if (isAdminSubdomain() && window.location.pathname === '/') {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <Suspense fallback={<V3LoadingSplash phase="syncing" />}>
