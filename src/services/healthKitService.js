@@ -1,71 +1,38 @@
 /**
  * healthKitService.js
  *
- * Bridge between atlas.core and Apple HealthKit via @perfood/capacitor-healthkit.
+ * Bridge between atlas.core and Apple HealthKit via @capgo/capacitor-health.
  * Handles permission requests, reading health data, and writing atlas.core data back.
  *
- * All methods are no-ops on non-iOS platforms.
+ * All methods are no-ops on non-iOS platforms (web returns empty/false).
  */
 
 import { Capacitor } from '@capacitor/core';
+import { Health } from '@capgo/capacitor-health';
 
 const IS_IOS = Capacitor.getPlatform() === 'ios';
 
-// Lazy-load the plugin to avoid import errors on non-iOS
-let _hk = null;
-async function getHK() {
-  if (!IS_IOS) return null;
-  if (!_hk) {
-    try {
-      try {
-        const modName = '@perfood/capacitor-healthkit';
-        const mod = await import(modName);
-        _hk = mod.CapacitorHealthkit;
-      } catch (e) {
-        console.warn('[HealthKit] plugin missing at build time:', e?.message);
-        return null;
-      }
-    } catch (e) {
-      console.warn('[HealthKit] Failed to load plugin:', e?.message);
-      return null;
-    }
-  }
-  return _hk;
-}
-
-// ─── Data type identifiers ───────────────────────────────────────────────────
+// ─── Data types we request ──────────────────────────────────────────────────
 
 const READ_TYPES = [
-  'HKQuantityTypeIdentifierBodyMass',
-  'HKQuantityTypeIdentifierBodyFatPercentage',
-  'HKQuantityTypeIdentifierHeight',
-  'HKQuantityTypeIdentifierActiveEnergyBurned',
-  'HKQuantityTypeIdentifierBasalEnergyBurned',
-  'HKQuantityTypeIdentifierStepCount',
-  'HKQuantityTypeIdentifierDistanceWalkingRunning',
-  'HKQuantityTypeIdentifierHeartRate',
-  'HKCategoryTypeIdentifierSleepAnalysis',
-  'HKWorkoutTypeIdentifier',
+  'weight', 'bodyFat', 'height',
+  'calories', 'basalCalories', 'steps',
+  'distance', 'heartRate', 'sleep', 'workouts',
 ];
 
 const WRITE_TYPES = [
-  'HKQuantityTypeIdentifierBodyMass',
-  'HKQuantityTypeIdentifierBodyFatPercentage',
-  'HKQuantityTypeIdentifierActiveEnergyBurned',
-  'HKWorkoutTypeIdentifier',
+  'weight', 'bodyFat', 'calories', 'workouts',
 ];
 
 // ─── Permission ──────────────────────────────────────────────────────────────
 
 /**
- * Check if HealthKit is available on this device.
+ * Check if HealthKit / Health Connect is available on this device.
  */
 export async function isAvailable() {
   if (!IS_IOS) return false;
-  const hk = await getHK();
-  if (!hk) return false;
   try {
-    const result = await hk.isAvailable();
+    const result = await Health.isAvailable();
     return result?.available === true;
   } catch {
     return false;
@@ -77,11 +44,9 @@ export async function isAvailable() {
  * Returns true if granted (at least partially), false otherwise.
  */
 export async function requestAuthorization() {
-  const hk = await getHK();
-  if (!hk) return false;
+  if (!IS_IOS) return false;
   try {
-    await hk.requestAuthorization({
-      all: [],
+    await Health.requestAuthorization({
       read: READ_TYPES,
       write: WRITE_TYPES,
     });
@@ -92,40 +57,40 @@ export async function requestAuthorization() {
   }
 }
 
+/**
+ * Check current authorization status without prompting.
+ */
+export async function checkAuthorization() {
+  if (!IS_IOS) return null;
+  try {
+    return await Health.checkAuthorization({ read: READ_TYPES, write: WRITE_TYPES });
+  } catch {
+    return null;
+  }
+}
+
 // ─── Read helpers ────────────────────────────────────────────────────────────
 
-/**
- * Query samples of a given type within a date range.
- * @param {string} sampleType - HK type identifier
- * @param {Date} startDate
- * @param {Date} endDate
- * @param {number} limit - max results (0 = no limit)
- * @returns {Array} samples
- */
-async function querySamples(sampleType, startDate, endDate, limit = 0) {
-  const hk = await getHK();
-  if (!hk) return [];
+async function querySamples(dataType, startDate, endDate, limit = 100) {
+  if (!IS_IOS) return [];
   try {
-    const result = await hk.queryHKitSampleType({
-      sampleName: sampleType,
+    const result = await Health.readSamples({
+      dataType,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       limit,
     });
-    return result?.resultData || [];
+    return result?.samples || [];
   } catch (e) {
-    console.warn(`[HealthKit] Query ${sampleType} failed:`, e?.message);
+    console.warn(`[HealthKit] Query ${dataType} failed:`, e?.message);
     return [];
   }
 }
 
-/**
- * Get the most recent sample of a given type.
- */
-async function getLatestSample(sampleType) {
+async function getLatestSample(dataType) {
   const samples = await querySamples(
-    sampleType,
-    new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), // last year
+    dataType,
+    new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
     new Date(),
     1
   );
@@ -134,150 +99,80 @@ async function getLatestSample(sampleType) {
 
 // ─── Read: Body ──────────────────────────────────────────────────────────────
 
-/**
- * Get weight history for a date range.
- * Returns [{ value: kg, date: ISO string }]
- */
 export async function getWeightHistory(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierBodyMass',
-    startDate,
-    endDate
-  );
+  const samples = await querySamples('weight', startDate, endDate, 0);
   return samples.map(s => ({
-    value: parseFloat(s.value),
-    unit: s.unit || 'kg',
-    date: s.startDate || s.date,
+    value: s.value,
+    unit: s.unit || 'kilogram',
+    date: s.startDate,
     source: s.sourceName || 'Apple Health',
   }));
 }
 
-/**
- * Get the latest weight reading.
- */
 export async function getLatestWeight() {
-  const s = await getLatestSample('HKQuantityTypeIdentifierBodyMass');
+  const s = await getLatestSample('weight');
   if (!s) return null;
-  return { value: parseFloat(s.value), unit: s.unit || 'kg', date: s.startDate || s.date };
+  return { value: s.value, unit: s.unit || 'kilogram', date: s.startDate };
 }
 
-/**
- * Get body fat percentage history.
- */
 export async function getBodyFatHistory(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierBodyFatPercentage',
-    startDate,
-    endDate
-  );
+  const samples = await querySamples('bodyFat', startDate, endDate, 0);
   return samples.map(s => ({
-    value: parseFloat(s.value) * 100, // HK stores as 0.0–1.0
-    date: s.startDate || s.date,
+    value: s.value, // @capgo returns percentage directly
+    date: s.startDate,
     source: s.sourceName || 'Apple Health',
   }));
 }
 
-/**
- * Get latest body fat percentage.
- */
 export async function getLatestBodyFat() {
-  const s = await getLatestSample('HKQuantityTypeIdentifierBodyFatPercentage');
+  const s = await getLatestSample('bodyFat');
   if (!s) return null;
-  return { value: parseFloat(s.value) * 100, date: s.startDate || s.date };
+  return { value: s.value, date: s.startDate };
 }
 
-/**
- * Get height.
- */
 export async function getHeight() {
-  const s = await getLatestSample('HKQuantityTypeIdentifierHeight');
+  const s = await getLatestSample('height');
   if (!s) return null;
-  return { value: parseFloat(s.value), unit: s.unit || 'cm', date: s.startDate || s.date };
+  return { value: s.value, unit: s.unit || 'centimeter', date: s.startDate };
 }
 
 // ─── Read: Activity ──────────────────────────────────────────────────────────
 
-/**
- * Get step count for a date range.
- */
 export async function getSteps(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierStepCount',
-    startDate,
-    endDate
-  );
-  const total = samples.reduce((sum, s) => sum + parseFloat(s.value || 0), 0);
+  const samples = await querySamples('steps', startDate, endDate, 0);
+  const total = samples.reduce((sum, s) => sum + (s.value || 0), 0);
   return { total: Math.round(total), samples: samples.length };
 }
 
-/**
- * Get active calories burned for a date range.
- */
 export async function getActiveCalories(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierActiveEnergyBurned',
-    startDate,
-    endDate
-  );
-  const total = samples.reduce((sum, s) => sum + parseFloat(s.value || 0), 0);
+  const samples = await querySamples('calories', startDate, endDate, 0);
+  const total = samples.reduce((sum, s) => sum + (s.value || 0), 0);
   return { total: Math.round(total), unit: 'kcal' };
 }
 
-/**
- * Get resting calories burned for a date range.
- */
 export async function getRestingCalories(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierBasalEnergyBurned',
-    startDate,
-    endDate
-  );
-  const total = samples.reduce((sum, s) => sum + parseFloat(s.value || 0), 0);
+  const samples = await querySamples('basalCalories', startDate, endDate, 0);
+  const total = samples.reduce((sum, s) => sum + (s.value || 0), 0);
   return { total: Math.round(total), unit: 'kcal' };
 }
 
-/**
- * Get walking/running distance for a date range (meters).
- */
 export async function getDistance(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierDistanceWalkingRunning',
-    startDate,
-    endDate
-  );
-  const total = samples.reduce((sum, s) => sum + parseFloat(s.value || 0), 0);
+  const samples = await querySamples('distance', startDate, endDate, 0);
+  const total = samples.reduce((sum, s) => sum + (s.value || 0), 0);
   return { total: Math.round(total), unit: 'm' };
 }
 
 // ─── Read: Heart Rate ────────────────────────────────────────────────────────
 
-/**
- * Get heart rate samples for a date range.
- */
 export async function getHeartRate(startDate, endDate) {
-  const samples = await querySamples(
-    'HKQuantityTypeIdentifierHeartRate',
-    startDate,
-    endDate
-  );
-  return samples.map(s => ({
-    value: parseFloat(s.value),
-    date: s.startDate || s.date,
-  }));
+  const samples = await querySamples('heartRate', startDate, endDate, 0);
+  return samples.map(s => ({ value: s.value, date: s.startDate }));
 }
 
 // ─── Read: Sleep ─────────────────────────────────────────────────────────────
 
-/**
- * Get sleep analysis for a date range.
- * Returns total hours and breakdown.
- */
 export async function getSleep(startDate, endDate) {
-  const samples = await querySamples(
-    'HKCategoryTypeIdentifierSleepAnalysis',
-    startDate,
-    endDate
-  );
+  const samples = await querySamples('sleep', startDate, endDate, 0);
   let totalMinutes = 0;
   const entries = samples.map(s => {
     const start = new Date(s.startDate);
@@ -288,7 +183,7 @@ export async function getSleep(startDate, endDate) {
       startDate: s.startDate,
       endDate: s.endDate,
       durationMinutes: Math.round(durationMin),
-      value: s.value, // 0=InBed, 1=Asleep, etc.
+      sleepState: s.sleepState,
     };
   });
   return { totalHours: +(totalMinutes / 60).toFixed(1), entries };
@@ -296,24 +191,19 @@ export async function getSleep(startDate, endDate) {
 
 // ─── Read: Workouts ──────────────────────────────────────────────────────────
 
-/**
- * Get workouts from Apple Health for a date range.
- */
 export async function getWorkouts(startDate, endDate) {
-  const hk = await getHK();
-  if (!hk) return [];
+  if (!IS_IOS) return [];
   try {
-    const result = await hk.queryHKitSampleType({
-      sampleName: 'HKWorkoutTypeIdentifier',
+    const result = await Health.queryWorkouts({
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      limit: 0,
+      limit: 100,
     });
-    return (result?.resultData || []).map(w => ({
-      activityType: w.workoutActivityType || w.activityType,
-      duration: parseFloat(w.duration || 0),
-      calories: parseFloat(w.totalEnergyBurned || 0),
-      distance: parseFloat(w.totalDistance || 0),
+    return (result?.workouts || []).map(w => ({
+      activityType: w.workoutType,
+      duration: w.duration,
+      calories: w.totalEnergyBurned || 0,
+      distance: w.totalDistance || 0,
       startDate: w.startDate,
       endDate: w.endDate,
       source: w.sourceName || 'Apple Health',
@@ -326,18 +216,11 @@ export async function getWorkouts(startDate, endDate) {
 
 // ─── Write: Body ─────────────────────────────────────────────────────────────
 
-/**
- * Save a weight entry to Apple Health.
- * @param {number} kg - weight in kilograms
- * @param {Date} date - when the measurement was taken
- */
 export async function saveWeight(kg, date = new Date()) {
-  const hk = await getHK();
-  if (!hk) return false;
+  if (!IS_IOS) return false;
   try {
-    await hk.store({
-      sampleName: 'HKQuantityTypeIdentifierBodyMass',
-      unitName: 'kg',
+    await Health.writeSample({
+      dataType: 'weight',
       value: kg,
       startDate: date.toISOString(),
       endDate: date.toISOString(),
@@ -349,19 +232,12 @@ export async function saveWeight(kg, date = new Date()) {
   }
 }
 
-/**
- * Save a body fat percentage entry to Apple Health.
- * @param {number} percent - body fat percentage (e.g. 15.5 for 15.5%)
- * @param {Date} date
- */
 export async function saveBodyFat(percent, date = new Date()) {
-  const hk = await getHK();
-  if (!hk) return false;
+  if (!IS_IOS) return false;
   try {
-    await hk.store({
-      sampleName: 'HKQuantityTypeIdentifierBodyFatPercentage',
-      unitName: '%',
-      value: percent / 100, // HK expects 0.0–1.0
+    await Health.writeSample({
+      dataType: 'bodyFat',
+      value: percent,
       startDate: date.toISOString(),
       endDate: date.toISOString(),
     });
@@ -372,80 +248,15 @@ export async function saveBodyFat(percent, date = new Date()) {
   }
 }
 
-// ─── Write: Nutrition ────────────────────────────────────────────────────────
-
-/**
- * Save nutrition data to Apple Health.
- * @param {{ calories: number, protein: number, carbs: number, fat: number }} macros
- * @param {Date} date
- */
-export async function saveNutrition({ calories, protein, carbs, fat }, date = new Date()) {
-  const hk = await getHK();
-  if (!hk) return false;
-  const iso = date.toISOString();
-  try {
-    const writes = [];
-    if (calories > 0) {
-      writes.push(hk.store({
-        sampleName: 'HKQuantityTypeIdentifierDietaryEnergyConsumed',
-        unitName: 'kcal',
-        value: calories,
-        startDate: iso,
-        endDate: iso,
-      }));
-    }
-    if (protein > 0) {
-      writes.push(hk.store({
-        sampleName: 'HKQuantityTypeIdentifierDietaryProtein',
-        unitName: 'g',
-        value: protein,
-        startDate: iso,
-        endDate: iso,
-      }));
-    }
-    if (carbs > 0) {
-      writes.push(hk.store({
-        sampleName: 'HKQuantityTypeIdentifierDietaryCarbohydrates',
-        unitName: 'g',
-        value: carbs,
-        startDate: iso,
-        endDate: iso,
-      }));
-    }
-    if (fat > 0) {
-      writes.push(hk.store({
-        sampleName: 'HKQuantityTypeIdentifierDietaryFatTotal',
-        unitName: 'g',
-        value: fat,
-        startDate: iso,
-        endDate: iso,
-      }));
-    }
-    await Promise.all(writes);
-    return true;
-  } catch (e) {
-    console.warn('[HealthKit] Save nutrition failed:', e?.message);
-    return false;
-  }
-}
-
 // ─── Write: Workout ──────────────────────────────────────────────────────────
 
-/**
- * Save a workout to Apple Health.
- * @param {{ name: string, durationMinutes: number, caloriesBurned: number, startDate: Date, endDate: Date }} workout
- */
 export async function saveWorkout({ durationMinutes, caloriesBurned, startDate, endDate }) {
-  const hk = await getHK();
-  if (!hk) return false;
+  if (!IS_IOS) return false;
   try {
-    await hk.storeWorkout({
-      activityType: 'HKWorkoutActivityTypeTraditionalStrengthTraining',
-      duration: durationMinutes * 60, // seconds
+    await Health.saveWorkout({
+      workoutType: 'traditionalStrengthTraining',
+      duration: durationMinutes * 60,
       totalEnergyBurned: caloriesBurned || 0,
-      totalEnergyBurnedUnit: 'kcal',
-      totalDistance: 0,
-      totalDistanceUnit: 'm',
       startDate: (startDate || new Date()).toISOString(),
       endDate: (endDate || new Date()).toISOString(),
     });
@@ -458,10 +269,6 @@ export async function saveWorkout({ durationMinutes, caloriesBurned, startDate, 
 
 // ─── Sync: Full import from Apple Health ─────────────────────────────────────
 
-/**
- * Import a comprehensive health snapshot for the given date range.
- * Used for initial onboarding import and periodic sync.
- */
 export async function importHealthSnapshot(startDate, endDate) {
   const [weight, bodyFat, steps, activeCal, restingCal, distance, sleep, workouts] =
     await Promise.all([
@@ -476,21 +283,14 @@ export async function importHealthSnapshot(startDate, endDate) {
     ]);
 
   return {
-    weight,
-    bodyFat,
-    steps,
+    weight, bodyFat, steps,
     activeCalories: activeCal,
     restingCalories: restingCal,
-    distance,
-    sleep,
-    workouts,
+    distance, sleep, workouts,
     importedAt: new Date().toISOString(),
   };
 }
 
-/**
- * Get today's activity summary (steps, active cal, distance).
- */
 export async function getTodayActivity() {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -504,20 +304,10 @@ export async function getTodayActivity() {
 
 // ─── Widget shared data ──────────────────────────────────────────────────────
 
-/**
- * Write a compact widget snapshot to App Groups shared storage.
- * This is called by the main app after important data changes.
- * The WidgetKit extension reads this JSON to render widgets.
- */
 export async function writeWidgetSnapshot(data) {
   if (!IS_IOS) return;
   try {
-    // Use Capacitor Preferences or a custom plugin to write to App Group
-    // For now, store in localStorage; native widget bridge reads from App Group
-    const snapshot = {
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
+    const snapshot = { ...data, updatedAt: new Date().toISOString() };
     localStorage.setItem('atlas_widget_snapshot', JSON.stringify(snapshot));
   } catch (e) {
     console.warn('[HealthKit] Widget snapshot write failed:', e?.message);
