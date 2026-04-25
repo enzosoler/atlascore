@@ -78,7 +78,7 @@ export function OnboardingShell({ dark = false, step, total = 10, onBack, eyebro
     : 'radial-gradient(55% 35% at 100% 12%, rgba(10,10,10,0.05), rgba(10,10,10,0) 72%)';
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, position: 'relative', minHeight: 0, overflow: 'hidden' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, position: 'relative', minHeight: 0 }}>
       <div style={{ position: 'absolute', inset: 0, background: topGlow, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', inset: 0, background: sideGlow, pointerEvents: 'none' }} />
       <div
