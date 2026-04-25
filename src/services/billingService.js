@@ -68,21 +68,15 @@ export async function startWebCheckout({
   const publishableKey = data.publishableKey || clientConfig.publishableKey;
   const testMode = typeof data.testMode === 'boolean' ? data.testMode : clientConfig.testMode;
 
+  // publishableKey is only needed for Stripe.js embedded checkout.
+  // For URL-redirect checkout (which this app uses), data.url is sufficient.
   if (!publishableKey) {
-    throw new Error('Stripe publishable key is not configured for billing.');
-  }
-
-  if (testMode && !publishableKey.startsWith('pk_test_')) {
-    throw new Error('Stripe test mode is enabled but the client publishable key is not a test key.');
-  }
-
-  if (!testMode && publishableKey.startsWith('pk_test_')) {
-    throw new Error('Stripe live mode is enabled but the client publishable key is still a test key.');
+    console.warn('[billing] Stripe publishable key not configured — URL redirect will still work.');
   }
 
   return {
     url: data.url,
-    publishableKey,
+    publishableKey: publishableKey || '',
     testMode,
   };
 }

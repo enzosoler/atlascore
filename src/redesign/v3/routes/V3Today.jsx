@@ -164,7 +164,7 @@ function CheckInScreen({ dark, greeting, weather, onSubmit }) {
         <WeatherChip weather={weather} c={c} />
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '8px 22px 24px' }}>
+      <div tabIndex={-1} style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '8px 22px 24px' }}>
         {greeting && (
           <div style={{
             fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700,
@@ -247,7 +247,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
         <WeatherChip weather={weather} c={c} />
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '8px 22px 24px' }}>
+      <div tabIndex={-1} style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '8px 22px 24px' }}>
         {greeting && (
           <div style={{
             fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700,
@@ -444,6 +444,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
                   {/* Checkbox — training actions auto-complete from workouts, not manual */}
                   <button
                     type="button"
+                    tabIndex={0}
                     onClick={() => {
                       if (action.category === 'train' && !isDone) {
                         // Training actions must be completed by actually logging a workout

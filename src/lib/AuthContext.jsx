@@ -507,7 +507,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [applyAuthenticatedUser, applyLocalBypassUser]);
 
-  const signUp = useCallback(async (email, password, metadata = {}) => {
+  const signUp = useCallback(async (email, password, metadata = {}, _retryCount = 0) => {
     if (isAuthBypassEnabled()) {
       const mockUser = createAuthBypassUser(email, { onboardingCompleted: false });
       return applyLocalBypassUser(mockUser);
@@ -528,6 +528,12 @@ export const AuthProvider = ({ children }) => {
 
       return { needsEmailConfirmation: true };
     } catch (error) {
+      // Retry once on timeout — auth webhook cold start on Supabase free tier
+      if (_retryCount < 1 && error?.message?.includes?.('timeout')) {
+        console.log('[AuthContext] signUp timeout, retrying...');
+        await new Promise(r => setTimeout(r, 2500));
+        return signUp(email, password, metadata, _retryCount + 1);
+      }
       const authError = normalizeAuthError(error, 'Could not create your account.');
       setAuthState(AUTH_STATES.UNAUTHENTICATED);
       setAuthError(authError);

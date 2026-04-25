@@ -94,14 +94,22 @@ async function sendPasswordReset({ email, language } = {}) {
 
   const lang = normaliseLang(language);
 
-  const { error } = await supabase.functions.invoke('send-password-reset', {
-    body: { email, language: lang },
-  });
-
-  if (error) {
-    // Surface this one — callers need to know if the request failed
-    console.warn('[emailService] sendPasswordReset error:', error.message);
-    throw error;
+  try {
+    const { error } = await supabase.functions.invoke('send-password-reset', {
+      body: { email, language: lang },
+    });
+    if (error) throw error;
+  } catch (edgeFnError) {
+    // Edge Function unreachable (cold start, deploy lag, network) — fall back to
+    // Supabase's built-in password reset which always works.
+    console.warn('[emailService] Edge Function failed, falling back to native reset:', edgeFnError.message);
+    const { error: nativeError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${APP_URL}/auth/reset`,
+    });
+    if (nativeError) {
+      console.warn('[emailService] sendPasswordReset native fallback error:', nativeError.message);
+      throw nativeError;
+    }
   }
 }
 
