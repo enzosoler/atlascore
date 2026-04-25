@@ -35,6 +35,8 @@ export function useDevMode() {
     }
   }, [bypassEnabled, params]);
 
+  // Admin subdomain always bypasses platform gate
+  if (typeof window !== 'undefined' && window.location.hostname.startsWith('admin.')) return true;
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) return true;
   if (import.meta.env.DEV) return true;
   if (!bypassEnabled) return false;
