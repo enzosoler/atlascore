@@ -146,7 +146,7 @@ function S60_Onboard_Constraints({
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
       <OBHeader step={step} total={total} dark={dark} onBack={onBack} />
 
       {/* scrollable body */}
@@ -219,7 +219,7 @@ function S60_Onboard_Constraints({
       </div>
 
       {/* bottom actions */}
-      <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
         <ACBtn primary block dark={dark} size="lg" pill onClick={() => onContinue?.()}>Continue →</ACBtn>
         <div style={{ textAlign: 'center', padding: 4 }}>
           <button type="button" onClick={() => onSkip?.()} style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}>

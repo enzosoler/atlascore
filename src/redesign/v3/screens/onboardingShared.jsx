@@ -99,6 +99,7 @@ export function OnboardingShell({ dark = false, step, total = 10, onBack, eyebro
         <div
           style={{
             padding: '14px 28px 26px',
+            flexShrink: 0,
             background: dark ? 'linear-gradient(180deg, rgba(10,10,10,0), rgba(10,10,10,0.32) 40%, rgba(10,10,10,0.58))' : 'linear-gradient(180deg, rgba(239,233,218,0), rgba(239,233,218,0.62) 35%, rgba(239,233,218,0.94))',
             backdropFilter: 'blur(10px)',
           }}

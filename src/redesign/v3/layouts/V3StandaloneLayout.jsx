@@ -82,9 +82,10 @@ function PhoneFrameInner({ children }) {
           height: isDesktop ? 'min(100dvh - 32px, 900px)' : '100dvh',
           background: c.bg,
           color: c.fg,
-          overflow: 'hidden',
+          overflow: isDesktop ? 'hidden' : 'visible',
           display: 'flex',
           flexDirection: 'column',
+          minHeight: 0,
           borderRadius: isDesktop ? 38 : 0,
           border: isDesktop
             ? (dark

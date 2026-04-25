@@ -115,7 +115,7 @@ function S61_Onboard_Summary({
   });
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
       <OBHeader step={step} total={total} dark={dark} onBack={onBack} />
 
       {/* scrollable body */}
@@ -305,7 +305,7 @@ function S61_Onboard_Summary({
 
       {/* bottom CTA */}
       <div style={{
-        padding: '14px 28px 26px', background: c.bg,
+        padding: '14px 28px 26px', background: c.bg, flexShrink: 0,
         ...fadeIn(showCelebrate, 200),
       }}>
         <ACBtn

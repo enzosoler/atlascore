@@ -45,7 +45,7 @@ function SplitOnboardingCard({ dark = false, stepLabel, title, body, children, f
   const c = useACT(dark);
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
       <div style={{ padding: '18px 28px 0' }}>
         <ACLabel size={11} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase' }}>
           {stepLabel}
@@ -57,10 +57,10 @@ function SplitOnboardingCard({ dark = false, stepLabel, title, body, children, f
           {body}
         </div>
       </div>
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '24px 28px 16px' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 28px 16px' }}>
         {children}
       </div>
-      <div style={{ padding: '14px 28px 26px', background: c.bg }}>
+      <div style={{ padding: '14px 28px 26px', background: c.bg, flexShrink: 0 }}>
         {footer}
       </div>
     </div>
