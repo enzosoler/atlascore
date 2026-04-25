@@ -1,8 +1,14 @@
 import React from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Camera } from '@capacitor/camera';
+import { notificationService } from '@/services/notificationService';
+import * as healthKitService from '@/services/healthKitService';
 import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn, ACChip,
 } from '../lib/paper.jsx';
+
+const IS_NATIVE = Capacitor.isNativePlatform();
 
 function OBHeader({ step, total, dark, onBack = true }) {
   const c = useACT(dark);
@@ -27,8 +33,7 @@ function OBHeader({ step, total, dark, onBack = true }) {
 }
 
 // Real brand-ish icons for permission cards.
-function PermIcon({ k, on }) {
-  // Apple Health — white rounded square w/ pink heart (brand-accurate)
+function PermIcon({ k }) {
   if (k === 'health') return (
     <div style={{
       width: 38, height: 38, borderRadius: 10,
@@ -55,7 +60,6 @@ function PermIcon({ k, on }) {
       </svg>
     </div>
   );
-  // Notifications — iOS bell in accent-filled rounded square
   if (k === 'notif') return (
     <div style={{
       width: 38, height: 38, borderRadius: 10,
@@ -69,7 +73,6 @@ function PermIcon({ k, on }) {
       </svg>
     </div>
   );
-  // Whoop — black disc with bold white W
   if (k === 'whoop') return (
     <div style={{
       width: 38, height: 38, borderRadius: 999,
@@ -83,6 +86,25 @@ function PermIcon({ k, on }) {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Connector state: 'idle' | 'connecting' | 'granted' | 'denied' | 'unavailable' | 'coming_soon'
+// ---------------------------------------------------------------------------
+
+const STATUS_LABELS = {
+  idle: 'Connect',
+  connecting: 'Connecting\u2026',
+  granted: 'Connected',
+  denied: 'Denied',
+  unavailable: 'Not available',
+  coming_soon: 'Coming soon',
+};
+
+function chipProps(state) {
+  if (state === 'granted') return { accent: true };
+  if (state === 'denied' || state === 'unavailable') return { accent: false };
+  return { accent: false };
+}
+
 function S11_Onboard_Permissions({
   dark = false,
   onBack,
@@ -92,55 +114,106 @@ function S11_Onboard_Permissions({
   onChange,
 }) {
   const c = useACT(dark);
-  const [perms, setPerms] = React.useState(value || {
-    health: false,
-    camera: false,
-    notif: false,
-    whoop: false,
+  const [perms, setPerms] = React.useState({
+    health: value?.health || 'idle',
+    camera: value?.camera || 'idle',
+    notif: value?.notif || 'idle',
+    whoop: 'coming_soon',
   });
 
-  function toggle(k) {
-    const next = { ...perms, [k]: !perms[k] };
+  function update(k, state) {
+    const next = { ...perms, [k]: state };
     setPerms(next);
     onChange?.(next);
   }
+
+  // --- Real permission request handlers ---
+
+  async function connectHealth() {
+    if (perms.health === 'granted' || perms.health === 'connecting') return;
+    if (!IS_NATIVE) {
+      update('health', 'unavailable');
+      return;
+    }
+    update('health', 'connecting');
+    try {
+      const available = await healthKitService.isAvailable();
+      if (!available) {
+        update('health', 'unavailable');
+        return;
+      }
+      const granted = await healthKitService.requestAuthorization();
+      update('health', granted ? 'granted' : 'denied');
+    } catch {
+      update('health', 'denied');
+    }
+  }
+
+  async function connectCamera() {
+    if (perms.camera === 'granted' || perms.camera === 'connecting') return;
+    if (!IS_NATIVE) {
+      update('camera', 'unavailable');
+      return;
+    }
+    update('camera', 'connecting');
+    try {
+      const result = await Camera.requestPermissions({ permissions: ['camera'] });
+      update('camera', result.camera === 'granted' ? 'granted' : 'denied');
+    } catch {
+      update('camera', 'denied');
+    }
+  }
+
+  async function connectNotif() {
+    if (perms.notif === 'granted' || perms.notif === 'connecting') return;
+    if (!IS_NATIVE) {
+      update('notif', 'unavailable');
+      return;
+    }
+    update('notif', 'connecting');
+    try {
+      const result = await notificationService.requestPermissions();
+      update('notif', result === 'granted' ? 'granted' : 'denied');
+    } catch {
+      update('notif', 'denied');
+    }
+  }
+
+  const handlers = {
+    health: connectHealth,
+    camera: connectCamera,
+    notif: connectNotif,
+    whoop: () => {},
+  };
 
   const items = [
     {
       k: 'health',
       t: 'Apple Health',
-      d: 'Why it matters: recovery, sleep, steps, and heart rate let coach adjust the day instead of guessing.',
-      status: perms.health ? 'Connected' : 'Connect',
-      on: perms.health,
+      d: 'Recovery, sleep, steps, and heart rate let coach adjust the day instead of guessing.',
     },
     {
       k: 'camera',
       t: 'Camera',
-      d: 'Why it matters: progress photos, barcode scans, and meal capture work faster when camera access is ready.',
-      status: perms.camera ? 'Enabled' : 'Enable',
-      on: perms.camera,
+      d: 'Progress photos, barcode scans, and meal capture work faster when camera access is ready.',
     },
     {
       k: 'notif',
       t: 'Notifications',
-      d: 'Why it matters: day-5 trial reminders, coach nudges, and workout check-ins land at the right moment.',
-      status: perms.notif ? 'Enabled' : 'Enable',
-      on: perms.notif,
+      d: 'Trial reminders, coach nudges, and workout check-ins land at the right moment.',
     },
     {
       k: 'whoop',
       t: 'Whoop / Oura',
-      d: 'Optional: import readiness signals if you already track recovery somewhere else.',
-      status: perms.whoop ? 'Connected' : 'Connect',
-      on: perms.whoop,
+      d: 'Import readiness signals from your recovery tracker.',
     },
   ];
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
       <OBHeader step={5} total={10} dark={dark} onBack={onBack} />
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px 16px' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 28px 16px' }}>
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Connect</ACLabel>
         <div style={{
           marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
@@ -153,27 +226,36 @@ function S11_Onboard_Permissions({
         </div>
 
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {items.map((p, i) => (
-            <button
-              key={p.k}
-              type="button"
-              onClick={() => toggle(p.k)}
-              style={{
-                padding: 18, borderRadius: ACRadii.card,
-                background: c.card,
-                display: 'flex', alignItems: 'center', gap: 14,
-                border: 'none', cursor: 'pointer', textAlign: 'left',
-                width: '100%',
-              }}
-            >
-              <PermIcon k={p.k} on={p.on} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: c.fg }}>{p.t}</div>
-                <ACLabel size={12} color={c.dim}>{p.d}</ACLabel>
-              </div>
-              <ACChip accent={p.on} dark={dark}>{p.status}</ACChip>
-            </button>
-          ))}
+          {items.map((p) => {
+            const state = perms[p.k];
+            const isFinal = state === 'granted' || state === 'denied' || state === 'unavailable' || state === 'coming_soon';
+            const isLoading = state === 'connecting';
+            return (
+              <button
+                key={p.k}
+                type="button"
+                onClick={() => handlers[p.k]()}
+                disabled={isFinal || isLoading}
+                style={{
+                  padding: 18, borderRadius: ACRadii.card,
+                  background: c.card,
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  border: 'none', cursor: isFinal || isLoading ? 'default' : 'pointer',
+                  textAlign: 'left', width: '100%',
+                  opacity: state === 'coming_soon' ? 0.55 : 1,
+                }}
+              >
+                <PermIcon k={p.k} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: c.fg }}>{p.t}</div>
+                  <ACLabel size={12} color={c.dim}>{p.d}</ACLabel>
+                </div>
+                <ACChip accent={state === 'granted'} dark={dark}>
+                  {STATUS_LABELS[state] || state}
+                </ACChip>
+              </button>
+            );
+          })}
         </div>
 
         <div style={{
@@ -185,9 +267,12 @@ function S11_Onboard_Permissions({
             All data stays on-device by default. Cloud sync is opt-in, encrypted, and exportable.
           </div>
         </div>
+
+        {/* Bottom padding for safe area */}
+        <div style={{ height: 24 }} />
       </div>
 
-      <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
         <ACBtn primary block dark={dark} size="lg" pill onClick={onContinue}>Continue →</ACBtn>
         <div style={{ textAlign: 'center', padding: 4 }}>
           <button type="button" onClick={onSkip} style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}>
