@@ -172,6 +172,11 @@ const V3LabUpload = lazy(() => import('@/redesign/v3/routes/V3LabUpload.jsx'));
 const SmartOnboarding = lazy(() => import('@/components/onboarding/SmartOnboarding.jsx'));
 const WeightEntryRoute = lazy(() => import('@/routes/app/WeightEntryRoute.jsx'));
 const MeasurementsRoute = lazy(() => import('@/routes/app/MeasurementsRoute.jsx'));
+
+// ── Admin panel ──
+const AdminShell = lazy(() => import('@/pages/admin/AdminShell.jsx'));
+const AdminOverview = lazy(() => import('@/pages/admin/AdminOverview.jsx'));
+const AdminPlaceholder = lazy(() => import('@/pages/admin/AdminPlaceholder.jsx'));
 const BodyCheckInRoute = lazy(() => import('@/routes/app/BodyCheckInRoute.jsx'));
 
 // ─── ComingSoon stub (no v2 equivalent; keeps /help and fallback routes alive) ─
@@ -253,6 +258,29 @@ function AppRoutes() {
         <Route path="/webapp/settings" element={isAuthed ? (hasCompletedOnboarding ? <V3AccountSettings /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
         <Route path="/webapp/settings/danger" element={isAuthed ? (hasCompletedOnboarding ? <V3DangerZone /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
         <Route path="/webapp/settings/diagnostics" element={isAuthed ? (hasCompletedOnboarding ? <V3Diagnostics /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+
+        {/* ── Admin panel (web-only, role-guarded, NOT platform-gated) ── */}
+        <Route
+          path="/admin"
+          element={isAuthed && (user?.atlas_role === 'admin' || user?.atlas_role === 'superadmin')
+            ? <AdminShell />
+            : isAuthed
+              ? <Navigate to="/app/today" replace />
+              : <Navigate to="/auth/login" replace />
+          }
+        >
+          <Route index element={<AdminOverview />} />
+          <Route path="users" element={<AdminPlaceholder title="Users" description="User management — search, inspect, suspend, delete, grant roles." />} />
+          <Route path="users/:id" element={<AdminPlaceholder title="User Detail" description="Full user profile with data inspection tabs." />} />
+          <Route path="billing" element={<AdminPlaceholder title="Billing" description="Subscription management — comp, cancel, refund, force-sync." />} />
+          <Route path="moderation" element={<AdminPlaceholder title="Moderation" description="Content moderation queue and case management." />} />
+          <Route path="support" element={<AdminPlaceholder title="Support" description="Support inbox — tickets, replies, resolution." />} />
+          <Route path="invites" element={<AdminPlaceholder title="Invites & Beta" description="Beta invite codes, redemption tracking, onboarding funnel." />} />
+          <Route path="ops" element={<AdminPlaceholder title="Ops Health" description="Error logs, webhooks, AI costs, feature flags." />} />
+          <Route path="audit" element={<AdminPlaceholder title="Audit Log" description="Admin action audit trail with filters." />} />
+          <Route path="compliance" element={<AdminPlaceholder title="Compliance" description="GDPR export/delete tools, terms acceptance log." />} />
+          <Route path="settings" element={<AdminPlaceholder title="Settings" description="Admin panel configuration and role management." />} />
+        </Route>
 
         {/* Legacy mixed paths now redirect into the desktop utility surface. */}
         <Route path="/app/account" element={<Navigate to="/webapp/account" replace />} />
