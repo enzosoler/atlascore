@@ -233,9 +233,43 @@ function AppRoutes() {
   const hasCompletedOnboarding = !!user?.onboarding_completed;
   const postAuthRoute = hasCompletedOnboarding ? '/app/today' : '/onboarding';
 
-  // On admin subdomain, redirect root to /admin
-  if (isAdminSubdomain() && window.location.pathname === '/') {
-    return <Navigate to="/admin" replace />;
+  // On admin subdomain: lock down to admin routes only
+  if (isAdminSubdomain()) {
+    const path = window.location.pathname;
+    const isAdminRoute = path.startsWith('/admin');
+    const isAuthRoute = path.startsWith('/auth');
+    const isAdminRole = user?.atlas_role === 'admin' || user?.atlas_role === 'superadmin' || user?.role === 'admin' || user?.role === 'superadmin';
+
+    // Root → /admin
+    if (path === '/') return <Navigate to="/admin" replace />;
+
+    // Logged in but not admin → rejection screen
+    if (isAuthed && !isAdminRole && !isAuthRoute) {
+      return (
+        <div style={{ minHeight: '100vh', background: '#0a0a0a', color: '#efe9da', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, system-ui, sans-serif' }}>
+          <div style={{ textAlign: 'center', maxWidth: 400, padding: 40 }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>⛔</div>
+            <div style={{ fontFamily: '"Archivo Black", sans-serif', fontSize: 24, letterSpacing: -0.8, textTransform: 'lowercase', marginBottom: 12 }}>access denied</div>
+            <div style={{ fontSize: 14, color: 'rgba(239,233,218,0.6)', lineHeight: 1.5, marginBottom: 24 }}>
+              This panel is restricted to atlas.core administrators. Your account ({user?.email}) does not have admin privileges.
+            </div>
+            <a href="https://useatlascore.com/app/today" style={{ display: 'inline-block', padding: '12px 24px', background: '#e8b500', color: '#0a0a0a', borderRadius: 999, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+              Go to atlas.core →
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    // Not logged in + not on auth page → admin login
+    if (!isAuthed && !isAuthRoute) {
+      return <Navigate to="/auth/login" replace />;
+    }
+
+    // Non-admin/auth routes on admin subdomain → redirect to /admin
+    if (isAuthed && isAdminRole && !isAdminRoute && !isAuthRoute) {
+      return <Navigate to="/admin" replace />;
+    }
   }
 
   return (
