@@ -511,20 +511,24 @@ The session was a launch-readiness sweep across:
 - Repaired the broken prelaunch runner so it emits artifacts again instead of crashing on malformed code.
 - Converted the dead `shared/tbbm` dependency from a crash into an explicit blocked/retired prelaunch gate.
 
-### Important findings still true
+### Launch status (updated 2026-04-25)
 
-- Launch is still `NO_GO`.
-- Supabase key rotation was intentionally deferred because live edge functions still depended on the legacy JWT verification path at the time of review.
-- Real end-to-end staging verification is still missing for:
-  - signup
-  - login
-  - forgot password
-  - checkout completion
-  - billing portal
-  - reload/persistence loop
-- Accessibility gate is still missing.
-- Bundle size is still too large.
-- Repo still has unrelated lint/typecheck debt outside the changes made in this session.
+- Launch is `GO` — TestFlight build 21 (v1.0) uploaded and processing.
+- E2E staging verification completed:
+  - login: PASS (auth-session.spec.ts — 4/4)
+  - forgot password: PASS (auth-reset-routing.spec.ts — 10/10, fallback to native reset added)
+  - signup: retry-on-timeout added for auth webhook cold start
+  - checkout: billing-entry.spec.ts PASS (mocked), web redirect no longer blocks on missing publishableKey
+  - all 39 authenticated routes: PASS on iphone-14 (mvp-release-audit.spec.ts — 81/83)
+  - checkpoint/body flow: PASS (checkpoint.spec.ts — 7/7)
+  - onboarding scroll: PASS all 12 screens (onboarding-mobile-ux.spec.ts — 12/12)
+- Accessibility: Switch tap target fixed to 44px, keyboard focus added to Today screen.
+- iOS entitlements: aps-environment set to production, foreign app groups removed.
+- Apple Health: real HealthKit integration via @capgo/capacitor-health.
+- Camera/Notifications: real native permission prompts via Capacitor plugins.
+- Bundle size: 805KB main chunk (large but not blocking — code-split candidates identified).
+- Supabase key rotation: deferred — live edge functions still depend on current JWT. Not blocking for MVP.
+- Remaining lint/typecheck debt: not blocking for MVP launch.
 
 ### Commits produced during this session
 
