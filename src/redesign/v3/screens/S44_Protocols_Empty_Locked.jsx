@@ -221,7 +221,7 @@ function S44_Protocols_Empty_Locked({
               </ACBtn>
             </div>
             <div style={{ textAlign: 'center', paddingBottom: 20 }}>
-              <ACMono size={10} color={c.dim}>$12 / MO AFTER \u00b7 CANCEL ANYTIME</ACMono>
+              <ACMono size={10} color={c.dim}>$9.99 / MO AFTER \u00b7 CANCEL ANYTIME</ACMono>
             </div>
           </div>
         )}

@@ -228,7 +228,7 @@ export default function S68_Meal_Plans({
               </ACBtn>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <ACMono size={10} color={c.dim}>$12 / MO · CANCEL ANYTIME</ACMono>
+              <ACMono size={10} color={c.dim}>$9.99 / MO · CANCEL ANYTIME</ACMono>
             </div>
           </div>
         ) : (

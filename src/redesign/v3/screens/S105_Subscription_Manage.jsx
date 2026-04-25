@@ -22,12 +22,12 @@ export default function S105_Subscription_Manage({ dark }) {
           </div>
           <div style={{ marginTop:10, display:'flex', gap:14, alignItems:'baseline' }}>
             <div>
-              <div style={{ fontFamily:ACFonts.display, fontSize:24, fontWeight:700, letterSpacing:-0.6, fontVariantNumeric:'tabular-nums' }}>$180</div>
+              <div style={{ fontFamily:ACFonts.display, fontSize:24, fontWeight:700, letterSpacing:-0.6, fontVariantNumeric:'tabular-nums' }}>$79</div>
               <div style={{ fontFamily:ACFonts.mono, fontSize:9, color:'rgba(239,233,218,0.55)', letterSpacing:1.4, textTransform:'uppercase' }}>per year</div>
             </div>
             <div style={{ height:36, width:1, background:'rgba(239,233,218,0.2)' }} />
             <div>
-              <div style={{ fontFamily:ACFonts.display, fontSize:24, fontWeight:700, letterSpacing:-0.6, fontVariantNumeric:'tabular-nums' }}>$15</div>
+              <div style={{ fontFamily:ACFonts.display, fontSize:24, fontWeight:700, letterSpacing:-0.6, fontVariantNumeric:'tabular-nums' }}>$6.58</div>
               <div style={{ fontFamily:ACFonts.mono, fontSize:9, color:'rgba(239,233,218,0.55)', letterSpacing:1.4, textTransform:'uppercase' }}>per month · eff</div>
             </div>
           </div>
@@ -39,9 +39,9 @@ export default function S105_Subscription_Manage({ dark }) {
           <ACMono size={10} color={c.dim} track={1.6} style={{ textTransform:'uppercase' }}>change plan</ACMono>
           <div style={{ marginTop:10, display:'flex', flexDirection:'column', gap:8 }}>
             {[
-              { k:'Monthly',  v:'$22/mo',  sub:'Billed every month',            tag:null,      active:false },
-              { k:'Annual',   v:'$180/yr', sub:'Save $84/yr · currently active', tag:'CURRENT', active:true  },
-              { k:'Lifetime', v:'$480',    sub:'One payment · forever',          tag:'NEW',     active:false },
+              { k:'Weekly',   v:'$3.99/wk', sub:'Billed every week',              tag:null,      active:false },
+              { k:'Monthly',  v:'$9.99/mo', sub:'Billed every month',            tag:null,      active:false },
+              { k:'Annual',   v:'$79/yr',   sub:'Save 34% · currently active',   tag:'CURRENT', active:true  },
             ].map(p => (
               <div key={p.k} style={{
                 padding:'14px 14px', background: p.active ? `${c.accent}10` : c.card,

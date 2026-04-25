@@ -56,7 +56,7 @@ export default function S104_Account_Hub({ dark }) {
             h:'plan',
             rows:[
               ['Subscription', 'Pro · annual',    { accent:true }],
-              ['Next charge',  '$180.00 · sep 24', {}],
+              ['Next charge',  '$79.00 · sep 24', {}],
               ['Invoices',     '12 saved',         {}],
               ['Billing email','jordan@figma.com', {}],
             ],

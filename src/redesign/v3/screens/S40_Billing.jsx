@@ -13,17 +13,17 @@ const DEMO_PERKS = [
 ];
 
 const DEMO_INVOICES = [
-  { d: '18 APR 26', n: 'INV-0014', a: '$12.00', s: 'PAID' },
-  { d: '18 MAR 26', n: 'INV-0013', a: '$12.00', s: 'PAID' },
-  { d: '18 FEB 26', n: 'INV-0012', a: '$12.00', s: 'PAID' },
-  { d: '18 JAN 26', n: 'INV-0011', a: '$12.00', s: 'PAID' },
+  { d: '18 APR 26', n: 'INV-0014', a: '$9.99', s: 'PAID' },
+  { d: '18 MAR 26', n: 'INV-0013', a: '$9.99', s: 'PAID' },
+  { d: '18 FEB 26', n: 'INV-0012', a: '$9.99', s: 'PAID' },
+  { d: '18 JAN 26', n: 'INV-0011', a: '$9.99', s: 'PAID' },
 ];
 
 /**
  * S40_Billing — subscription / billing management screen.
  *
  * Gallery:    <S40_Billing dark />
- * Production: <S40_Billing dark planName="atlas.core" price="$12" interval="/month"
+ * Production: <S40_Billing dark planName="atlas.core" price="$9.99" interval="/month"
  *               nextCharge="MAY 18" perks={[...]} invoices={[{d,n,a,s},...]}
  *               paymentLast4="4242" paymentBrand="VISA" paymentExpiry="08/27"
  *               onBack={fn} onEditPayment={fn} onSwitchPlan={fn}
@@ -37,7 +37,7 @@ const DEMO_INVOICES = [
 function S40_Billing({
   dark = false,
   planName = 'atlas.core',
-  price = '$12',
+  price = '$9.99',
   interval = '/month',
   nextCharge = 'MAY 18',
   perks,
