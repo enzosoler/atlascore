@@ -19,10 +19,12 @@ export function interpolate(input, variables) {
 }
 
 function interpolateRows(rows = [], variables = {}) {
-  return rows.map((row) => ({
-    label: interpolate(row.label, variables),
-    value: interpolate(row.value, variables),
-  }));
+  return rows
+    .map((row) => ({
+      label: interpolate(row.label, variables),
+      value: interpolate(row.value, variables),
+    }))
+    .filter((row) => !/{{\s*[a-zA-Z0-9_]+\s*}}/.test(`${row.label}${row.value}`));
 }
 
 function normalizeTemplateKey(templateKey) {
@@ -219,4 +221,3 @@ export function renderEmail(templateKey, locale = brand.defaultLocale, variables
     signature,
   });
 }
-

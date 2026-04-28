@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { supabase } from '@/lib/supabaseClient';
+import { getAuthRedirectUrl } from '@/lib/authRedirects';
 import { useTheme } from '@/lib/ThemeContext';
 import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
@@ -50,7 +51,7 @@ function MagicLinkState() {
     try {
       const { error: err } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: getAuthRedirectUrl() },
       });
       if (err) throw err;
       setResent(true);

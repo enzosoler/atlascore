@@ -83,7 +83,12 @@
       "intentDescription": "Sua primeira semana está pronta. Crie sua conta para desbloqueá-la e continuar a configuração.",
       "intentHint": "Salvamos seu objetivo, experiência e equipamento. Finalize o cadastro para desbloquear o plano.",
       "rateLimitedCountdown": "Muitas tentativas. Tente novamente em {time}",
-      "submit": "Criar conta →"
+      "submit": "Criar conta →",
+      "creating": "Criando…",
+      "stillCreating": "Ainda criando…",
+      "creatingHint": "Criando sua conta…",
+      "slowHint": "Ainda trabalhando — pode levar alguns segundos…",
+      "delayedConfirmationHint": "Quase lá. Verifique sua caixa de entrada em instantes para confirmar seu e-mail."
     },
     "forgot": {
       "title": "Redefinir senha",
@@ -862,6 +867,26 @@
         "performance": "Performance e PRs",
         "body_comp": "Composição corporal",
         "recovery": "Recuperação e prontidão"
+      }
+    },
+    "tour": {
+      "skip": "Pular tour",
+      "next": "Próximo",
+      "finishing": "Finalizando…",
+      "enter": "Entrar no atlas.core →",
+      "slides": {
+        "log": {
+          "title": "Registre sem\npensar.",
+          "sub": "Tire uma foto. Diga \"dois ovos e torrada.\" Escaneie um código. Nós cuidamos do resto."
+        },
+        "coach": {
+          "title": "Seu coach está\nsempre aqui.",
+          "sub": "Pergunte qualquer coisa. Ele conhece seu plano, sono, treino e o que você comeu ontem."
+        },
+        "recovery": {
+          "title": "Recuperação se\nconquista.",
+          "sub": "Toda manhã você recebe uma pontuação: o que forçar, o que segurar, quando descansar."
+        }
       }
     },
     "tourError": {

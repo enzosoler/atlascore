@@ -20,6 +20,7 @@ export default function S36_Auth({
   onClose,
   onSwitchMode,
   loading = false,
+  loadingLabel,
   error = '',
   hint,
   submitDisabled = false,
@@ -244,7 +245,7 @@ export default function S36_Auth({
             disabled={submitDisabled}
             style={{ opacity: submitDisabled ? 0.6 : 1 }}
           >
-            {loading ? t('auth.form.working') : submitLabel || (mode === 'magic' ? t('auth.form.sendMagic') : t('auth.form.signIn'))}
+            {loading ? (loadingLabel || t('auth.form.working')) : submitLabel || (mode === 'magic' ? t('auth.form.sendMagic') : t('auth.form.signIn'))}
           </ACBtn>
         </div>
 

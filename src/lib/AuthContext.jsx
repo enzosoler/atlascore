@@ -6,6 +6,7 @@ import { sendWelcomeEmailAsync } from '@/lib/emailService';
 import { t as translate } from '@/lib/i18n';
 import { setSentryUser, trackEvent } from '@/lib/sentry';
 import { hasSupabaseConfigFromEnv, isAuthBypassEnabledFromEnv } from '@/lib/envGuards';
+import { getAuthRedirectUrl } from '@/lib/authRedirects';
 
 const AuthContext = createContext(null);
 
@@ -20,6 +21,41 @@ const AUTH_STATES = {
 const AUTH_CHECK_TIMEOUT = 5000;
 const REVALIDATION_TIMEOUT = 15000;
 const AUTH_BYPASS_STORAGE_KEY = 'atlas.authBypassUser';
+
+function nowMs() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+}
+
+function durationMs(startedAt) {
+  return Math.round(nowMs() - startedAt);
+}
+
+function maskEmail(email) {
+  const raw = String(email || '').trim().toLowerCase();
+  const [name, domain] = raw.split('@');
+  if (!name || !domain) return raw ? '[invalid-email]' : '[missing-email]';
+  const visible = name.length <= 2 ? name[0] : `${name.slice(0, 2)}…`;
+  return `${visible}@${domain}`;
+}
+
+function serializeAuthError(error) {
+  if (!error) return null;
+  return {
+    name: error.name || null,
+    message: error.message || null,
+    status: error.status || null,
+    code: error.code || error.error_code || null,
+    error: error.error || null,
+    error_description: error.error_description || null,
+  };
+}
+
+function logAuthDiagnostic(event, payload = {}) {
+  const level = payload.level || (payload.error ? 'warn' : 'log');
+  const safePayload = { ...payload };
+  delete safePayload.level;
+  console[level]?.(`[AuthContext] ${event}`, safePayload);
+}
 
 function hasSupabaseConfig() {
   return hasSupabaseConfigFromEnv(import.meta.env);
@@ -154,6 +190,12 @@ function normalizeAuthError(error, fallbackMessage) {
   }
 
   return buildAuthError('auth_failed', rawMessage || fallbackMessage);
+}
+
+function isSignupHookTimeout(error) {
+  const rawMessage = String(error?.message || '');
+  return /hook within maximum time|failed to reach hook|send email hook|auth hook/i.test(rawMessage)
+    && /timeout|maximum time|too long|failed to reach/i.test(rawMessage);
 }
 
 function readAuthBypassUser() {
@@ -490,14 +532,30 @@ export const AuthProvider = ({ children }) => {
       return applyLocalBypassUser(mockUser);
     }
 
+    const startedAt = nowMs();
+    logAuthDiagnostic('signIn:start', { email: maskEmail(email) });
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      logAuthDiagnostic('signIn:response', {
+        email: maskEmail(email),
+        durationMs: durationMs(startedAt),
+        hasUser: Boolean(data?.user),
+        hasSession: Boolean(data?.session),
+        error: serializeAuthError(error),
+      });
       if (error) throw error;
       if (data.user) {
         return await applyAuthenticatedUser(data.user);
       }
       return null;
     } catch (error) {
+      logAuthDiagnostic('signIn:error', {
+        level: 'warn',
+        email: maskEmail(email),
+        durationMs: durationMs(startedAt),
+        error: serializeAuthError(error),
+      });
       const authError = normalizeAuthError(error, 'Could not sign you in.');
       setAuthState(AUTH_STATES.UNAUTHENTICATED);
       setAuthError(authError);
@@ -505,17 +563,38 @@ export const AuthProvider = ({ children }) => {
     }
   }, [applyAuthenticatedUser, applyLocalBypassUser]);
 
-  const signUp = useCallback(async (email, password, metadata = {}, _retryCount = 0) => {
+  const signUp = useCallback(async (email, password, metadata = {}) => {
     if (isAuthBypassEnabled()) {
       const mockUser = createAuthBypassUser(email, { onboardingCompleted: false });
       return applyLocalBypassUser(mockUser);
     }
 
+    const startedAt = nowMs();
+    const emailRedirectTo = getAuthRedirectUrl();
+    logAuthDiagnostic('signUp:start', {
+      email: maskEmail(email),
+      redirectTo: emailRedirectTo,
+      metadataKeys: Object.keys(metadata || {}),
+    });
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: metadata },
+        options: {
+          data: metadata,
+          emailRedirectTo,
+        },
+      });
+      logAuthDiagnostic('signUp:response', {
+        email: maskEmail(email),
+        durationMs: durationMs(startedAt),
+        hasUser: Boolean(data?.user),
+        hasSession: Boolean(data?.session),
+        emailConfirmedAt: data?.user?.email_confirmed_at || null,
+        identitiesCount: Array.isArray(data?.user?.identities) ? data.user.identities.length : null,
+        confirmationRequired: Boolean(data?.user && !data?.session),
+        error: serializeAuthError(error),
       });
       if (error) throw error;
 
@@ -524,14 +603,35 @@ export const AuthProvider = ({ children }) => {
         return await applyAuthenticatedUser(data.user);
       }
 
-      return { needsEmailConfirmation: true };
+      return {
+        needsEmailConfirmation: true,
+        email,
+        emailConfirmedAt: data?.user?.email_confirmed_at || null,
+      };
     } catch (error) {
-      // Retry once on timeout — auth webhook cold start on Supabase free tier
-      if (_retryCount < 1 && error?.message?.includes?.('timeout')) {
-        console.log('[AuthContext] signUp timeout, retrying...');
-        await new Promise(r => setTimeout(r, 2500));
-        return signUp(email, password, metadata, _retryCount + 1);
+      logAuthDiagnostic('signUp:error', {
+        level: 'warn',
+        email: maskEmail(email),
+        durationMs: durationMs(startedAt),
+        error: serializeAuthError(error),
+      });
+
+      if (isSignupHookTimeout(error)) {
+        logAuthDiagnostic('signUp:delayedConfirmationAssumed', {
+          level: 'warn',
+          email: maskEmail(email),
+          durationMs: durationMs(startedAt),
+          message: 'Supabase Auth reported a send-email hook timeout; treating signup as pending confirmation because the auth email may still arrive.',
+        });
+        setAuthState(AUTH_STATES.UNAUTHENTICATED);
+        setAuthError(null);
+        return {
+          needsEmailConfirmation: true,
+          delayedConfirmation: true,
+          email,
+        };
       }
+
       const authError = normalizeAuthError(error, 'Could not create your account.');
       setAuthState(AUTH_STATES.UNAUTHENTICATED);
       setAuthError(authError);

@@ -83,7 +83,12 @@
       "intentDescription": "Your first week is ready. Create your account to unlock it and continue setup.",
       "intentHint": "We saved your goal, experience, and equipment. Finish signup to unlock the plan.",
       "rateLimitedCountdown": "Too many attempts. Try again in {time}",
-      "submit": "Create account →"
+      "submit": "Create account →",
+      "creating": "Creating…",
+      "stillCreating": "Still creating…",
+      "creatingHint": "Creating your account…",
+      "slowHint": "Still working — this can take a few seconds…",
+      "delayedConfirmationHint": "Almost there. Check your inbox shortly to confirm your email."
     },
     "forgot": {
       "title": "Reset password",
@@ -867,6 +872,26 @@
         "performance": "Performance and PRs",
         "body_comp": "Body composition",
         "recovery": "Recovery and readiness"
+      }
+    },
+    "tour": {
+      "skip": "Skip tour",
+      "next": "Next",
+      "finishing": "Finishing…",
+      "enter": "Enter atlas.core →",
+      "slides": {
+        "log": {
+          "title": "Log without\nthinking.",
+          "sub": "Snap a photo. Say \"two eggs and toast.\" Scan a barcode. We handle the rest."
+        },
+        "coach": {
+          "title": "Your coach is\nalways here.",
+          "sub": "Ask anything. It knows your plan, sleep, training, and what you ate yesterday."
+        },
+        "recovery": {
+          "title": "Recovery is\nearned.",
+          "sub": "Every morning you get a score: what to push, what to hold, when to rest."
+        }
       }
     },
     "tourError": {

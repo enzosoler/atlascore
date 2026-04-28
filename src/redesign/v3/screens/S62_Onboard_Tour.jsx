@@ -26,25 +26,20 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 
 /* ── slide data ───────────────────────────────────────────────── */
 const SLIDES = [
   {
     key: 'log',
-    title: 'Log without\nthinking.',
-    sub: 'Snap a photo. Say "two eggs and toast." Scan a barcode. We handle the rest.',
     icon: 'camera',
   },
   {
     key: 'coach',
-    title: 'Your coach is\nalways here.',
-    sub: 'Ask anything. It knows your plan, sleep, training, and what you ate yesterday.',
     icon: 'chat',
   },
   {
     key: 'recovery',
-    title: 'Recovery is\nearned.',
-    sub: 'Every morning you get a score: what to push, what to hold, when to rest.',
     icon: 'ring',
   },
 ];
@@ -130,10 +125,12 @@ const SWIPE_THRESHOLD = 50;
 /* ── main component ───────────────────────────────────────────── */
 export default function S62_Onboard_Tour({
   dark = true,
+  finishing = false,
   onFinish,
   onSkip,
 }) {
   const c = useACT(dark);
+  const t = useT();
   const [idx, setIdx] = useState(0);
   const touchRef = useRef(null);
   const last = idx === SLIDES.length - 1;
@@ -171,6 +168,8 @@ export default function S62_Onboard_Tour({
   }, [last, goNext, goPrev, safe, onFinish]);
 
   const slide = SLIDES[idx];
+  const title = t(`onboarding.tour.slides.${slide.key}.title`);
+  const sub = t(`onboarding.tour.slides.${slide.key}.sub`);
 
   return (
     <div
@@ -209,12 +208,12 @@ export default function S62_Onboard_Tour({
           }}
         >
           <ACLabel size={13} color={c.mute} style={{ fontWeight: 500 }}>
-            Skip tour
+            {t('onboarding.tour.skip')}
           </ACLabel>
         </button>
       </div>
 
-      {/* ── slide content (translateX carousel) ── */}
+      {/* ── slide content ── */}
       <div style={{
         flex: 1,
         display: 'flex',
@@ -223,60 +222,39 @@ export default function S62_Onboard_Tour({
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
+        padding: '0 32px',
       }}>
+        {/* icon */}
+        <div style={{ marginBottom: 40 }}>
+          <SlideIcon kind={slide.icon} accent={c.accent} fg={c.fg} faint={c.faint} />
+        </div>
+
+        {/* headline */}
         <div style={{
-          display: 'flex',
-          width: `${SLIDES.length * 100}%`,
-          transform: `translateX(-${idx * (100 / SLIDES.length)}%)`,
-          transition: 'transform 400ms cubic-bezier(.22,1,.36,1)',
+          fontFamily: ACFonts.brand,
+          fontSize: 44,
+          letterSpacing: -2,
+          lineHeight: 1.05,
+          color: c.fg,
+          textTransform: 'lowercase',
+          textAlign: 'center',
+          whiteSpace: 'pre-line',
         }}>
-          {SLIDES.map((s, i) => (
-            <div
-              key={s.key}
-              style={{
-                width: `${100 / SLIDES.length}%`,
-                flexShrink: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 32px',
-              }}
-            >
-              {/* icon */}
-              <div style={{ marginBottom: 40 }}>
-                <SlideIcon kind={s.icon} accent={c.accent} fg={c.fg} faint={c.faint} />
-              </div>
+          {title}
+        </div>
 
-              {/* headline */}
-              <div style={{
-                fontFamily: ACFonts.brand,
-                fontSize: 44,
-                letterSpacing: -2,
-                lineHeight: 1.05,
-                color: c.fg,
-                textTransform: 'lowercase',
-                textAlign: 'center',
-                whiteSpace: 'pre-line',
-              }}>
-                {s.title}
-              </div>
-
-              {/* subtitle */}
-              <div style={{
-                marginTop: 16,
-                fontFamily: ACFonts.body,
-                fontSize: 14,
-                lineHeight: 1.55,
-                color: c.dim,
-                textAlign: 'center',
-                maxWidth: 300,
-                letterSpacing: -0.1,
-              }}>
-                {s.sub}
-              </div>
-            </div>
-          ))}
+        {/* subtitle */}
+        <div style={{
+          marginTop: 16,
+          fontFamily: ACFonts.body,
+          fontSize: 14,
+          lineHeight: 1.55,
+          color: c.dim,
+          textAlign: 'center',
+          maxWidth: 300,
+          letterSpacing: -0.1,
+        }}>
+          {sub}
         </div>
       </div>
 
@@ -319,7 +297,7 @@ export default function S62_Onboard_Tour({
               onClick={goNext}
               style={{ width: '100%' }}
             >
-              Next
+              {t('onboarding.tour.next')}
             </ACBtn>
           </>
         )}
@@ -349,10 +327,11 @@ export default function S62_Onboard_Tour({
               size="lg"
               pill
               block
+              disabled={finishing}
               onClick={() => safe(onFinish)}
-              style={{ width: '100%' }}
+              style={{ width: '100%', opacity: finishing ? 0.68 : 1 }}
             >
-              Enter atlas.core &rarr;
+              {finishing ? t('onboarding.tour.finishing') : t('onboarding.tour.enter')}
             </ACBtn>
           </>
         )}

@@ -472,29 +472,44 @@ export function V3OnboardingSummary() {
 export function V3OnboardingTour() {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { user } = useAuth();
+  const { user, checkAppState } = useAuth();
   const t = useT();
+  const [finishing, setFinishing] = useState(false);
 
   async function completeOnboarding() {
+    if (finishing) return;
     if (!user?.id) {
       navigate('/auth/signup', { replace: true });
       return;
     }
 
+    setFinishing(true);
     try {
+      console.log('[onboarding] tour finish requested', { userId: user.id });
       await finalizeOnboarding(user.id);
+      await checkAppState();
       navigate('/app/today', { replace: true });
     } catch (error) {
+      console.error('[onboarding] tour finish failed', {
+        userId: user.id,
+        code: error?.code || null,
+        message: error?.message || null,
+        details: error?.details || null,
+        hint: error?.hint || null,
+      });
       toast.error(t('onboarding.tourError.title'), {
         description: error?.message || t('onboarding.tourError.fallback'),
       });
+    } finally {
+      setFinishing(false);
     }
   }
 
   return (
     <Wrap>
       <S62_Onboard_Tour
-        dark={theme === 'dark'}
+        dark
+        finishing={finishing}
         onFinish={completeOnboarding}
         onSkip={completeOnboarding}
       />

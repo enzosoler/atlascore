@@ -182,8 +182,8 @@ export const canonicalTemplates = {
       eyebrow: 'Email confirmation',
       headline: 'confirme seu e-mail',
       body: [
-        'Sua conta já existe, mas o endereço ainda precisa ser confirmado.',
-        'Faça isso agora para evitar qualquer problema de acesso depois.',
+        'Sua conta foi criada e falta confirmar este endereço.',
+        'Faça isso agora para liberar o acesso com segurança.',
       ],
       ctaLabel: 'Confirmar e-mail',
       ctaUrl: '{{confirm_email_url}}',
@@ -191,7 +191,6 @@ export const canonicalTemplates = {
         title: 'Confirmation status',
         rows: [
           { label: 'Address', value: '{{email_address}}' },
-          { label: 'Link expires', value: '{{expires_at}}' },
         ],
       },
     },
@@ -201,8 +200,8 @@ export const canonicalTemplates = {
       eyebrow: 'Email confirmation',
       headline: 'confirm your email',
       body: [
-        'Your account already exists, but the address still needs to be confirmed.',
-        'Handle it now to avoid any access problems later.',
+        'Your account was created and this address still needs confirmation.',
+        'Confirm it now to open access securely.',
       ],
       ctaLabel: 'Confirm email',
       ctaUrl: '{{confirm_email_url}}',
@@ -210,7 +209,6 @@ export const canonicalTemplates = {
         title: 'Confirmation status',
         rows: [
           { label: 'Address', value: '{{email_address}}' },
-          { label: 'Link expires', value: '{{expires_at}}' },
         ],
       },
     },

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { signInWithOAuth } from '@/lib/googleSignIn';
+import { getAuthRedirectUrl } from '@/lib/authRedirects';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S36_Auth from '../screens/S36_Auth.jsx';
 import { useTheme } from '@/lib/ThemeContext';
@@ -98,7 +99,7 @@ export default function V3AuthLogin() {
       } else {
         const { error: otpError } = await supabase.auth.signInWithOtp({
           email: em,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { emailRedirectTo: getAuthRedirectUrl() },
         });
         if (otpError) {
           // Normalize OTP 429s into the same rate-limit shape the password path uses

@@ -47,6 +47,23 @@ function getFirstName(metadata: Record<string, unknown> | undefined, email: stri
   return email.split('@')[0];
 }
 
+function normalizeSupabaseAuthBaseUrl(rawUrl: string): string {
+  const fallback = SUPABASE_URL || 'https://xrtqwdpczgdomqebmfkk.supabase.co';
+  const candidate = rawUrl || fallback;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.pathname.includes('/auth/v1')) {
+      console.warn('[auth-webhook] site_url included /auth/v1; normalizing to origin', {
+        receivedPath: parsed.pathname,
+      });
+    }
+    return parsed.origin;
+  } catch {
+    const parsedFallback = new URL(fallback);
+    return parsedFallback.origin;
+  }
+}
+
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
   const resendApiKey = Deno.env.get('RESEND_API_KEY');
   const fromEmail = Deno.env.get('FROM_EMAIL') || 'atlas.core <noreply@useatlascore.com>';
@@ -79,15 +96,18 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
 }
 
 function buildConfirmationUrl(siteUrl: string, tokenHash: string, redirectTo: string): string {
-  return `${siteUrl}/auth/v1/verify?token=${tokenHash}&type=signup&redirect_to=${encodeURIComponent(redirectTo || APP_URL)}`;
+  const authBaseUrl = normalizeSupabaseAuthBaseUrl(siteUrl);
+  return `${authBaseUrl}/auth/v1/verify?token=${encodeURIComponent(tokenHash)}&type=email&redirect_to=${encodeURIComponent(redirectTo || APP_URL)}`;
 }
 
 function buildResetUrl(siteUrl: string, tokenHash: string, redirectTo: string): string {
-  return `${siteUrl}/auth/v1/verify?token=${tokenHash}&type=recovery&redirect_to=${encodeURIComponent(redirectTo || `${APP_URL}/auth/reset`)}`;
+  const authBaseUrl = normalizeSupabaseAuthBaseUrl(siteUrl);
+  return `${authBaseUrl}/auth/v1/verify?token=${encodeURIComponent(tokenHash)}&type=recovery&redirect_to=${encodeURIComponent(redirectTo || `${APP_URL}/auth/reset`)}`;
 }
 
 function buildMagicLinkUrl(siteUrl: string, tokenHash: string, redirectTo: string): string {
-  return `${siteUrl}/auth/v1/verify?token=${tokenHash}&type=magiclink&redirect_to=${encodeURIComponent(redirectTo || APP_URL)}`;
+  const authBaseUrl = normalizeSupabaseAuthBaseUrl(siteUrl);
+  return `${authBaseUrl}/auth/v1/verify?token=${encodeURIComponent(tokenHash)}&type=magiclink&redirect_to=${encodeURIComponent(redirectTo || APP_URL)}`;
 }
 
 function renderAuthEmail(
@@ -215,9 +235,13 @@ serve(async (req) => {
   const firstName = getFirstName(metadata, email);
   const emailData = data.email_data;
   const actionType = emailData?.email_action_type || 'signup';
-  const siteUrl = emailData?.site_url || SUPABASE_URL;
+  const siteUrl = normalizeSupabaseAuthBaseUrl(emailData?.site_url || SUPABASE_URL);
   const redirectTo = emailData?.redirect_to || APP_URL;
   const tokenHash = emailData?.token_hash || '';
+  const commonVariables = {
+    first_name: firstName,
+    email_address: email,
+  };
 
   const results: Record<string, boolean | string[]> = { emailSent: false, errors: [] };
 
@@ -246,7 +270,7 @@ serve(async (req) => {
 
     const confirmUrl = buildConfirmationUrl(siteUrl, tokenHash, redirectTo);
     const rendered = renderAuthEmail('confirm_email', locale, {
-      first_name: firstName,
+      ...commonVariables,
       confirm_email_url: confirmUrl,
     });
 
@@ -254,17 +278,20 @@ serve(async (req) => {
   } else if (actionType === 'recovery' || actionType === 'reset_password') {
     const resetUrl = buildResetUrl(siteUrl, tokenHash, redirectTo);
     const rendered = renderAuthEmail('reset_password', locale, {
-      first_name: firstName,
+      ...commonVariables,
       reset_password_url: resetUrl,
     });
 
     results.emailSent = await sendEmail(email, rendered.subject, rendered.html);
   } else if (actionType === 'magic_link' || actionType === 'magiclink') {
     const magicUrl = buildMagicLinkUrl(siteUrl, tokenHash, redirectTo);
-    const rendered = renderMagicLinkEmail(locale, magicUrl);
+    const rendered = renderAuthEmail('magic_login', locale, {
+      ...commonVariables,
+      magic_login_url: magicUrl,
+    });
     results.emailSent = await sendEmail(email, rendered.subject, rendered.html);
   } else if (actionType === 'email_change' || actionType === 'email_change_new') {
-    const verifyUrl = `${siteUrl}/auth/v1/verify?token=${tokenHash}&type=email_change&redirect_to=${encodeURIComponent(redirectTo)}`;
+    const verifyUrl = `${siteUrl}/auth/v1/verify?token=${encodeURIComponent(tokenHash)}&type=email_change&redirect_to=${encodeURIComponent(redirectTo)}`;
     const rendered = renderEmailChangeEmail(locale, verifyUrl);
     results.emailSent = await sendEmail(email, rendered.subject, rendered.html);
   } else {

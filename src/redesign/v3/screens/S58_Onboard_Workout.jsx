@@ -191,7 +191,7 @@ function S58_Onboard_Workout({
           onClick={canContinue ? onContinue : undefined}
           style={{ opacity: canContinue ? 1 : 0.4, pointerEvents: canContinue ? 'auto' : 'none' }}
         >
-          Continue \u2192
+          Continue →
         </ACBtn>
       </div>
     </div>

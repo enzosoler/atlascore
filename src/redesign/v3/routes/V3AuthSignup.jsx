@@ -34,6 +34,7 @@ export default function V3AuthSignup() {
   const [error, setError] = useState('');
   const [hint, setHint] = useState(t('auth.signup.hint'));
   const [loading, setLoading] = useState(false);
+  const [slowSignup, setSlowSignup] = useState(false);
   const [rateLimitRemaining, setRateLimitRemaining] = useState(0);
   const submitLockRef = useRef(false);
   const signupSource = searchParams.get('source');
@@ -65,6 +66,20 @@ export default function V3AuthSignup() {
     return () => window.clearInterval(timerId);
   }, [rateLimitRemaining]);
 
+  useEffect(() => {
+    if (!loading) {
+      setSlowSignup(false);
+      return undefined;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setSlowSignup(true);
+      setHint(t('auth.signup.slowHint'));
+    }, 6500);
+
+    return () => window.clearTimeout(timerId);
+  }, [loading, t]);
+
   const onSubmit = async (e) => {
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
@@ -89,10 +104,13 @@ export default function V3AuthSignup() {
 
     submitLockRef.current = true;
     setLoading(true);
+    setHint(t('auth.signup.creatingHint'));
     try {
       const result = await signUp(em, password, {});
       if (result?.needsEmailConfirmation) {
-        setHint(t('auth.signup.confirmEmailHint'));
+        setHint(result?.delayedConfirmation
+          ? t('auth.signup.delayedConfirmationHint')
+          : t('auth.signup.confirmEmailHint'));
         return;
       }
       seedOnboardingDraftFromIntent(intentDraft);
@@ -143,6 +161,7 @@ export default function V3AuthSignup() {
         onGoogle={() => onOAuth('google')}
         onClose={() => navigate(signupSource === 'intent' ? '/?quiz=start' : '/welcome/manifesto')}
         loading={loading}
+        loadingLabel={slowSignup ? t('auth.signup.stillCreating') : t('auth.signup.creating')}
         error={rateLimitRemaining > 0
           ? t('auth.signup.rateLimitedCountdown', { time: formatCountdown(rateLimitRemaining) })
           : error}

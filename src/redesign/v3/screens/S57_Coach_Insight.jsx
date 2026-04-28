@@ -305,7 +305,7 @@ export default function S57_Coach_Insight({
                         WebkitTapHighlightColor: 'transparent',
                       }}
                     >
-                      {r.label} \u2192
+                      {r.label} →
                     </button>
                   ))}
                 </div>
@@ -319,7 +319,7 @@ export default function S57_Coach_Insight({
       <div style={{ padding: '12px 22px 24px', background: c.bg }}>
         <ACBtn primary dark={dark} size="lg" pill block
           onClick={() => safe(onAskFollowUp, { headline: data.headline, category: data.category })}>
-          Ask follow-up \u2192
+          Ask follow-up →
         </ACBtn>
       </div>
     </div>

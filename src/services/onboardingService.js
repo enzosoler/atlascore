@@ -253,25 +253,63 @@ export async function finalizeOnboarding(userId, onboardingData = null) {
     throw new Error('You must be signed in to complete onboarding.');
   }
 
+  const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const sessionUserId = sessionData?.session?.user?.id || null;
+  if (sessionError || !sessionUserId) {
+    console.error('[onboarding] finalize blocked: no active auth session', {
+      userId,
+      sessionError: sessionError?.message || null,
+    });
+    throw new Error('Your session is not ready yet. Sign in again and retry onboarding.');
+  }
+  if (sessionUserId !== userId) {
+    console.error('[onboarding] finalize blocked: session/user mismatch', {
+      userId,
+      sessionUserId,
+    });
+    throw new Error('Your session does not match this onboarding profile.');
+  }
+
   const source = onboardingData || readOnboardingDraft();
   const profileData = buildProfileDataFromOnboarding(source);
+  console.log('[onboarding] finalize start', {
+    userId,
+    answers: Object.keys(source || {}),
+    targetCalories: profileData?.targets?.calories ?? null,
+  });
 
-  const { error: profileError } = await supabase
+  const { data: profileRow, error: profileError } = await supabase
     .from('profiles')
     .upsert({
       id: userId,
       onboarding_completed: true,
       profile_data: profileData,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'id' });
+    }, { onConflict: 'id' })
+    .select('id,onboarding_completed,updated_at')
+    .single();
 
   if (profileError) {
+    console.error('[onboarding] profile upsert failed', {
+      userId,
+      code: profileError.code || null,
+      message: profileError.message || null,
+      details: profileError.details || null,
+      hint: profileError.hint || null,
+    });
     throw profileError;
   }
 
   const authMetadata = buildAuthMetadataFromOnboarding(source, profileData);
   const { error: authError } = await supabase.auth.updateUser({ data: authMetadata });
   if (authError) {
+    console.error('[onboarding] auth metadata update failed', {
+      userId,
+      code: authError.code || null,
+      message: authError.message || null,
+      status: authError.status || null,
+    });
     throw authError;
   }
 
@@ -280,9 +318,20 @@ export async function finalizeOnboarding(userId, onboardingData = null) {
       bmr: profileData?.onboarding_v3?.computed_plan?.bmr,
       tdee: profileData?.onboarding_v3?.computed_plan?.tdee,
     });
-  } catch {}
+  } catch (snapshotError) {
+    console.warn('[onboarding] BMR snapshot skipped', {
+      userId,
+      message: snapshotError?.message || null,
+    });
+  }
 
   clearOnboardingDraft();
   clearOnboardingIntentDraft();
+  console.log('[onboarding] finalize complete', {
+    userId,
+    durationMs: Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt),
+    profileUpdatedAt: profileRow?.updated_at || null,
+    onboardingCompleted: profileRow?.onboarding_completed ?? null,
+  });
   return profileData;
 }
