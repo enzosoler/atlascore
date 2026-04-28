@@ -111,11 +111,18 @@ serve(async (req) => {
     return buildPreflightResponse(req);
   }
 
-  // Only allow service_role or authenticated calls
+  // Only allow service_role calls (internal/cron use only)
   const authHeader = req.headers.get('Authorization') ?? '';
+  const token = authHeader.replace('Bearer ', '');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  if (!serviceRoleKey || token !== serviceRoleKey) {
+    return new Response(JSON.stringify({ error: 'Unauthorized — service_role required' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    serviceRoleKey,
   );
 
   let body: {

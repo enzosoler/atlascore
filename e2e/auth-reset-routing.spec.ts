@@ -103,8 +103,9 @@ test.describe('Auth reset routing', () => {
     const passwordInputs = page.locator('input[type="password"]');
     await expect(passwordInputs).toHaveCount(2);
 
-    await passwordInputs.first().fill('AtlasAuth#2026');
-    await passwordInputs.nth(1).fill('AtlasAuth#2027');
+    const testPwd = process.env.E2E_USER_PASSWORD || 'TestReset#9999';
+    await passwordInputs.first().fill(testPwd);
+    await passwordInputs.nth(1).fill(testPwd + '1');
     await page.getByRole('button', { name: /update|reset/i }).click();
 
     await expect(page).toHaveURL(/\/auth\/reset$/);

@@ -238,7 +238,7 @@ test.describe('Real user loop integrity', () => {
     test.setTimeout(300000);
 
     const email = `atlas-loop-${Date.now()}@example.com`;
-    const password = 'AtlasLoopTest#2026';
+    const password = process.env.E2E_USER_PASSWORD || (() => { throw new Error('E2E_USER_PASSWORD required'); })();
     const browserErrors: string[] = [];
 
     page.on('pageerror', (error) => {

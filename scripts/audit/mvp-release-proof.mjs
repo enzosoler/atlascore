@@ -9,7 +9,8 @@ const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const email = process.env.E2E_USER_EMAIL || 'e2e-user@example.com';
-const password = process.env.E2E_USER_PASSWORD || 'AtlasAuth#2026';
+const password = process.env.E2E_USER_PASSWORD;
+if (!password) { console.error('E2E_USER_PASSWORD env var required'); process.exit(1); }
 const auditId = `mvp_audit_${Date.now()}`;
 const today = new Date().toISOString().slice(0, 10);
 

@@ -9,7 +9,9 @@ export default async function globalSetup() {
   loadEnv({ path: '.env.local', override: true });
 
   process.env.E2E_USER_EMAIL ||= 'e2e-user@example.com';
-  process.env.E2E_USER_PASSWORD ||= 'AtlasAuth#2026';
+  if (!process.env.E2E_USER_PASSWORD) {
+    throw new Error('E2E_USER_PASSWORD env var is required. Set it in .env or your CI config.');
+  }
 
   mkdirSync('e2e/.auth', { recursive: true });
 

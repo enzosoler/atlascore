@@ -17,7 +17,8 @@ const { writeSubscriptionByUserId } = await import(helperUrl);
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const TARGET_EMAIL = process.env.E2E_USER_EMAIL || process.argv[2] || 'e2e-user@example.com';
-const TARGET_PASSWORD = process.env.E2E_USER_PASSWORD || process.argv[3] || 'AtlasAuth#2026';
+const TARGET_PASSWORD = process.env.E2E_USER_PASSWORD || process.argv[3];
+if (!TARGET_PASSWORD) { console.error('E2E_USER_PASSWORD env var or argv[3] required'); process.exit(1); }
 const TARGET_NAME = process.env.E2E_USER_NAME || 'E2E User';
 const PLAN = process.env.E2E_BILLING_PLAN || 'pro';
 
