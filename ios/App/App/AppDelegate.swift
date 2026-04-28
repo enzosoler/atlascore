@@ -6,13 +6,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    private func registerPluginsIfNeeded() {
+        guard let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge else { return }
+        if bridge.plugin(withName: "NativeAuthSession") == nil {
+            bridge.registerPluginInstance(NativeAuthSession())
+        }
+        if bridge.plugin(withName: "WidgetDataBridge") == nil {
+            bridge.registerPluginInstance(WidgetDataBridge())
+        }
+        WatchConnectivityHandler.shared.configure(bridge: bridge)
+    }
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Plugins are now registered synchronously in AtlasBridgeViewController.capacitorDidLoad().
-        // WatchConnectivity still needs a brief delay for the bridge to fully initialize.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
-                WatchConnectivityHandler.shared.configure(bridge: bridge)
-            }
+        // Register plugins on the next run loop — bridge is ready by then but JS hasn't executed yet.
+        DispatchQueue.main.async {
+            self.registerPluginsIfNeeded()
         }
         return true
     }
