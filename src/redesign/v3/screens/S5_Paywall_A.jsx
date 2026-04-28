@@ -6,14 +6,14 @@ import {
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { useT } from '@/lib/i18nContext';
 
-const TERMS_URL = 'https://useatlascore.com/terms';
+const EULA_URL    = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 const PRIVACY_URL = 'https://useatlascore.com/privacy';
 
 const openExternal = async (url) => {
   try {
     if (window.Capacitor?.isNativePlatform?.()) {
       const { Browser } = await import('@capacitor/browser');
-      await Browser.open({ url });
+      await Browser.open({ url, presentationStyle: 'popover' });
       return;
     }
   } catch { /* fall through */ }
@@ -155,7 +155,7 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
               </button>
             )}
             {onRestore && <span style={{ color: c.dim, fontSize: 11 }}>&middot;</span>}
-            <button type="button" onClick={() => openExternal(TERMS_URL)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+            <button type="button" onClick={() => openExternal(EULA_URL)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
               <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline', fontFamily: ACFonts.mono, letterSpacing: 0.3 }}>{t('paywall.links.terms')}</ACLabel>
             </button>
             <span style={{ color: c.dim, fontSize: 11 }}>&middot;</span>

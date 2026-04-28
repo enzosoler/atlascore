@@ -324,13 +324,23 @@ export default function V3Paywall() {
               <span style={{ color: MC.mute }}>&middot;</span>
             </>
           )}
-          <Link to="/terms" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
+          <button type="button" onClick={() => {
+            const url = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+            if (Capacitor.isNativePlatform()) {
+              import('@capacitor/browser').then(({ Browser }) => Browser.open({ url, presentationStyle: 'popover' }));
+            } else { window.open(url, '_blank', 'noopener,noreferrer'); }
+          }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
             {t('webNav.terms')}
-          </Link>
+          </button>
           <span style={{ color: MC.mute }}>&middot;</span>
-          <Link to="/privacy" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
+          <button type="button" onClick={() => {
+            const url = 'https://useatlascore.com/privacy';
+            if (Capacitor.isNativePlatform()) {
+              import('@capacitor/browser').then(({ Browser }) => Browser.open({ url, presentationStyle: 'popover' }));
+            } else { window.open(url, '_blank', 'noopener,noreferrer'); }
+          }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
             {t('webNav.privacy')}
-          </Link>
+          </button>
         </div>
       </div>
 

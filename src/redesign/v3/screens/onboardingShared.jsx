@@ -68,10 +68,11 @@ export function OnboardingHeader({ step, total, dark, onBack = true, onExit, eye
           <button
             type="button"
             onClick={onExit}
+            onTouchEnd={(e) => { e.preventDefault(); onExit(); }}
             aria-label="Exit onboarding"
             style={{
-              width: 34,
-              height: 34,
+              width: 44,
+              height: 44,
               borderRadius: 999,
               background: dark ? 'rgba(239,233,218,0.06)' : 'rgba(10,10,10,0.05)',
               border: `1px solid ${c.hair}`,
@@ -80,6 +81,7 @@ export function OnboardingHeader({ step, total, dark, onBack = true, onExit, eye
               justifyContent: 'center',
               cursor: 'pointer',
               flexShrink: 0,
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <svg width="10" height="10" viewBox="0 0 10 10">
