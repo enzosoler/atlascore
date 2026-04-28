@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>atlas.core — App Store copy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --bg:  #efe9da;
+    --accent: #e8b500;
+    --dim: rgba(10,10,10,0.55);
+    --mute: rgba(10,10,10,0.40);
+    --line: rgba(10,10,10,0.12);
+    --soft: rgba(10,10,10,0.04);
+    --hair: rgba(10,10,10,0.08);
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection { background: var(--accent); color: var(--ink); }
+
+  .page {
+    max-width: 1200px; margin: 0 auto; padding: 64px 48px 120px;
+  }
+
+  /* Header */
+  .backlink {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px;
+    text-transform: uppercase; color: var(--dim);
+    text-decoration: none;
+  }
+  .backlink:hover { color: var(--ink); }
+
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+  h1.display {
+    margin: 10px 0 20px;
+    font-family: var(--display); font-size: 88px; letter-spacing: -3.6px; line-height: 0.92;
+    text-transform: lowercase;
+  }
+  h1.display .accent { color: var(--accent); }
+  h1.display .stamp { background: var(--ink); color: var(--bg); padding: 0 14px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 760px; color: rgba(10,10,10,0.82); }
+
+  /* Two columns A / B */
+  .versions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    margin-top: 56px;
+  }
+
+  .ver {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    display: flex; flex-direction: column;
+  }
+  .ver-head {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--soft);
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .ver-id {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .ver-title {
+    font-family: var(--display); font-size: 28px; letter-spacing: -0.8px;
+    text-transform: lowercase;
+  }
+  .ver-tag {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px;
+    text-transform: uppercase; padding: 3px 7px;
+    background: var(--ink); color: var(--bg);
+  }
+  .ver-tag.accent { background: var(--accent); color: var(--ink); }
+
+  .ver-body { padding: 24px; display: flex; flex-direction: column; gap: 28px; }
+
+  .field {
+    border-top: 1px solid var(--hair);
+    padding-top: 18px;
+  }
+  .field:first-child { border-top: 0; padding-top: 0; }
+  .field-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .field-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--ink);
+  }
+  .field-meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px;
+    color: var(--dim);
+  }
+  .field-meta .ok { color: #4a7d2c; }
+  .field-meta .warn { color: #c2391a; }
+
+  /* Copy block — looks pasted from App Store Connect */
+  .copy {
+    background: #fdfaf0;
+    border: 1px solid var(--hair);
+    padding: 14px 16px;
+    font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
+    font-size: 14px; line-height: 1.55;
+    color: var(--ink);
+    position: relative;
+    white-space: pre-wrap;
+  }
+  .copy.tight { font-family: var(--mono); font-size: 13px; letter-spacing: 0.2px; }
+  .copy.bullets { padding: 14px 16px 14px 30px; }
+  .copy strong { font-weight: 700; }
+
+  .copy ul { margin: 0; padding-left: 0; list-style: none; }
+  .copy ul li {
+    padding: 4px 0; position: relative; padding-left: 16px;
+  }
+  .copy ul li::before {
+    content: "—"; position: absolute; left: 0; color: var(--accent); font-weight: 700;
+  }
+
+  .copy-large {
+    font-size: 13.5px; line-height: 1.6;
+  }
+
+  .copy h4 {
+    margin: 14px 0 4px; font-size: 14px; font-weight: 700;
+  }
+  .copy h4:first-child { margin-top: 0; }
+
+  .tagline {
+    font-family: var(--display); font-size: 24px; letter-spacing: -0.6px;
+    line-height: 1.1; text-transform: lowercase;
+    padding: 18px 18px;
+    background: var(--ink); color: var(--bg);
+  }
+  .tagline .accent { color: var(--accent); }
+
+  /* Notes block at bottom */
+  .notes {
+    margin-top: 56px;
+    padding: 28px 32px;
+    background: var(--ink); color: var(--bg);
+  }
+  .notes .eyebrow { color: rgba(239,233,218,0.6); }
+  .notes h3 { font-family: var(--display); font-size: 36px; letter-spacing: -1.2px; margin: 4px 0 18px; text-transform: lowercase; }
+  .notes ul { padding-left: 18px; font-size: 14px; line-height: 1.7; margin: 0; column-count: 2; column-gap: 48px; }
+  .notes li::marker { color: var(--accent); }
+
+  /* Print */
+  @media print {
+    .page { padding: 24px; max-width: none; }
+    .versions { grid-template-columns: 1fr; gap: 0; }
+    .ver { page-break-inside: avoid; margin-bottom: 24px; }
+    .backlink { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="backlink">← atlas.core · back to canvas</a>
+
+  <div style="margin-top: 32px;">
+    <div class="eyebrow">/// atlas.core · app store · listing copy</div>
+    <h1 class="display">
+      app store <span class="accent">copy</span>.<br/>
+      <span class="stamp">two angles. paste-ready.</span>
+    </h1>
+    <p class="lede">
+      Two listings, same product. <strong>A</strong> sells fitness and results — the people searching
+      for "workout tracker." <strong>B</strong> sells consistency and calm — the people quitting their
+      fifth fitness app this year. Pick one for launch, A/B the other for v1.1. Every field below is
+      sized to App Store Connect limits and free of medical claims.
+    </p>
+  </div>
+
+  <div class="versions">
+
+    <!-- ═══════════════════════════════ VERSION A ═══════════════════════════════ -->
+    <section class="ver">
+      <header class="ver-head">
+        <div>
+          <div class="ver-id">version a</div>
+          <div class="ver-title">fitness · results</div>
+        </div>
+        <span class="ver-tag accent">primary candidate</span>
+      </header>
+      <div class="ver-body">
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">App Store Title</span>
+            <span class="field-meta">27 / 30 <span class="ok">✓</span></span>
+          </div>
+          <div class="copy tight">atlas.core: Fitness Tracker</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Subtitle</span>
+            <span class="field-meta">29 / 30 <span class="ok">✓</span></span>
+          </div>
+          <div class="copy tight">Workouts, nutrition, progress</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Promotional Text / Short</span>
+            <span class="field-meta">170 char</span>
+          </div>
+          <div class="copy">A clean, modern fitness app for tracking workouts, nutrition, and body measurements in one place. Built for everyday people who want to see real progress without the noise.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Description</span>
+            <span class="field-meta">~1,720 / 4,000</span>
+          </div>
+          <div class="copy copy-large"><strong>Train. Eat. Measure. See progress.</strong>
+
+atlas.core is an all-in-one fitness tracker designed for people who want to get in shape and actually see how far they've come. No clutter. No gimmicks. Just the tools you need to train with intent and track what matters.
+
+Plan your workouts, log your sets, track your meals, and check in on your body measurements at regular checkpoints. Everything flows into a single daily dashboard so you always know where you stand.
+
+Whether you're starting your first program or returning after a break, atlas.core gives you the structure to train consistently and the data to know it's working.
+
+<strong>Workouts that fit your routine</strong>
+Follow a guided program or build your own. Log sets, reps, and weight quickly between sets. Review your training history and watch your numbers climb.
+
+<strong>Nutrition without the spreadsheet</strong>
+Log meals, track macros, and stay aware of what you're eating — without turning every meal into a chore.
+
+<strong>Measurable progress</strong>
+Take body measurements at your own pace and compare checkpoints over time. Progress shows up as a clear line, not a guess.
+
+<strong>Daily dashboard</strong>
+One screen for today: your workout, your meals, your numbers. Open the app, see what's next, get on with your day.
+
+<strong>Coaching and guidance</strong>
+Optional coaching content helps you stay on track when motivation dips and gives you a direction when you're not sure what to do next.
+
+Designed mobile-first. Built for consistency. Made for the long run.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Feature Bullets</span>
+            <span class="field-meta">6 items</span>
+          </div>
+          <div class="copy bullets">
+            <ul>
+              <li><strong>Workouts &amp; routines</strong> — Follow programs or build your own. Log sets in seconds.</li>
+              <li><strong>Nutrition tracking</strong> — Log meals and macros without the spreadsheet feel.</li>
+              <li><strong>Body measurements</strong> — Track checkpoints and compare progress over time.</li>
+              <li><strong>Daily dashboard</strong> — Today's workout, meals, and numbers on one screen.</li>
+              <li><strong>Coaching &amp; guidance</strong> — Direction when you need it, quiet when you don't.</li>
+              <li><strong>Clean, modern design</strong> — Mobile-first. Minimal. Built to be opened daily.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Keywords</span>
+            <span class="field-meta">98 / 100 <span class="ok">✓</span></span>
+          </div>
+          <div class="copy tight">fitness,workout,gym,tracker,nutrition,macros,routine,training,progress,measurements,health,coach</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Tagline</span>
+            <span class="field-meta">marketing site</span>
+          </div>
+          <div class="tagline">train with <span class="accent">intent</span>.<br/>see the line move.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ VERSION B ═══════════════════════════════ -->
+    <section class="ver">
+      <header class="ver-head">
+        <div>
+          <div class="ver-id">version b</div>
+          <div class="ver-title">consistency · habit</div>
+        </div>
+        <span class="ver-tag">a/b candidate</span>
+      </header>
+      <div class="ver-body">
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">App Store Title</span>
+            <span class="field-meta">25 / 30 <span class="ok">✓</span></span>
+          </div>
+          <div class="copy tight">atlas.core: Daily Fitness</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Subtitle</span>
+            <span class="field-meta">25 / 30 <span class="ok">✓</span></span>
+          </div>
+          <div class="copy tight">Show up. Stay consistent.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Promotional Text / Short</span>
+            <span class="field-meta">175 char</span>
+          </div>
+          <div class="copy">A calm, all-in-one fitness app built around the daily habit. Workouts, nutrition, and progress checkpoints in one quiet dashboard — designed to help you show up consistently.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Description</span>
+            <span class="field-meta">~1,640 / 4,000</span>
+          </div>
+          <div class="copy copy-large"><strong>The hard part isn't the workout. It's showing up.</strong>
+
+atlas.core is a fitness app built around a single idea: consistency beats intensity. Open the app, see what today asks of you, do it, close the app. That's the loop.
+
+Your workouts, your meals, your measurements, and your guidance all live in one quiet dashboard. No streaks shouting at you. No leaderboards. Just a clear picture of today and an honest record of the weeks behind you.
+
+Built for everyday people — not professional athletes — atlas.core fits into your life instead of taking it over.
+
+<strong>A daily dashboard, not a feed</strong>
+Open the app and see today: your planned workout, your meals so far, your next checkpoint. One screen, one focus.
+
+<strong>Workouts that respect your time</strong>
+Follow a routine or build your own. Log quickly. Move on. Your training history is there when you want to look back.
+
+<strong>Nutrition, kept simple</strong>
+Log meals and stay aware of your macros without making food complicated.
+
+<strong>Progress at your pace</strong>
+Body measurement checkpoints give you an honest read on the long arc — not the daily noise.
+
+<strong>Guidance when you want it</strong>
+Coaching content is there to help you stay on track and give you direction, without nagging you.
+
+Calm, modern, and mobile-first. Designed to be opened every day for years, not deleted in a week.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Feature Bullets</span>
+            <span class="field-meta">7 items</span>
+          </div>
+          <div class="copy bullets">
+            <ul>
+              <li><strong>One daily dashboard</strong> — Today's plan in one quiet view.</li>
+              <li><strong>Workouts &amp; routines</strong> — Guided programs or your own. Log in seconds.</li>
+              <li><strong>Nutrition tracking</strong> — Meals and macros, kept simple.</li>
+              <li><strong>Progress checkpoints</strong> — Body measurements at your pace.</li>
+              <li><strong>Coaching &amp; guidance</strong> — Direction when you want it.</li>
+              <li><strong>Built for the long run</strong> — Designed for daily use over years, not weeks.</li>
+              <li><strong>Calm by design</strong> — No streaks, no leaderboards, no noise.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Keywords</span>
+            <span class="field-meta">96 / 100 <span class="ok">✓</span></span>
+          </div>
+          <div class="copy tight">fitness,habit,routine,workout,daily,nutrition,tracker,progress,health,training,gym,consistency</div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label">Tagline</span>
+            <span class="field-meta">marketing site</span>
+          </div>
+          <div class="tagline">show up. <span class="accent">every day.</span><br/>quietly.</div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ASO notes -->
+  <div class="notes">
+    <div class="eyebrow">/// app store connect · notes</div>
+    <h3>before you paste.</h3>
+    <ul>
+      <li><strong>Title + Subtitle</strong> are both indexed by Apple search — front-load search terms in keywords rather than repeat them in the title.</li>
+      <li><strong>Keywords field</strong> is comma-separated, no spaces (Apple ignores spaces but counts them). Both sit under 100 chars.</li>
+      <li>Don't repeat words between Title, Subtitle, and Keywords — Apple indexes all three together.</li>
+      <li>"Coach" / "coaching" only appears in keywords for A — swap into B if coaching becomes a paid hook.</li>
+      <li>Neither version makes medical, diagnostic, or outcome claims. Safe for App Review on Health &amp; Fitness category.</li>
+      <li>Promotional Text (170 char) is editable without resubmitting a build — use it for limited-time messaging.</li>
+      <li>Bullets are for the marketing site / press kit. App Store description has no native bullet UI; the field renders as a paragraph block.</li>
+      <li>If localizing, translate Subtitle and Keywords first — they move the needle more than the long description.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

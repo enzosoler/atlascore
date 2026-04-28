@@ -5,6 +5,7 @@ import { fetchProfileRole, normalizeAtlasRole } from '@/hooks/useRole';
 import { sendWelcomeEmailAsync } from '@/lib/emailService';
 import { t as translate } from '@/lib/i18n';
 import { setSentryUser, trackEvent } from '@/lib/sentry';
+import { hasSupabaseConfigFromEnv, isAuthBypassEnabledFromEnv } from '@/lib/envGuards';
 
 const AuthContext = createContext(null);
 
@@ -21,14 +22,11 @@ const REVALIDATION_TIMEOUT = 15000;
 const AUTH_BYPASS_STORAGE_KEY = 'atlas.authBypassUser';
 
 function hasSupabaseConfig() {
-  return Boolean(
-    import.meta.env.VITE_SUPABASE_URL &&
-    (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY)
-  );
+  return hasSupabaseConfigFromEnv(import.meta.env);
 }
 
 function isAuthBypassEnabled() {
-  return import.meta.env.VITE_ENABLE_AUTH_BYPASS === 'true';
+  return isAuthBypassEnabledFromEnv(import.meta.env);
 }
 
 function withTimeout(promise, label) {
@@ -222,7 +220,7 @@ export const AuthProvider = ({ children }) => {
     clearAuthBypassUser();
 
     try {
-      const queryClient = window.__queryClient;
+      const queryClient = /** @type {any} */ (window).__queryClient;
       if (queryClient) {
         queryClient.removeQueries();
       }

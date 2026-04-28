@@ -19,6 +19,10 @@
     "athlete": "Atleta",
     "dismiss": "×"
   },
+  "errors": {
+    "aiWorkoutTooManyRequests": "Muitas solicitações. Espere um momento e tente novamente.",
+    "aiFoodTooManyRequests": "Muitas solicitações. A IA está ocupada. Use a busca abaixo ou espere um momento."
+  },
   "appShell": {
     "comingSoon": {
       "status": "Em breve",
@@ -57,7 +61,8 @@
       "signInFailed": "Não foi possível fazer seu login.",
       "magicLinkFailed": "Não foi possível enviar o magic link.",
       "appleStartFailed": "Não foi possível iniciar o login com Apple.",
-      "googleStartFailed": "Não foi possível iniciar o login com Google."
+      "googleStartFailed": "Não foi possível iniciar o login com Google.",
+      "rateLimitedCountdown": "Muitas tentativas. Tente novamente em {time}"
     },
     "signup": {
       "title": "Comece seu progresso",
@@ -117,7 +122,25 @@
     "form": {
       "emailLabel": "E-mail",
       "passwordLabel": "Senha",
-      "defaultHint": "Voltando? Vamos reconhecer este endereço."
+      "newPasswordLabel": "Nova senha",
+      "confirmPasswordLabel": "Confirmar senha",
+      "defaultHint": "Voltando? Vamos reconhecer este endereço.",
+      "defaultHeadlineLine1": "uma tela.",
+      "defaultHeadlineLine2Prefix": "um",
+      "defaultHeadlineAccent": "campo.",
+      "defaultMagicDescription": "Vamos enviar um link mágico por e-mail. Sem senhas para lembrar.",
+      "defaultPasswordDescription": "Use seu e-mail e senha para entrar novamente.",
+      "magicMode": "Link mágico",
+      "passwordMode": "Senha",
+      "emailPlaceholder": "voce@email.com",
+      "passwordPlaceholder": "••••••••",
+      "working": "Processando…",
+      "sendMagic": "Enviar link mágico →",
+      "signIn": "Entrar →",
+      "orUse": "Ou use",
+      "continueApple": "Continuar com Apple",
+      "continueGoogle": "Continuar com Google",
+      "legal": "Ao continuar, você aceita nossos termos e aviso de privacidade. Dados de saúde não saem deste dispositivo por padrão."
     },
     "redirecting": "Redirecionando...",
     "didNotOpen": "O login não abriu automaticamente",
@@ -143,34 +166,15 @@
       "failed": "Falha no login",
       "noSession": "Sessão não encontrada. Tente fazer login novamente.",
       "genericError": "Falha na autenticação. Tente novamente.",
-      "backToSignIn": "Voltar ao login"
+      "backToSignIn": "Voltar ao login",
+      "openingReset": "Abrindo redefinição de senha…",
+      "verifyingReset": "Verificando sua sessão de recuperação e abrindo o fluxo de redefinição."
     },
     "profileError": {
       "title": "Algo deu errado",
       "message": "Não foi possível carregar seu perfil. Verifique sua conexão e tente novamente.",
       "tryAgain": "Tentar Novamente",
       "signOut": "Sair"
-    },
-    "form": {
-      "emailLabel": "E-mail",
-      "passwordLabel": "Senha",
-      "defaultHint": "Voltando? Vamos reconhecer este endereço.",
-      "defaultHeadlineLine1": "uma tela.",
-      "defaultHeadlineLine2Prefix": "um",
-      "defaultHeadlineAccent": "campo.",
-      "defaultMagicDescription": "Vamos enviar um link mágico por e-mail. Sem senhas para lembrar.",
-      "defaultPasswordDescription": "Use seu e-mail e senha para entrar novamente.",
-      "magicMode": "Link mágico",
-      "passwordMode": "Senha",
-      "emailPlaceholder": "voce@email.com",
-      "passwordPlaceholder": "••••••••",
-      "working": "Processando…",
-      "sendMagic": "Enviar link mágico →",
-      "signIn": "Entrar →",
-      "orUse": "Ou use",
-      "continueApple": "Continuar com Apple",
-      "continueGoogle": "Continuar com Google",
-      "legal": "Ao continuar, você aceita nossos termos e aviso de privacidade. Dados de saúde não saem deste dispositivo por padrão."
     }
   },
   "format": {
@@ -484,7 +488,7 @@
     "athlete": "Para atletas e entusiastas",
     "professional": "Para profissionais — em breve",
     "professionalDesc": "Planos profissionais para treinadores, nutricionistas e clínicos estão chegando em breve. Entre na lista de espera para acesso antecipado.",
-    "footer": "Todos os planos pagos incluem 7 dias de teste grátis · Cancele quando quiser · Sem taxas de cancelamento",
+    "footer": "Todos os planos pagos incluem Termos exibidos no checkout · Cancele quando quiser · Sem taxas de cancelamento",
     "footerPayment": "Pagamentos processados com segurança via Stripe",
     "featureLabel": "Recurso",
     "compare": {
@@ -535,7 +539,7 @@
         "price": "R$ 29,90",
         "period": "/mês",
         "pitch": "Coaching com IA, planos inteligentes e insights mais profundos para otimizar mais rápido.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "popular": "Mais popular",
         "cta": "Assinar Pro",
         "features": [
@@ -558,7 +562,7 @@
         "price": "R$ 59,90",
         "period": "/mês",
         "pitch": "Análises avançadas, acompanhamento de protocolos e controle total sobre cada variável.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "cta": "Assinar Performance",
         "features": [
           "Tudo do Pro",
@@ -578,7 +582,7 @@
         "price": "R$ 99,90",
         "period": "/mês",
         "pitch": "Gerencie atletas com eficiência.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "note": "Por treinador · até 20 atletas",
         "cta": "Assinar como Treinador",
         "features": [
@@ -597,7 +601,7 @@
         "price": "R$ 79,90",
         "period": "/mês",
         "pitch": "Monitore nutrição de clientes.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "note": "Por nutricionista · até 25 clientes",
         "cta": "Assinar como Nutricionista",
         "features": [
@@ -616,7 +620,7 @@
         "price": "R$ 129,90",
         "period": "/mês",
         "pitch": "Visão clínica consolidada.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "note": "Por clínico · até 30 pacientes",
         "cta": "Assinar como Clínico",
         "features": [
@@ -817,7 +821,53 @@
     },
     "continue": "Continuar",
     "saveError": "Algo deu errado ao salvar seus dados. Tente novamente.",
-    "retry": "Toque para tentar novamente"
+    "retry": "Toque para tentar novamente",
+    "diet": {
+      "stepLabel": "Configuração · nutrição",
+      "title": "Como a comida deve funcionar?",
+      "body": "Defina o padrão alimentar, restrições rígidas e alimentos que o coach deve evitar ao criar refeições e lembretes.",
+      "continue": "Continuar →",
+      "styles": {
+        "high_protein": "Alta proteína",
+        "balanced": "Equilibrada",
+        "low_carb": "Baixo carboidrato",
+        "plant_forward": "Base vegetal"
+      },
+      "restrictionsLabel": "Restrições",
+      "restrictions": {
+        "dairy_free": "Sem laticínios",
+        "gluten_free": "Sem glúten",
+        "vegetarian": "Vegetariano",
+        "vegan": "Vegano",
+        "no_pork": "Sem carne suína",
+        "no_shellfish": "Sem frutos do mar"
+      },
+      "avoidLabel": "Alimentos a evitar",
+      "avoidPlaceholder": "Algo que o coach deve deixar fora das suas ideias de refeição?"
+    },
+    "coachMatch": {
+      "stepLabel": "Configuração · coach",
+      "title": "Ajuste o coach ao atleta.",
+      "body": "Defina o tom e a lente principal de coaching para que chat, lembretes e sugestões pareçam intencionais em vez de genéricos.",
+      "continue": "Continuar →",
+      "toneLabel": "Tom",
+      "tones": {
+        "direct": "Direto e conciso",
+        "supportive": "Apoiador e constante",
+        "analytical": "Analítico e orientado a dados"
+      },
+      "focusLabel": "Foco principal",
+      "focuses": {
+        "consistency": "Consistência diária",
+        "performance": "Performance e PRs",
+        "body_comp": "Composição corporal",
+        "recovery": "Recuperação e prontidão"
+      }
+    },
+    "tourError": {
+      "title": "Não foi possível finalizar a configuração",
+      "fallback": "Tente novamente."
+    }
   },
   "today": {
     "greeting": {
@@ -1082,7 +1132,7 @@
     },
     "subscriptionBanner": {
       "welcome": "Bem-vindo ao {name}! 🎉",
-      "trialInfo": "7 dias grátis. Cobrança após o período de trial."
+      "trialInfo": "O checkout confirma os termos de cobrança antes do pagamento."
     },
     "quickCheckin": {
       "label": "Check-in",
@@ -1534,6 +1584,10 @@
         "dailyCheckinRequiredDescOn": "Hoje fica bloqueado até você concluir o check-in diário.",
         "dailyCheckinRequiredDescOff": "Hoje mostra sua prontidão primeiro e deixa o check-in opcional.",
         "dailyCheckinRequiredAriaLabel": "Alternar obrigatoriedade do check-in diário",
+        "analyticsConsent": "Consentimento de analytics",
+        "analyticsConsentDescOn": "Analytics de produto, Meta Pixel e GA4 estão permitidos.",
+        "analyticsConsentDescOff": "PostHog, Meta Pixel e GA4 ficam desligados até você permitir.",
+        "analyticsConsentAriaLabel": "Alternar consentimento de rastreamento de analytics",
         "appearance": "Aparência",
         "appearanceDesc": "Atualmente {theme} · toque para alternar",
         "language": "Idioma",
@@ -1570,7 +1624,107 @@
         "comingSoon": "Esta funcionalidade estará disponível em breve",
         "dailyCheckinRequiredOn": "O check-in diário agora é obrigatório por padrão.",
         "dailyCheckinRequiredOff": "O check-in diário agora é opcional no Hoje.",
-        "dailyCheckinRequiredError": "Não foi possível atualizar sua preferência de check-in diário."
+        "dailyCheckinRequiredError": "Não foi possível atualizar sua preferência de check-in diário.",
+        "analyticsOn": "Rastreamento de analytics permitido.",
+        "analyticsOff": "Rastreamento de analytics desligado."
+      }
+    }
+  },
+  "you": {
+    "v3": {
+      "athlete": "Atleta",
+      "athleteStatus": "atleta",
+      "joinedRecently": "entrou recentemente",
+      "joinedDate": "entrou em {date}",
+      "today": "hoje",
+      "now": "agora",
+      "body": "corpo",
+      "start": "começar",
+      "train": "treino",
+      "plan": "plano",
+      "workoutSession": "sessão de treino",
+      "bioByFitnessLevel": "Atleta {level} focado em consistência e progresso mensurável.",
+      "latestBodyTrend": "Tendência corporal mais recente",
+      "lifts": {
+        "deadlift": "Terra",
+        "squat": "Agachamento",
+        "bench": "Supino",
+        "ohp": "Desenvolvimento"
+      },
+      "stats": {
+        "sessions": "Sessões",
+        "routines": "Rotinas",
+        "checks": "Checks"
+      },
+      "labels": {
+        "bigFour": "Os quatro grandes",
+        "composition90d": "Composição · 90d",
+        "weight": "Peso",
+        "recent": "Recente",
+        "moreFromProfile": "Mais do perfil",
+        "open": "Abrir"
+      },
+      "program": {
+        "activePlan": "Plano ativo",
+        "recentRoutine": "Rotina recente",
+        "nextUp": "Próximo",
+        "pickRoutine": "Escolha uma rotina para começar a treinar.",
+        "createRoutine": "Crie ou importe uma rotina para ativar este perfil."
+      },
+      "recent": {
+        "completedSession": "{session} concluído",
+        "loggedMealToday": "{count} refeição registrada hoje",
+        "loggedMealsToday": "{count} refeições registradas hoje",
+        "updatedBodyCheckpoint": "Check corporal atualizado",
+        "sessionsLogged": "{count} sessões registradas até agora",
+        "noSessions": "Nenhuma sessão registrada ainda",
+        "bodyCheckpointRecorded": "{count} check corporal registrado",
+        "bodyCheckpointsRecorded": "{count} checks corporais registrados",
+        "addFirstCheckpoint": "Adicione seu primeiro check para liberar tendências corporais",
+        "routineSaved": "{count} rotina salva",
+        "routinesSaved": "{count} rotinas salvas",
+        "saveRoutine": "Salve uma rotina para ela aparecer aqui"
+      },
+      "badges": {
+        "dayStreak": "Sequência de {days} dias",
+        "checkpoint": "{count} check",
+        "checkpoints": "{count} checks",
+        "savedRoutine": "{count} rotina salva",
+        "savedRoutines": "{count} rotinas salvas",
+        "profileLive": "Perfil ativo",
+        "coreLoopActive": "Loop central ativo"
+      },
+      "links": {
+        "body": {
+          "label": "Corpo",
+          "meta": "Acompanhar",
+          "description": "Medidas, fotos e tendência de peso."
+        },
+        "labs": {
+          "label": "Exames",
+          "meta": "Premium",
+          "description": "Painéis, biomarcadores e análise."
+        },
+        "protocols": {
+          "label": "Protocolos",
+          "meta": "Avançado",
+          "description": "Stacks, horários e registro de dose."
+        },
+        "social": {
+          "label": "Social",
+          "meta": "Comunidade",
+          "description": "Crew, amigos e compromisso."
+        },
+        "settings": {
+          "label": "Ajustes",
+          "meta": "Conta",
+          "description": "Preferências, integrações e exportações."
+        },
+        "billing": {
+          "label": "Cobrança",
+          "meta": "Gerenciar",
+          "description": "Status da assinatura e detalhes de pagamento."
+        }
       }
     }
   },
@@ -2357,6 +2511,7 @@
   },
   "status": {
     "offline": "Você está offline. As alterações serão sincronizadas ao reconectar.",
+    "noInternetConnection": "Sem conexão com a internet",
     "backOnline": "De volta online",
     "sessionExpiresSoon": "Sua sessão expira em breve",
     "sessionRefresh": "Atualizar"
@@ -2558,6 +2713,29 @@
       "weightSaveFailed": "Falha ao salvar peso",
       "measurementsSaved": "Medidas salvas",
       "measurementsSaveFailed": "Falha ao salvar medidas"
+    },
+    "dashboard": {
+      "stable": "Estável",
+      "deltaLatest": "{delta} · mais recente",
+      "avgWeight": "Média {avg} kg",
+      "recentWeight": "Peso recente",
+      "checkpoints": "{count} checkpoint",
+      "checkpointsPlural": "{count} checkpoints",
+      "firstCheckpointHint": "Registre seu primeiro checkpoint para desbloquear tendências corporais",
+      "bodyFat": "Gordura corporal",
+      "leanMass": "Massa magra",
+      "waistHip": "Cintura:quadril",
+      "chest": "Peito",
+      "waist": "Cintura",
+      "hips": "Quadril",
+      "arm": "Braço",
+      "thigh": "Coxa",
+      "measurementsWithCount": "Medidas · {count} checkpoints",
+      "measurementsLabel": "Medidas",
+      "logCheckpoint": "+ Registrar checkpoint",
+      "startLogging": "Começar a registrar",
+      "emptyTitle": "Nenhum checkpoint ainda",
+      "emptyDescription": "Registre peso, cintura e outros checkpoints corporais para transformar esta tela em uma visão real de tendências."
     }
   },
   "measurements": {
@@ -3138,6 +3316,13 @@
     "describe_with_ai": "Descrever com IA",
     "search": "Buscar",
     "photo": "Foto",
+    "photoConsent": {
+      "title": "Permitir análise da foto por IA",
+      "body": "Sua imagem da refeição pode ser enviada ao Google Gemini ou a outro modelo de visão de IA de terceiros para que o atlas.core identifique alimentos e estime a nutrição. A imagem é usada apenas para esta análise e não é enviada até você aceitar.",
+      "accept": "Permitir análise da foto",
+      "decline": "Agora não",
+      "error": "O consentimento é obrigatório antes de enviar uma foto de comida para análise por IA."
+    },
     "quick_suggestions": "Sugestões rápidas:",
     "search_placeholder": "Ex: frango grelhado, arroz integral, banana...",
     "searching_database": "Buscando no banco de dados…",
@@ -3597,6 +3782,12 @@
       "dismissedForToday": "Dispensado por hoje",
       "noted": "Anotado",
       "savedForLater": "Salvo para depois",
+      "consent": {
+        "title": "Compartilhamento de dados do Coach IA",
+        "body": "Para fornecer coaching personalizado, o atlas.core compartilha seus dados de saúde e fitness (nutrição, treino, sono, humor) com um provedor de IA. Seus dados são usados apenas para gerar respostas de coaching e não são vendidos ou usados para publicidade.",
+        "accept": "Entendi, continuar",
+        "decline": "Agora não"
+      },
       "connectingToast": "O coach IA está sendo conectado. Isso funcionará em breve.",
       "connectingPlaceholder": "Coach IA sendo conectado...",
       "runtime": {
@@ -3625,6 +3816,56 @@
           "later": "Depois"
         }
       }
+    },
+    "home": {
+      "train": "Treinar",
+      "fuel": "Alimentar",
+      "momentum": "Momentum",
+      "openWorkoutLibrary": "Abrir biblioteca de treinos",
+      "readyWhenYouAre": "Pronto quando você estiver",
+      "pickRoutineOrEmpty": "Escolha uma rotina ou inicie uma sessão vazia",
+      "mealsLogged": "{count} refeição registrada",
+      "mealsLoggedPlural": "{count} refeições registradas",
+      "nutritionTrackingActive": "Acompanhamento nutricional ativo",
+      "dayStreak": "Sequência de {count} dia",
+      "recentSessionsInView": "{count} sessão recente em vista",
+      "recentSessionsInViewPlural": "{count} sessões recentes em vista",
+      "signalStreak": "Sequência",
+      "signalMeals": "Refeições",
+      "signalPlan": "Plano",
+      "signalDays": "dias",
+      "signalToday": "hoje",
+      "signalActive": "ativo",
+      "signalLive": "ativo",
+      "signalStart": "iniciar",
+      "signalLogged": "registrado",
+      "signalNone": "nenhum",
+      "signalSet": "definido",
+      "signalPick": "escolher",
+      "safeMode": "Coach modo seguro",
+      "stillHere": "{name}, o coach ainda está aqui.",
+      "safeModeExplanation": "O resumo visual teve um problema de renderização e esta rota voltou para uma versão estável em texto ao invés de travar.",
+      "todayLabel": "Hoje",
+      "threeMoves": "Três movimentos",
+      "startToday": "começar hoje",
+      "askCoachAnything": "Perguntar qualquer coisa ao coach",
+      "dailyBrief": "Briefing diário",
+      "youre": "{name}, você está",
+      "onTrack": "no caminho",
+      "building": "construindo",
+      "streakLabel": "Sequência",
+      "mealsToday": "refeições hoje",
+      "timelineStart": "INÍCIO",
+      "timelineRecent": "RECENTE",
+      "timelineToday": "HOJE",
+      "activePlanReason": "Seu plano ativo é {plan}. Use esta tela como ponte para treino, nutrição e chat ao vivo com o coach.",
+      "noPlanReason": "O coach já pode ajudar com perguntas sobre treino, alimentação e recuperação. Escolha uma rotina ou faça uma pergunta direta para começar.",
+      "todayThreeMoves": "Hoje · três movimentos",
+      "movesProgress": "{done} / 03",
+      "liveContext": "Contexto ao vivo",
+      "fromYourData": "Dos seus dados no app",
+      "startTodayAction": "Começar hoje →",
+      "secondaryAction": "perguntar qualquer coisa ao coach"
     }
   },
   "nutritionist": {
@@ -3882,8 +4123,9 @@
       "empty_description": "Tente um termo de busca mais amplo ou limpe os filtros ativos para reabrir o catálogo completo."
     },
     "detail": {
-      "favoritingComingSoon": "Favoritar exercícios em breve",
-      "historyComingSoon": "Visualização completa do histórico em breve"
+      "savedToast": "Exercício salvo na sua biblioteca.",
+      "favoritedToast": "Exercício adicionado aos favoritos.",
+      "unfavoritedToast": "Exercício removido dos favoritos."
     }
   },
   "myWorkout": {
@@ -4478,6 +4720,77 @@
         "nothingScheduled": "Nada agendado",
         "nothingScheduledDesc": "Nenhuma dose agendada para hoje."
       }
+    },
+    "form": {
+      "preview": "Prévia",
+      "categories": {
+        "supplement": "Suplemento",
+        "medication": "Medicamento",
+        "hormone": "Hormônio",
+        "peptide": "Peptídeo",
+        "ancillary": "Auxiliar",
+        "other": "Outro"
+      },
+      "units": {
+        "mg": "mg",
+        "mcg": "mcg",
+        "g": "g",
+        "ml": "ml",
+        "UI": "UI",
+        "caps": "cápsulas",
+        "comp": "comprimidos",
+        "other": "outro"
+      },
+      "statuses": {
+        "active": "Ativo",
+        "paused": "Pausado",
+        "finished": "Finalizado"
+      },
+      "newProtocol": "Novo protocolo",
+      "doseToBeDefinedLabel": "Dose a definir",
+      "frequencyToBeDefined": "Frequência a definir",
+      "identity": {
+        "eyebrow": "Identidade",
+        "title": "Definição do protocolo",
+        "description": "Defina a substância principal, categoria e nome interno usado nas operações clínicas."
+      },
+      "internalName": "Nome interno / stack",
+      "internalNameDesc": "Opcional, útil quando o protocolo faz parte de um bloco maior.",
+      "internalNamePlaceholder": "Ex.: TRT Base, Base de recuperação",
+      "categoryLabel": "Categoria",
+      "doseLabel": "Dose",
+      "dosePlaceholder": "Ex.: 200, 5, 0.5",
+      "unitLabel": "Unidade",
+      "frequencyLabel": "Frequência",
+      "frequencyPlaceholder": "Ex.: 1x/semana, diário, DDA",
+      "cadence": {
+        "eyebrow": "Cadência",
+        "title": "Janela e operação",
+        "description": "Defina a cadência de uso, status atual e janela de tempo do protocolo."
+      },
+      "scheduleLabel": "Horário / rotina",
+      "schedulePlaceholder": "Ex.: manhã, pré-treino, antes de dormir",
+      "statusLabel": "Status atual",
+      "startLabel": "Início",
+      "endLabel": "Fim",
+      "endDescFinished": "Obrigatório para protocolos finalizados.",
+      "endDescDefault": "Opcional enquanto o protocolo está ativo ou pausado.",
+      "notes": {
+        "eyebrow": "Notas",
+        "title": "Contexto clínico",
+        "description": "Adicione observações de monitoramento, resposta percebida ou instruções da equipe."
+      },
+      "notesLabel": "Notas",
+      "notesPlaceholder": "Ex.: ajustar após novos exames, monitorar pressão arterial, usar apenas em dias de treino...",
+      "errors": {
+        "substanceRequired": "Informe a substância principal ou um nome de protocolo.",
+        "startDateRequired": "Defina a data de início.",
+        "endDateRequired": "Defina a data de término para protocolos finalizados."
+      },
+      "cancel": "Cancelar",
+      "saving": "Salvando...",
+      "saveChanges": "Salvar alterações",
+      "createProtocol": "Criar protocolo"
     }
   },
   "paywall": {
@@ -4491,12 +4804,15 @@
       "weekly": "1 semana",
       "monthly": "1 mês",
       "yearly": "12 meses",
-      "save": "Economize 62%"
+      "save": "Melhor valor"
     },
     "pricing": {
-      "weekly": "$3.99 / sem",
-      "monthly": "$9.99 / mês",
-      "yearlyEffective": "$6.58 / mês"
+      "weekly": "Preço da loja",
+      "monthly": "Renovação mensal",
+      "yearly": "Renovação anual",
+      "yearlyEffective": "Renovação anual",
+      "confirmedInStore": "Preço da loja",
+      "confirmedInCheckout": "Preço no checkout"
     },
     "features": {
       "heading": "tudo incluído",
@@ -4510,10 +4826,12 @@
     "cta": {
       "processing": "processando...",
       "buy": "assinar pro",
-      "webFallback": "baixe o app para assinar"
+      "webFallback": "continuar para o checkout"
     },
     "links": {
-      "restore": "Restaurar compras"
+      "restore": "Restaurar compras",
+      "terms": "Termos",
+      "privacy": "Privacidade"
     },
     "mobile": {
       "skip": "Agora não",
@@ -4521,10 +4839,11 @@
       "titleLine1": "Liberte",
       "titleLine2Prefix": "seu",
       "titleAccent": "core",
-      "subtitle": "Teste grátis por 3 dias. Cancele com um toque. Seus dados são seus para exportar para sempre.",
-      "startTrial": "Começar teste grátis de 3 dias →",
-      "nativeDisclaimer": "Sem cobrança hoje · avisar antes da cobrança",
-      "webDisclaimer": "Checkout seguro com Stripe · Cancele quando quiser",
+      "subtitle": "Confirme preço, renovação e elegibilidade de teste na tela da App Store antes de aprovar.",
+      "startTrial": "Continuar →",
+      "continue": "Continuar →",
+      "nativeDisclaimer": "A Apple confirma preço, teste elegível e renovação antes da compra.",
+      "webDisclaimer": "O checkout seguro confirma preço e renovação antes do pagamento.",
       "features": {
         "recovery": "Monitoramento de prontidão + recuperação"
       }
@@ -5116,6 +5435,17 @@
     "saving": "Salvando…",
     "saveBtn": "Salvar check-in"
   },
+  "labs": {
+    "upload": {
+      "consent": {
+        "title": "Permitir leitura do exame por IA",
+        "body": "Seu PDF ou imagem de exame e seus biomarcadores podem ser processados pelo Google Gemini ou por outro provedor de IA de terceiros para que o atlas.core extraia marcadores e explique o significado. Nada é enviado até você aceitar.",
+        "accept": "Permitir leitura do exame",
+        "decline": "Agora não",
+        "error": "O consentimento é obrigatório antes de enviar dados de exames para leitura por IA."
+      }
+    }
+  },
   "marketing": {
     "nav": {
       "theApp": "O app",
@@ -5541,6 +5871,37 @@
           "email": "privacy@useatlascore.com"
         }
       ]
+    }
+  },
+  "social": {
+    "follow": {
+      "tabs": {
+        "suggested": "Sugestões",
+        "leaderboard": "Ranking",
+        "search": "Buscar"
+      },
+      "discover": "Descobrir",
+      "title": "Encontrar pessoas",
+      "openUser": "Abrir {name}",
+      "unknownUser": "Usuário",
+      "follow": "Seguir",
+      "following": "Seguindo",
+      "unfollow": "Deixar de seguir",
+      "peopleYouMayKnow": "Pessoas que você pode conhecer",
+      "emptySuggestedTitle": "Use a busca para montar seu grupo",
+      "emptySuggestedBody": "Encontre parceiros pelo nome. O Atlas vai sugerir conexões melhores depois das suas primeiras conexões reais.",
+      "leaderboardLockedTitle": "Rankings liberam com {count} amigos",
+      "leaderboardLockedBody": "Adicione mais {count} {friendWord} para liberar rankings semanais de volume e sequência.",
+      "friend": "amigo",
+      "friends": "amigos",
+      "friendProgress": "{current} / {count} amigos",
+      "weeklyVolumeTop": "Volume semanal · Top {count}",
+      "searchPlaceholder": "Buscar por nome",
+      "clearSearch": "Limpar busca",
+      "searchEmptyTitle": "Encontre pessoas no atlas.core",
+      "searchEmptyBody": "Busque pelo nome para descobrir outros membros.",
+      "noResultsTitle": "Nenhum resultado",
+      "noResultsBody": "Nada correspondeu a \"{query}\"."
     }
   }
 }

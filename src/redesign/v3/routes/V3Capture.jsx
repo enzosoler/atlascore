@@ -6,6 +6,8 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { addEntries } from '@/lib/nutritionStore';
+import { useT } from '@/lib/i18nContext';
+import { useAIConsent } from '../lib/useAIConsent.js';
 import { ACFonts, ACRadii, useACT, ACBtn, ACLabel, ACMono } from '../lib/paper.jsx';
 
 function todayISO() {
@@ -98,6 +100,12 @@ export default function V3Capture() {
   const dark = theme === 'dark';
   const c = useACT(dark);
   const fileInputRef = useRef(null);
+  const t = useT();
+  const { consented, grant: grantConsent } = useAIConsent({
+    userId: user?.id,
+    kind: 'food_vision',
+    provider: 'Google Gemini or another third-party AI vision model',
+  });
 
   const mode = useMemo(() => {
     if (location.pathname.includes('/voice')) return 'voice';
@@ -217,6 +225,52 @@ export default function V3Capture() {
     setSelected((current) => current.includes(index)
       ? current.filter((value) => value !== index)
       : [...current, index]
+    );
+  }
+
+  // Blocking consent gate — must be granted before any AI photo/vision call
+  if (mode === 'photo' && !consented) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: c.bg, color: c.fg,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        padding: 32, textAlign: 'center',
+      }}>
+        <h2 style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, letterSpacing: -0.5, marginBottom: 12, color: c.fg }}>
+          {t('nutrition.photoConsent.title')}
+        </h2>
+        <p style={{ fontSize: 15, lineHeight: 1.6, color: c.dim, maxWidth: 360, marginBottom: 32, fontFamily: ACFonts.body }}>
+          {t('nutrition.photoConsent.body')}
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            grantConsent().catch((error) => {
+              console.error('[V3Capture] consent save failed', error);
+              toast.error(t('nutrition.photoConsent.error'));
+            });
+          }}
+          style={{
+            padding: '14px 28px', borderRadius: 12, border: 'none', cursor: 'pointer',
+            fontSize: 16, fontWeight: 600, marginBottom: 12, width: '100%', maxWidth: 320,
+            background: dark ? '#fff' : '#111', color: dark ? '#111' : '#fff',
+            fontFamily: ACFonts.body,
+          }}
+        >
+          {t('nutrition.photoConsent.accept')}
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={{
+            padding: '14px 28px', borderRadius: 12, border: `1px solid ${c.hair}`,
+            cursor: 'pointer', fontSize: 16, fontWeight: 500, width: '100%', maxWidth: 320,
+            background: 'transparent', color: c.fg, fontFamily: ACFonts.body,
+          }}
+        >
+          {t('nutrition.photoConsent.decline')}
+        </button>
+      </div>
     );
   }
 

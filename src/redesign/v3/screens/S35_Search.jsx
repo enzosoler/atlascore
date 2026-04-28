@@ -3,6 +3,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel,
 } from '../lib/paper.jsx';
+import { useVirtualRows } from '../lib/useVirtualRows.js';
 
 export default function S35_Search({
   dark = false,
@@ -50,6 +51,63 @@ export default function S35_Search({
     'When should I test a 1RM deadlift?',
     'Compare my deadlift to my squat ratio',
   ];
+  const flatResults = React.useMemo(() => resolvedGroups.flatMap((group) => [
+    { type: 'group', id: `group-${group.cat}`, group },
+    ...(group.rows || []).map((row, index) => ({
+      type: 'row',
+      id: `${group.cat}-${row.id || row.t || index}`,
+      row,
+      index,
+    })),
+  ]), [resolvedGroups]);
+  const { parentRef: resultsRef, virtualRows, totalSize } = useVirtualRows({
+    count: flatResults.length,
+    estimateSize: 64,
+    overscan: 8,
+  });
+
+  const renderResultRow = (item) => {
+    if (item.type === 'group') {
+      return (
+        <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>
+          {item.group.cat}
+        </ACLabel>
+      );
+    }
+
+    const r = item.row;
+    return (
+      <button type="button" onClick={() => onOpenResult?.(r)} style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '12px 2px',
+        borderTop: item.index === 0 ? `1px solid ${c.hair}` : 'none',
+        borderBottom: `1px solid ${c.hair}`,
+        width: '100%', background: 'transparent', borderRight: 'none', borderLeft: 'none', textAlign: 'left',
+        cursor: onOpenResult ? 'pointer' : 'default',
+      }}>
+        <div style={{
+          width: 6, height: 6, flexShrink: 0,
+          background: r.hi ? c.accent : c.mute,
+        }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 14, color: c.fg, letterSpacing: -0.2,
+            fontWeight: r.hi ? 600 : 500,
+          }}>
+            {r.t.split(/(deadlift)/i).map((part, pi) =>
+              /^deadlift$/i.test(part)
+                ? <mark key={pi} style={{ background: 'transparent', color: c.accent, fontWeight: 700 }}>{part}</mark>
+                : <span key={pi}>{part}</span>
+            )}
+          </div>
+          <ACLabel size={11} color={c.dim} style={{ marginTop: 2, display: 'block' }}>{r.sub}</ACLabel>
+        </div>
+        <svg width="8" height="10" viewBox="0 0 8 10">
+          <path d="M1 1l4 4-4 4" stroke={c.mute} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    );
+  };
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -164,46 +222,40 @@ export default function S35_Search({
         </button>
 
         {/* Grouped results */}
-        {resolvedGroups.map((g, gi) => (
-          <div key={gi} style={{ marginTop: 22 }}>
-            <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>
-              {g.cat}
-            </ACLabel>
-            <div style={{ marginTop: 8 }}>
-              {g.rows.map((r, i) => (
-                <button key={i} type="button" onClick={() => onOpenResult?.(r)} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '12px 2px',
-                  borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
-                  borderBottom: `1px solid ${c.hair}`,
-                  width: '100%', background: 'transparent', borderRight: 'none', borderLeft: 'none', textAlign: 'left',
-                  cursor: onOpenResult ? 'pointer' : 'default',
-                }}>
-                  <div style={{
-                    width: 6, height: 6, flexShrink: 0,
-                    background: r.hi ? c.accent : c.mute,
-                  }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 14, color: c.fg, letterSpacing: -0.2,
-                      fontWeight: r.hi ? 600 : 500,
-                    }}>
-                      {r.t.split(/(deadlift)/i).map((part, pi) =>
-                        /^deadlift$/i.test(part)
-                          ? <mark key={pi} style={{ background: 'transparent', color: c.accent, fontWeight: 700 }}>{part}</mark>
-                          : <span key={pi}>{part}</span>
-                      )}
-                    </div>
-                    <ACLabel size={11} color={c.dim} style={{ marginTop: 2, display: 'block' }}>{r.sub}</ACLabel>
+        <div style={{ marginTop: 22 }}>
+          <div
+            ref={resultsRef}
+            style={{
+              maxHeight: Math.min(560, Math.max(140, totalSize)),
+              overflow: 'auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            <div style={{ height: totalSize, position: 'relative' }}>
+              {virtualRows.map((virtualRow) => {
+                const item = flatResults[virtualRow.index];
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                      display: 'flex',
+                      alignItems: item.type === 'group' ? 'flex-end' : 'stretch',
+                      paddingTop: item.type === 'group' ? 10 : 0,
+                    }}
+                  >
+                    <div style={{ width: '100%' }}>{renderResultRow(item)}</div>
                   </div>
-                  <svg width="8" height="10" viewBox="0 0 8 10">
-                    <path d="M1 1l4 4-4 4" stroke={c.mute} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              ))}
+                );
+              })}
             </div>
           </div>
-        ))}
+        </div>
 
         {/* Quick actions */}
         <div style={{ marginTop: 22 }}>

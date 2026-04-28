@@ -7,13 +7,14 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import { useNavigate } from 'react-router-dom';
 import { listMeasurements } from '@/services/bodyProgressService';
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
 import S14_Body_Dashboard from '../screens/S14_Body_Dashboard.jsx';
 
-function formatSignedDelta(delta, unit = '') {
-  if (!Number.isFinite(delta) || delta === 0) return 'Stable';
+function formatSignedDelta(delta, unit = '', stableLabel = 'Stable') {
+  if (!Number.isFinite(delta) || delta === 0) return stableLabel;
   const arrow = delta > 0 ? '↑' : '↓';
   return `${arrow} ${Math.abs(delta).toFixed(1)}${unit ? ` ${unit}` : ''}`;
 }
@@ -35,6 +36,7 @@ function avgTwo(a, b) {
 export default function V3Body() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const { data: measurements = [] } = useQuery({
     queryKey: ['v3-body-measurements', user?.id],
@@ -52,8 +54,9 @@ export default function V3Body() {
 
   const latestWeight = getMeasurementFieldValue(latest, 'weight');
   const previousWeight = getMeasurementFieldValue(previous, 'weight');
+  const stableLabel = t('body.dashboard.stable');
   const trendChip = latestWeight != null && previousWeight != null
-    ? `${formatSignedDelta(latestWeight - previousWeight, 'kg')} · latest`
+    ? t('body.dashboard.deltaLatest', { delta: formatSignedDelta(latestWeight - previousWeight, 'kg', stableLabel) })
     : '';
 
   const avgWeight = weightSeries.length > 0
@@ -73,22 +76,22 @@ export default function V3Body() {
 
   const composition = [
     {
-      l: 'Body fat',
+      l: t('body.dashboard.bodyFat'),
       v: latestBodyFat != null ? latestBodyFat.toFixed(1) : '—',
       u: latestBodyFat != null ? '%' : '',
-      d: latestBodyFat != null && previousBodyFat != null ? formatSignedDelta(latestBodyFat - previousBodyFat, '%') : '',
+      d: latestBodyFat != null && previousBodyFat != null ? formatSignedDelta(latestBodyFat - previousBodyFat, '%', stableLabel) : '',
     },
     {
-      l: 'Lean mass',
+      l: t('body.dashboard.leanMass'),
       v: latestLeanMass != null ? latestLeanMass.toFixed(1) : '—',
       u: latestLeanMass != null ? 'kg' : '',
-      d: latestLeanMass != null && previousLeanMass != null ? formatSignedDelta(latestLeanMass - previousLeanMass, 'kg') : '',
+      d: latestLeanMass != null && previousLeanMass != null ? formatSignedDelta(latestLeanMass - previousLeanMass, 'kg', stableLabel) : '',
     },
     {
-      l: 'Waist:hip',
+      l: t('body.dashboard.waistHip'),
       v: latestRatio != null ? latestRatio.toFixed(2) : '—',
       u: '',
-      d: latestRatio != null && previousRatio != null ? formatSignedDelta(latestRatio - previousRatio) : '',
+      d: latestRatio != null && previousRatio != null ? formatSignedDelta(latestRatio - previousRatio, '', stableLabel) : '',
     },
   ];
 
@@ -104,11 +107,11 @@ export default function V3Body() {
     ?? getMeasurementFieldValue(previous, 'thighs');
 
   const measurementRows = latest ? [
-    { l: 'Chest', v: latestChest != null ? latestChest.toFixed(1) : '—', u: latestChest != null ? 'cm' : '', d: latestChest != null && previousChest != null ? formatSignedDelta(latestChest - previousChest, 'cm') : '' },
-    { l: 'Waist', v: latestWaist != null ? latestWaist.toFixed(1) : '—', u: latestWaist != null ? 'cm' : '', d: latestWaist != null && previousWaist != null ? formatSignedDelta(latestWaist - previousWaist, 'cm') : '' },
-    { l: 'Hips',  v: latestHips != null ? latestHips.toFixed(1) : '—', u: latestHips != null ? 'cm' : '', d: latestHips != null && previousHips != null ? formatSignedDelta(latestHips - previousHips, 'cm') : '' },
-    { l: 'Arm',   v: latestArm != null ? latestArm.toFixed(1) : '—', u: latestArm != null ? 'cm' : '', d: latestArm != null && previousArm != null ? formatSignedDelta(latestArm - previousArm, 'cm') : '' },
-    { l: 'Thigh', v: latestThigh != null ? latestThigh.toFixed(1) : '—', u: latestThigh != null ? 'cm' : '', d: latestThigh != null && previousThigh != null ? formatSignedDelta(latestThigh - previousThigh, 'cm') : '' },
+    { l: t('body.dashboard.chest'), v: latestChest != null ? latestChest.toFixed(1) : '—', u: latestChest != null ? 'cm' : '', d: latestChest != null && previousChest != null ? formatSignedDelta(latestChest - previousChest, 'cm', stableLabel) : '' },
+    { l: t('body.dashboard.waist'), v: latestWaist != null ? latestWaist.toFixed(1) : '—', u: latestWaist != null ? 'cm' : '', d: latestWaist != null && previousWaist != null ? formatSignedDelta(latestWaist - previousWaist, 'cm', stableLabel) : '' },
+    { l: t('body.dashboard.hips'),  v: latestHips != null ? latestHips.toFixed(1) : '—', u: latestHips != null ? 'cm' : '', d: latestHips != null && previousHips != null ? formatSignedDelta(latestHips - previousHips, 'cm', stableLabel) : '' },
+    { l: t('body.dashboard.arm'),   v: latestArm != null ? latestArm.toFixed(1) : '—', u: latestArm != null ? 'cm' : '', d: latestArm != null && previousArm != null ? formatSignedDelta(latestArm - previousArm, 'cm', stableLabel) : '' },
+    { l: t('body.dashboard.thigh'), v: latestThigh != null ? latestThigh.toFixed(1) : '—', u: latestThigh != null ? 'cm' : '', d: latestThigh != null && previousThigh != null ? formatSignedDelta(latestThigh - previousThigh, 'cm', stableLabel) : '' },
   ] : [];
 
   return (
@@ -120,16 +123,16 @@ export default function V3Body() {
         weight: latestWeight != null ? latestWeight.toFixed(1) : '—',
         unit: latestWeight != null ? 'kg' : '',
         subtitle: latestWeight != null
-          ? `${avgWeight ? `Avg ${avgWeight} kg` : 'Recent weight'} · ${measurements.length} checkpoint${measurements.length === 1 ? '' : 's'}`
-          : 'Log your first checkpoint to unlock body trends',
+          ? `${avgWeight ? t('body.dashboard.avgWeight', { avg: avgWeight }) : t('body.dashboard.recentWeight')} · ${measurements.length === 1 ? t('body.dashboard.checkpoints', { count: measurements.length }) : t('body.dashboard.checkpointsPlural', { count: measurements.length })}`
+          : t('body.dashboard.firstCheckpointHint'),
         trend: weightSeries.length > 1 ? weightSeries : undefined,
       }}
       composition={composition}
       measurements={measurementRows}
-      measurementsLabel={latest ? `Measurements · ${measurements.length} checkpoints` : 'Measurements'}
-      measurementsActionLabel={latest ? '+ Log checkpoint' : 'Start logging'}
-      emptyTitle={!latest ? 'No checkpoints yet' : undefined}
-      emptyDescription={!latest ? 'Log weight, waist, and other body checkpoints to turn this screen into a real trend view.' : undefined}
+      measurementsLabel={latest ? t('body.dashboard.measurementsWithCount', { count: measurements.length }) : t('body.dashboard.measurementsLabel')}
+      measurementsActionLabel={latest ? t('body.dashboard.logCheckpoint') : t('body.dashboard.startLogging')}
+      emptyTitle={!latest ? t('body.dashboard.emptyTitle') : undefined}
+      emptyDescription={!latest ? t('body.dashboard.emptyDescription') : undefined}
       labs={[]}
       onOpenMeasurements={() => navigate('/app/body/measurements')}
       onOpenLabs={() => navigate('/app/labs')}

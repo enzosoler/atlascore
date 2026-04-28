@@ -24,6 +24,7 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
+import { executeRevenueCatPurchase } from '@/lib/revenueCatPurchase';
 
 const ENTITLEMENT_ID = 'pro';
 
@@ -201,54 +202,17 @@ export async function setRevenueCatAttributes(attrs) {
  * @returns {{ success: boolean, customerInfo: object|null, error: string|null, userCancelled: boolean }}
  */
 export async function purchasePackage(pkgOrIdentifier) {
-  if (!isRevenueCatAvailable()) {
-    return {
-      success: false,
-      customerInfo: null,
-      error: 'billing_unavailable',
-      userCancelled: false,
-    };
+  const result = await executeRevenueCatPurchase({
+    pkgOrIdentifier,
+    purchases: Purchases,
+    getCurrentOffering: () => getOfferings({ currentOnly: true }),
+    isAvailable: isRevenueCatAvailable(),
+    entitlementId: ENTITLEMENT_ID,
+  });
+  if (result.error && !['billing_unavailable', 'no_offering'].includes(result.error) && !result.error.startsWith('package_not_found')) {
+    console.error('[RevenueCat] purchasePackage failed:', result.error);
   }
-
-  let pkg = pkgOrIdentifier;
-
-  // Resolve string identifier to a package object from the current offering.
-  if (typeof pkgOrIdentifier === 'string') {
-    const current = await getOfferings({ currentOnly: true });
-    if (!current) {
-      return { success: false, customerInfo: null, error: 'no_offering', userCancelled: false };
-    }
-    const match = (current.availablePackages || []).find(
-      (p) => p.identifier === pkgOrIdentifier
-    );
-    if (!match) {
-      return {
-        success: false,
-        customerInfo: null,
-        error: `package_not_found:${pkgOrIdentifier}`,
-        userCancelled: false,
-      };
-    }
-    pkg = match;
-  }
-
-  try {
-    const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg });
-    const isActive = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
-    return { success: isActive, customerInfo, error: null, userCancelled: false };
-  } catch (err) {
-    // User cancelling is not an error. Normalize to a clean shape.
-    if (err?.code === 1 || err?.userCancelled) {
-      return { success: false, customerInfo: null, error: null, userCancelled: true };
-    }
-    console.error('[RevenueCat] purchasePackage failed:', err);
-    return {
-      success: false,
-      customerInfo: null,
-      error: err?.message || 'purchase_failed',
-      userCancelled: false,
-    };
-  }
+  return result;
 }
 
 /**

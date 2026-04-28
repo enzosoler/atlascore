@@ -9,7 +9,12 @@ const TABLE_EXPORTS = [
   { key: 'routines', table: 'routines', orderBy: 'created_at' },
   { key: 'protocols', table: 'protocols', orderBy: 'created_at' },
   { key: 'progress_photos', table: 'progress_photos', orderBy: 'date' },
+  { key: 'coach_messages', table: 'coach_messages', orderBy: 'created_at' },
+  { key: 'lab_exams', table: 'lab_exams', orderBy: 'created_at' },
+  { key: 'onboarding_data', table: 'onboarding_data', orderBy: 'created_at' },
 ];
+const PROGRESS_PHOTOS_BUCKET = 'progress-photos';
+const PROGRESS_PHOTOS_REF_PREFIX = `supabase://${PROGRESS_PHOTOS_BUCKET}/`;
 
 function todayStamp() {
   const d = new Date();
@@ -28,6 +33,86 @@ function csvEscape(value) {
   const str = value == null ? '' : String(value);
   if (/[",\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
   return str;
+}
+
+function getProgressPhotoStoragePath(photoUrl, userId) {
+  if (!photoUrl || typeof photoUrl !== 'string') return null;
+  if (photoUrl.startsWith(`${userId}/`)) return photoUrl;
+
+  if (photoUrl.startsWith(PROGRESS_PHOTOS_REF_PREFIX)) {
+    const storagePath = photoUrl.slice(PROGRESS_PHOTOS_REF_PREFIX.length);
+    return storagePath.startsWith(`${userId}/`) ? storagePath : null;
+  }
+
+  try {
+    const parsed = new URL(photoUrl);
+    const marker = `/storage/v1/object/`;
+    if (!parsed.pathname.includes(marker)) return null;
+    const bucketIndex = parsed.pathname.indexOf(`/${PROGRESS_PHOTOS_BUCKET}/`);
+    if (bucketIndex === -1) return null;
+    const storagePath = decodeURIComponent(
+      parsed.pathname.slice(bucketIndex + PROGRESS_PHOTOS_BUCKET.length + 2),
+    );
+    return storagePath.startsWith(`${userId}/`) ? storagePath : null;
+  } catch {
+    return null;
+  }
+}
+
+async function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function fetchProgressPhotoFiles(userId, progressPhotos = []) {
+  const files = [];
+
+  for (const photo of asArray(progressPhotos)) {
+    const storagePath = getProgressPhotoStoragePath(photo?.photo_url || photo?.storage_path, userId);
+    if (!storagePath) {
+      files.push({
+        progress_photo_id: photo?.id || null,
+        status: 'skipped',
+        reason: 'No user-scoped storage path was available for this photo.',
+      });
+      continue;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from(PROGRESS_PHOTOS_BUCKET)
+        .createSignedUrl(storagePath, 60);
+      if (error) throw error;
+
+      const response = await fetch(data.signedUrl);
+      if (!response.ok) throw new Error(`download failed ${response.status}`);
+      const blob = await response.blob();
+      const dataUrl = await blobToDataUrl(blob);
+      const filename = storagePath.split('/').pop() || `${photo?.id || 'progress-photo'}.jpg`;
+
+      files.push({
+        progress_photo_id: photo?.id || null,
+        storage_path: storagePath,
+        filename,
+        mime_type: blob.type || 'application/octet-stream',
+        bytes: blob.size,
+        data_url: dataUrl,
+      });
+    } catch (error) {
+      files.push({
+        progress_photo_id: photo?.id || null,
+        storage_path: storagePath,
+        status: 'failed',
+        reason: error?.message || 'Could not download photo file.',
+      });
+    }
+  }
+
+  return files;
 }
 
 async function selectOwnRows(table, userId, orderBy) {
@@ -105,6 +190,7 @@ export async function buildUserDataExport(userId) {
   exportData.subscriptions = subscriptions;
   exportData.workout_sessions = sessionBundle.sessions;
   exportData.workout_sets = sessionBundle.sets;
+  exportData.progress_photo_files = await fetchProgressPhotoFiles(userId, exportData.progress_photos);
 
   return {
     exported_at: new Date().toISOString(),

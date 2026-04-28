@@ -22,14 +22,11 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
+import { hasUserAiConsent } from '../_shared/ai-consent.ts';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const MODEL_NAME = 'gemini-2.0-flash';
@@ -56,11 +53,13 @@ interface DetectedFood {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function json(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-  });
+function makeJson(corsHeaders: Record<string, string>) {
+  return function json(payload: unknown, status = 200) {
+    return new Response(JSON.stringify(payload), {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  };
 }
 
 function estimateCost(inputTokens: number, outputTokens: number): number {
@@ -162,8 +161,10 @@ Be realistic with portion estimates. If unsure about an item, include it with lo
 // ─── Main Handler ────────────────────────────────────────────────────────────
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  const json = makeJson(corsHeaders);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
@@ -210,6 +211,14 @@ serve(async (req) => {
     return json({
       error: 'Food photo analysis is a paid feature. Upgrade your plan to unlock it.',
       code: 'UPGRADE_REQUIRED',
+    }, 403);
+  }
+
+  const hasConsent = await hasUserAiConsent(supabase, user.id, 'food_vision');
+  if (!hasConsent) {
+    return json({
+      error: 'Food photo analysis requires consent before images are processed by a third-party AI model.',
+      code: 'AI_CONSENT_REQUIRED',
     }, 403);
   }
 

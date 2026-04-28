@@ -1,0 +1,458 @@
+# atlas.core — COMPLETE DESIGN SYSTEM HANDOFF
+## Master Orchestration Prompt for Claude.ai/design
+
+---
+
+## EXECUTIVE BRIEF
+
+You are designing the complete, production-ready design system for **atlas.core** — an AI-powered fitness coaching app (iOS-first, Android, web).
+
+**Your mission**: Deliver everything needed to handoff to engineering in one cohesive execution. This includes icons, components, tokens, specs, accessibility, dark mode, micro-interactions, data viz, and a Series A VC pitch deck.
+
+**Constraint**: Maximize design quality while minimizing token usage. Reuse patterns. Batch similar work. Ship production-ready assets.
+
+**Timeline**: All deliverables in one session.
+
+---
+
+## BRAND FOUNDATION (Reference Only)
+
+**Product**: atlas.core — Health operating system. Calm, analytical, editorial. Built for people who measure.
+
+**Visual Language**:
+- **Mark**: Filled heart with ECG trace across midline (never tilted, never outlined, never gradient)
+- **Wordmark**: "atlas.core" in Archivo Black, lowercase, with sulfur dot
+- **Palette**: Ink (#1a1a1a), Paper (#fafaf8), Sulfur (#f5c211)
+- **Typography**: Archivo Black (display), Inter (body), IBM Plex Mono (mono)
+
+**Existing Assets**: 107 designed screens, data model, feature specs, React component library
+
+**Tone**: Calm, analytical, editorial. Empowering. No hype.
+
+---
+
+## EXECUTION PLAN (10 Layers, Sequential)
+
+### LAYER 1: ICON LIBRARY (60 Icons, SVG)
+
+**Deliverable**: 60 cohesive, production-ready icons in SVG format.
+
+**Specs**:
+- Grid: 24×24 with 2px stroke
+- Weights: Regular & bold
+- Sizes: Work at 16px, 24px, 32px, 48px
+- Style: Apple SF Symbols aesthetic (minimal, geometric, consistent weight)
+- Color: Ink only (stroke-based, no fills)
+
+**Categories** (60 total):
+- Navigation (8): home, search, settings, menu, back, close, notifications, profile
+- Training (12): dumbbell, barbell, kettlebell, cable, machine, bodyweight, timer, stopwatch, rest, pr-badge, volume, intensity
+- Nutrition (10): apple, water, protein, carbs, fats, calories, meal, plate, utensils, macros
+- Body (8): weight, scale, heart, blood-pressure, temperature, lab-flask, chart-line, trending-up
+- Protocols (6): pill, calendar, dose, check, clock, repeat
+- Coach (6): chat, message, user, team, crown, star
+- Platform (10): download, upload, share, export, sync, offline, error, warning, info, help
+
+**Output**: 60 SVG files (organized by category) + icon reference sheet (PDF or PNG)
+
+---
+
+### LAYER 2: COMPONENT LIBRARY (15 Core Components)
+
+**Deliverable**: 15 production-ready React components with full documentation.
+
+**For each component, provide**:
+1. Visual design (light + dark mode)
+2. State variants (default, hover, active, disabled, loading, error)
+3. React TSX code (~20 lines, TypeScript)
+4. Accessibility specs (ARIA, keyboard nav, focus states)
+5. Animation spec (if applicable: duration, easing, trigger)
+
+**Components**:
+1. Button (primary, secondary, tertiary, ghost)
+2. Input Field (text, email, password, number, with validation)
+3. Chip/Tag (dismissible, selectable, with icon)
+4. Card (elevated, flat, with image, with actions)
+5. List Row (with avatar, toggle, badge, action menu)
+6. Modal/Dialog (confirm, alert, form modal)
+7. Toast Notification (success, error, warning, info)
+8. Segmented Control (2–4 options, icon + text)
+9. Toggle Switch (on/off, with label)
+10. Dropdown/Select (single, multi, searchable)
+11. Slider/Range (single value, range, with labels)
+12. Progress Ring (indeterminate, determinate, with label)
+13. Tab Bar (5 tabs, with badges, active indicator)
+14. Skeleton Loader (text lines, card, list rows)
+15. Stepper/Form Progress (numbered steps, linear flow)
+
+**Output**: 
+- React TSX files (one per component, with variants)
+- Figma design file (components with auto-layout, variants)
+- Storybook-style documentation (usage, do's & don'ts, code examples)
+
+---
+
+### LAYER 3: DESIGN TOKENS (JSON + CSS)
+
+**Deliverable**: Production-ready design tokens in JSON and CSS formats.
+
+**Token Categories**:
+- **Color**: Ink, Paper, Sulfur, gray scale (50–900), semantic colors (success, error, warning, info)
+- **Spacing**: 0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48px
+- **Radius**: 0, 2, 4, 8, 12, 16px
+- **Typography**: Display (lg, md), Headline, Body (lg, base), Label, Mono
+- **Shadow**: sm, md, lg
+- **Animation**: fast (150ms), base (250ms), slow (350ms) with cubic-bezier easing
+
+**Output**:
+- `tokens.json` (Design Tokens Format)
+- `tokens.css` (CSS custom properties)
+- `tokens.scss` (SCSS variables)
+- Token documentation (usage guide, semantic naming)
+
+---
+
+### LAYER 4: RESPONSIVE DESIGN SPECS
+
+**Deliverable**: Breakpoint definitions and responsive layouts for 3 key screens.
+
+**Breakpoints**:
+- **Mobile** (375px): Single column, full-width cards, bottom sheet modals
+- **Tablet** (768px): Two-column grid, side navigation, split view
+- **Desktop** (1280px+): Three-column grid, left sidebar (coach console), right panel
+
+**Screens to redesign**:
+1. Today (dashboard)
+2. Workout (logging)
+3. Coach (messaging)
+
+**Output**: 
+- Responsive specs document (breakpoints, grid columns, layout rules)
+- 3 screens × 3 breakpoints = 9 design variants (Figma or PNG)
+
+---
+
+### LAYER 5: ACCESSIBILITY COMPLIANCE (WCAG 2.1 AA)
+
+**Deliverable**: Complete accessibility specs and audit checklist.
+
+**Specs**:
+- Color contrast ratios (all text ≥ 4.5:1 for body, ≥ 3:1 for large text)
+- Focus states (visible 2px outline, 2px offset)
+- Keyboard navigation (Tab order, Enter/Space triggers, Escape closes)
+- Screen reader labels (aria-label, aria-describedby, role attributes)
+- Motion (prefers-reduced-motion support, no auto-play)
+- Form validation (error messages, required indicators, inline hints)
+
+**Audit for 5 critical screens**:
+1. Auth (sign-in, sign-up)
+2. Onboarding (profile setup)
+3. Today (dashboard)
+4. Workout (logging)
+5. Coach (messaging)
+
+**Output**:
+- A11y specs document (WCAG 2.1 AA checklist)
+- Per-screen audit report (pass/fail, remediation notes)
+
+---
+
+### LAYER 6: ERROR, EMPTY & LOADING STATES
+
+**Deliverable**: Designed states for 5+ screens.
+
+**State Types**:
+- **Error States**: Network error, server error (500), validation error, permission denied
+- **Empty States**: No workouts logged, no meals, no labs, no coach messages, no crew
+- **Loading States**: Skeleton screens, progress indicators, shimmer animations
+
+**Screens to design**:
+1. Workout (empty, loading, error)
+2. Nutrition (empty, loading, error)
+3. Coach (empty, loading, error)
+4. Labs (empty, loading, error)
+5. Crew (empty, loading, error)
+
+**Output**: 
+- Figma designs (all variants)
+- PNG exports (per screen, per state)
+- Copy guidelines (error messages, empty state CTAs)
+
+---
+
+### LAYER 7: DARK MODE & HIGH-CONTRAST VARIANTS
+
+**Deliverable**: Dark mode and high-contrast designs for 5 key screens.
+
+**Dark Mode Palette**:
+- Ink → Paper (inverted)
+- Paper → Ink (inverted)
+- Sulfur → Sulfur (same or lighter if needed)
+- Gray scale adjusted for OLED
+
+**High-Contrast Variant**:
+- Increase color contrast to WCAG AAA (≥ 7:1)
+- Thicker strokes for icons
+- Bolder typography weights
+
+**Screens**:
+1. Today (dashboard)
+2. Workout (logging)
+3. Coach (messaging)
+4. Settings
+5. Onboarding
+
+**Output**:
+- Dark mode CSS overrides or Figma variants
+- High-contrast variants (Figma or PNG)
+- Toggle implementation guide
+
+---
+
+### LAYER 8: MICRO-INTERACTIONS & FEEDBACK PATTERNS
+
+**Deliverable**: Detailed specs for 10 key interactions.
+
+**Interactions**:
+1. Button press → scale down 2%, haptic feedback (iOS)
+2. Form submission → loading spinner, disable button, success toast
+3. Swipe to delete → reveal delete button, confirm on tap
+4. Pull to refresh → spinner animation, haptic on complete
+5. Set logged → PR badge animation (scale + fade in), confetti (optional)
+6. Session complete → slide-up modal, celebration animation
+7. Error toast → shake animation, 4s auto-dismiss
+8. Tab switch → fade transition (150ms), preserve scroll
+9. Modal open → backdrop fade in (150ms), modal slide up (250ms)
+10. Notification badge → pulse animation on new message
+
+**For each interaction, specify**:
+- Trigger condition
+- Animation duration
+- Easing function (cubic-bezier)
+- Haptic feedback (iOS)
+- Accessibility (prefers-reduced-motion)
+
+**Output**:
+- Micro-interactions specs document
+- Lottie animations (5 key interactions)
+- CSS animation code examples
+
+---
+
+### LAYER 9: DATA VISUALIZATION COMPONENTS
+
+**Deliverable**: 5 chart components designed and documented.
+
+**Charts**:
+1. **Volume Over Time** (line chart) — 12-week trend with current session highlight
+2. **Macro Breakdown** (pie chart) — protein/carbs/fats distribution
+3. **Body Weight Trend** (area chart) — weekly average with trend line
+4. **Readiness Score** (circular gauge) — 0–100 scale with color zones
+5. **Workout Frequency** (bar chart) — sessions per week, 4-week rolling
+
+**For each chart, specify**:
+- Color scheme (using atlas.core palette)
+- Axis labels, legend, data point interactions
+- Hover tooltip design
+- Responsive sizing (mobile, tablet, desktop)
+- Data format (JSON example)
+
+**Output**:
+- Chart designs (Figma or PNG)
+- React component code (Recharts or Chart.js)
+- Data format documentation
+
+---
+
+### LAYER 10: VC PITCH DECK (15 Slides)
+
+**Deliverable**: Series A fundraising presentation, visually sophisticated and on-brand.
+
+**Slide Outline**:
+1. Cover — Mark, wordmark, tagline, date
+2. Problem — Fragmentation, inaccessibility, privacy concerns
+3. Market Size — TAM/SAM/SOM with data viz
+4. Solution — Value prop (AI coach, privacy-first, accessible)
+5. Product Demo — 3 key screens with annotations
+6. Business Model — Freemium + partnerships revenue streams
+7. Traction — DAU, retention, NPS with growth chart
+8. Competitive Landscape — 2×2 matrix positioning
+9. Go-to-Market — 3-phase launch strategy + channels
+10. Team — Founder bios (3–4 key roles)
+11. Financial Projections — 3-year revenue forecast + unit economics
+12. Funding Ask — Amount, use of funds breakdown
+13. Key Metrics — DAU, MAU, retention, LTV/CAC, cohort analysis
+14. Roadmap — 12-month product plan (quarterly phases)
+15. Closing — Vision statement, CTA, contact info
+
+**Design Specs**:
+- Dimensions: 1920×1080 (16:9 widescreen)
+- Typography: Archivo Black (headlines), Inter (body), IBM Plex Mono (data)
+- Colors: Ink, Paper, Sulfur, gray scale
+- Imagery: Mark, icons, charts, mockups (no stock photos)
+- Speaker notes: 100 words per slide
+
+**Output**:
+- Figma file (15 slides, editable, with components)
+- PDF export (for email, printing)
+- PNG per slide (for social media, web)
+- Speaker notes document
+
+---
+
+## DESIGN PRINCIPLES (Apply to All Layers)
+
+**Minimal**: Remove all non-essential elements. Every pixel serves a purpose.
+
+**Consistent**: Reuse spacing, colors, typography across all components and screens.
+
+**Accessible**: WCAG 2.1 AA compliance by default. Test with screen readers.
+
+**Responsive**: Mobile-first design. Scale gracefully to tablet & desktop.
+
+**Performant**: Optimize SVGs. Use CSS animations, not JavaScript.
+
+**Documented**: Every component has usage guidelines, do's & don'ts, code examples.
+
+**On-Brand**: Use atlas.core palette, typography, mark, and tone consistently.
+
+---
+
+## EXECUTION STRATEGY (Token Optimization)
+
+**Batch similar work**: Design all icons at once, not one at a time.
+
+**Reuse patterns**: Build components from icons and tokens. Don't reinvent.
+
+**Show, don't tell**: Use visuals (charts, icons, mockups) instead of long descriptions.
+
+**Minimal copy**: Specs are concise. Code examples are short. No fluff.
+
+**Figma as source**: Design once in Figma, export to SVG/PNG/code.
+
+**Semantic naming**: Use consistent naming conventions (e.g., `button-primary`, `spacing-16`, `color-ink`).
+
+---
+
+## DELIVERABLES CHECKLIST
+
+### Icons
+- [ ] 60 SVG files (organized by category)
+- [ ] Icon reference sheet (PDF or PNG)
+- [ ] Icon naming convention document
+
+### Components
+- [ ] 15 React TSX files (with variants)
+- [ ] Figma design file (components, auto-layout, variants)
+- [ ] Storybook documentation (usage, do's & don'ts, code examples)
+
+### Tokens
+- [ ] `tokens.json` (Design Tokens Format)
+- [ ] `tokens.css` (CSS custom properties)
+- [ ] `tokens.scss` (SCSS variables)
+- [ ] Token documentation (usage guide, semantic naming)
+
+### Responsive Specs
+- [ ] Breakpoint definitions (mobile, tablet, desktop)
+- [ ] 3 screens × 3 breakpoints = 9 design variants
+- [ ] Responsive specs document
+
+### Accessibility
+- [ ] WCAG 2.1 AA checklist
+- [ ] Per-screen audit report (5 critical screens)
+- [ ] A11y implementation guide
+
+### Error/Empty/Loading States
+- [ ] 5 screens × 3 states = 15 design variants
+- [ ] Copy guidelines (error messages, empty state CTAs)
+- [ ] State design documentation
+
+### Dark Mode & High-Contrast
+- [ ] Dark mode CSS overrides
+- [ ] High-contrast variants (5 screens)
+- [ ] Toggle implementation guide
+
+### Micro-Interactions
+- [ ] 10 interaction specs (trigger, duration, easing, haptics)
+- [ ] Lottie animations (5 key interactions)
+- [ ] CSS animation code examples
+
+### Data Visualization
+- [ ] 5 chart designs (Figma or PNG)
+- [ ] React component code (Recharts or Chart.js)
+- [ ] Data format documentation
+
+### VC Pitch Deck
+- [ ] 15-slide Figma file (editable, with components)
+- [ ] PDF export
+- [ ] PNG per slide
+- [ ] Speaker notes document (100 words per slide)
+
+---
+
+## SUCCESS CRITERIA
+
+✓ All 60 icons are cohesive, scalable, work at 16px–48px
+✓ 15 components have light + dark variants, all states, code examples, a11y specs
+✓ Tokens are production-ready (JSON + CSS + SCSS)
+✓ Responsive specs cover mobile, tablet, desktop with 3 key screens each
+✓ A11y checklist is WCAG 2.1 AA compliant
+✓ Error/empty/loading states designed for 5+ screens
+✓ Dark mode + high-contrast variants are visually distinct
+✓ 10 micro-interactions specified with timings & haptics
+✓ 5 data visualization components designed & documented
+✓ VC deck is 15 slides, visually sophisticated, on-brand, with speaker notes
+✓ All deliverables are production-ready and ship-able
+✓ Token usage is optimized (reuse, batch, minimal copy)
+
+---
+
+## QUICK REFERENCE: BRAND ASSETS
+
+**Mark**: Filled heart with ECG trace (never tilted, never outlined, never gradient)
+**Wordmark**: "atlas.core" in Archivo Black, lowercase, sulfur dot
+**Palette**: Ink (#1a1a1a), Paper (#fafaf8), Sulfur (#f5c211)
+**Typography**: Archivo Black (display), Inter (body), IBM Plex Mono (mono)
+**Existing**: 107 screens, data model, feature specs, React component library
+
+---
+
+## TONE & VOICE
+
+**Calm**: No urgency, no hype. Speak like a coach, not a marketer.
+**Analytical**: Data-driven language. Show numbers, trends, insights.
+**Editorial**: Sophisticated, slightly formal. Avoid jargon.
+**Empowering**: Help users feel in control of their health data.
+
+---
+
+## FINAL NOTE
+
+This is your complete design system handoff. Everything needed to ship atlas.core to engineering, investors, and users.
+
+**Execute in order**: Icons → Components → Tokens → Responsive → A11y → States → Dark Mode → Micro-interactions → Data Viz → VC Deck.
+
+**Maximize reuse**: Each layer builds on the previous one. Don't repeat work.
+
+**Ship production-ready**: No placeholders. No "TBD." Every asset is finished.
+
+**Ready to build.**
+
+---
+
+## BONUS: IF TIME PERMITS
+
+- Figma component library (auto-layout, variants, documentation)
+- Lottie animations for 5 key micro-interactions
+- Storybook setup with component stories
+- Accessibility audit report (WAVE, Axe, manual testing)
+- Performance optimization guide (image formats, bundle size budgets)
+- Design system npm package (`@atlascore/design-system`)
+- Changelog and versioning (semver)
+- Testing specs (visual regression, unit tests, e2e tests)
+- Deployment checklist and release notes template
+- Brand guidelines PDF (1-page reference)
+
+---
+
+**atlas.core — Complete. Cohesive. Ready to ship.**

@@ -1,13 +1,11 @@
 /**
- * V3Paywall — v3 paper+ink+amber paywall wired to real RevenueCat purchases.
+ * V3Paywall — v3 paper+ink+amber paywall wired to shared billing helpers.
  *
  * Desktop web SaaS pricing/upgrade page — NOT a mobile screen.
  * Uses the same marketing header/footer style as V3AccountHub.
  *
- * Prices displayed match RevenueCat products (plans.js source of truth):
- *   Weekly  → $3.99/wk  ($rc_weekly)
- *   Monthly → $9.99/mo  ($rc_monthly)
- *   Yearly  → $79/yr    ($rc_annual)
+ * Public UI shows monthly/yearly only. Weekly is intentionally hidden until
+ * RevenueCat, StoreKit, and web checkout all expose the same package set.
  */
 
 import React, { useState, useMemo } from 'react';
@@ -18,31 +16,29 @@ import { useT } from '@/lib/i18nContext';
 import { ACFonts, ACBrand, ACRadii } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
-import {
-  purchasePackage,
-  restorePurchases,
-  isRevenueCatAvailable,
-} from '@/lib/revenueCat';
+import { useRevenueCat } from '../lib/useRevenueCat.js';
 import { Capacitor } from '@capacitor/core';
 import { startWebCheckout } from '@/services/billingService';
 import { getStripeBillingConfig } from '@/services/stripeBillingConfig';
 import { WEBAPP_BILLING, WEBAPP_EXPORT, WEBAPP_HOME } from '@/lib/platformRoutes';
 
-const BILLING_TO_PACKAGE = {
-  weekly: '$rc_weekly',
-  monthly: '$rc_monthly',
-  yearly: '$rc_annual',
-};
-
-/** Price + cadence strings are intentionally unlocalized — they mirror
- *  the RevenueCat product config exactly. Only the cadence label
- *  ("1 week") goes through i18n. */
-function usePlans() {
+function usePlans(packageDisplays = {}) {
   const t = useT();
   return [
-    { k: 'weekly',  t: t('paywall.plans.weekly'),  p: '$3.99', pm: t('paywall.pricing.weekly'), save: null },
-    { k: 'monthly', t: t('paywall.plans.monthly'), p: '$9.99', pm: t('paywall.pricing.monthly'), save: null },
-    { k: 'yearly',  t: t('paywall.plans.yearly'),  p: '$79',   pm: t('paywall.pricing.yearlyEffective'), save: t('paywall.plans.save') },
+    {
+      k: 'monthly',
+      t: t('paywall.plans.monthly'),
+      p: packageDisplays.monthly?.price || t('paywall.pricing.confirmedInCheckout'),
+      pm: t('paywall.pricing.monthly'),
+      save: null,
+    },
+    {
+      k: 'yearly',
+      t: t('paywall.plans.yearly'),
+      p: packageDisplays.yearly?.price || t('paywall.pricing.confirmedInCheckout'),
+      pm: t('paywall.pricing.yearly'),
+      save: t('paywall.plans.save'),
+    },
   ];
 }
 
@@ -71,70 +67,45 @@ export default function V3Paywall() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const t = useT();
-  const PLANS = usePlans();
+  const isNative = Capacitor.isNativePlatform();
+  const { purchase, restore, loading: revenueCatLoading, packageDisplays } = useRevenueCat({
+    userId: user?.id,
+    source: 'web_paywall_native',
+  });
+  const PLANS = usePlans(isNative ? packageDisplays : {});
   const FEATURES = useFeatures();
   const [plan, setPlan] = useState('yearly');
-  const [loading, setLoading] = useState(false);
-  const isNative = Capacitor.isNativePlatform();
+  const [webLoading, setWebLoading] = useState(false);
+  const loading = webLoading || revenueCatLoading;
   const stripeBilling = getStripeBillingConfig();
 
   async function handlePurchase() {
-    setLoading(true);
     try {
-      if (!isNative) {
+      if (isNative) {
+        await purchase({ planId: plan });
+        return;
+      }
+
+      setWebLoading(true);
         const checkout = await startWebCheckout({
           userId: user?.id,
           email: user?.email,
-          billing: plan === 'yearly' ? 'yearly' : 'monthly',
+          billing: plan,
           region: 'us',
           plan: 'athlete_pro',
         });
         window.location.href = checkout.url;
-        return;
-      }
-
-      if (isRevenueCatAvailable()) {
-        const pkgId = BILLING_TO_PACKAGE[plan];
-        const result = await purchasePackage(pkgId);
-        if (result.userCancelled) {
-          setLoading(false);
-          return;
-        }
-        if (result.success) {
-          toast.success(t('paywall.toasts.welcome'));
-          navigate('/app/today', { replace: true });
-          return;
-        }
-        if (result.error) {
-          toast.error(result.error === 'billing_unavailable'
-            ? t('paywall.toasts.billingUnavailable')
-            : t('paywall.toasts.genericError'));
-        }
-      }
-      toast.error(t('paywall.toasts.billingUnavailable'));
     } catch (err) {
       console.error('[V3Paywall] purchase error:', err);
       toast.error(t('paywall.toasts.genericError'));
     } finally {
-      setLoading(false);
+      setWebLoading(false);
     }
   }
 
   async function handleRestore() {
-    setLoading(true);
-    try {
-      const result = await restorePurchases();
-      if (result.isActive) {
-        toast.success(t('paywall.toasts.restored'));
-        navigate('/app/today', { replace: true });
-      } else {
-        toast(t('paywall.toasts.noActiveSub'));
-      }
-    } catch {
-      toast.error(t('paywall.toasts.restoreFailed'));
-    } finally {
-      setLoading(false);
-    }
+    if (!isNative) return;
+    await restore();
   }
 
   return (
@@ -237,9 +208,9 @@ export default function V3Paywall() {
           </div>
         )}
 
-        {/* Plan cards — 3-column grid */}
+        {/* Plan cards */}
         <div className="pw-plans-grid" style={{
-          marginTop: 44, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16,
+          marginTop: 44, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16,
         }}>
           {PLANS.map(p => {
             const on = p.k === plan;
@@ -337,18 +308,22 @@ export default function V3Paywall() {
 
         {/* Restore + Terms + Privacy links */}
         <div style={{ marginTop: 20, display: 'flex', gap: 16, alignItems: 'center' }}>
-          <button
-            type="button"
-            onClick={handleRestore}
-            style={{
-              background: 'none', border: 'none', fontFamily: ACFonts.mono,
-              fontSize: 11, letterSpacing: 0.5, color: MC.dim,
-              cursor: 'pointer', textDecoration: 'underline', padding: 0,
-            }}
-          >
-            {t('paywall.links.restore')}
-          </button>
-          <span style={{ color: MC.mute }}>&middot;</span>
+          {isNative && (
+            <>
+              <button
+                type="button"
+                onClick={handleRestore}
+                style={{
+                  background: 'none', border: 'none', fontFamily: ACFonts.mono,
+                  fontSize: 11, letterSpacing: 0.5, color: MC.dim,
+                  cursor: 'pointer', textDecoration: 'underline', padding: 0,
+                }}
+              >
+                {t('paywall.links.restore')}
+              </button>
+              <span style={{ color: MC.mute }}>&middot;</span>
+            </>
+          )}
           <Link to="/terms" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
             {t('webNav.terms')}
           </Link>

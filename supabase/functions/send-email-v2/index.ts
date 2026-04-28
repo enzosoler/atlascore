@@ -9,6 +9,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 type EmailType = 'welcome' | 'confirm_email' | 'reset_password';
 interface SendResult { success: boolean; id?: string; error?: string; }
@@ -54,13 +55,6 @@ async function sendEmail(opts: {
     return { success: false, error: String(e) };
   }
 }
-
-// CORS headers
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 // Environment
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -157,19 +151,20 @@ function validateRequest(body: unknown): { valid: boolean; error?: string; data?
 
 // Main handler
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
   
-  // Handle CORS preflight
+  // Handle corsHeaders preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
   
   // Only accept POST
   if (req.method !== 'POST') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
   
@@ -186,7 +181,7 @@ serve(async (req) => {
   if (!user) {
     return new Response(
       JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
   
@@ -207,7 +202,7 @@ serve(async (req) => {
       { 
         status: 429, 
         headers: { 
-          ...CORS, 
+          ...corsHeaders, 
           'Content-Type': 'application/json',
           'X-RateLimit-Remaining': '0',
         } 
@@ -222,7 +217,7 @@ serve(async (req) => {
   } catch {
     return new Response(
       JSON.stringify({ error: 'Invalid JSON body' }),
-      { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
   
@@ -231,7 +226,7 @@ serve(async (req) => {
   if (!validation.valid || !validation.data) {
     return new Response(
       JSON.stringify({ error: validation.error }),
-      { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
   
@@ -286,7 +281,7 @@ serve(async (req) => {
     { 
       status, 
       headers: { 
-        ...CORS, 
+        ...corsHeaders, 
         'Content-Type': 'application/json',
         'X-RateLimit-Remaining': String(rateCheck.remaining),
       } 

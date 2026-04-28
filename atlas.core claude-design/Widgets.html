@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>atlas.core — iOS widgets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --bg:  #efe9da;
+    --accent: #e8b500;
+    --dim: rgba(10,10,10,0.55);
+    --line: rgba(10,10,10,0.12);
+    --soft: rgba(10,10,10,0.04);
+    --hair: rgba(10,10,10,0.08);
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--ink); }
+
+  .page { max-width: 1200px; margin: 0 auto; padding: 64px 48px 120px; }
+
+  .backlink { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); text-decoration: none; }
+  .backlink:hover { color: var(--ink); }
+
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+  h1.display { margin: 10px 0 20px; font-family: var(--display); font-size: 88px; letter-spacing: -3.6px; line-height: 0.92; text-transform: lowercase; }
+  h1.display .accent { color: var(--accent); }
+  h1.display .stamp { background: var(--ink); color: var(--bg); padding: 0 14px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 760px; color: rgba(10,10,10,0.82); }
+
+  h2.section { font-family: var(--display); font-size: 44px; letter-spacing: -1.6px; line-height: 1; text-transform: lowercase; margin: 96px 0 8px; }
+  .section-sub { font-size: 14px; color: var(--dim); margin-bottom: 28px; max-width: 640px; line-height: 1.5; }
+
+  /* Home screens row */
+  .phones { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
+
+  /* Spec table */
+  .spec {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    margin-top: 28px;
+  }
+  .spec-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    border-top: 1px solid var(--line);
+  }
+  .spec-row:first-child { border-top: 0; }
+  .spec-key {
+    padding: 18px 20px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--dim);
+    background: var(--soft);
+    border-right: 1px solid var(--line);
+  }
+  .spec-val {
+    padding: 18px 20px; font-size: 14px; line-height: 1.55;
+  }
+  .spec-val strong { font-weight: 700; }
+  .spec-val ul { margin: 4px 0; padding-left: 18px; }
+  .spec-val li { margin: 4px 0; }
+  .spec-val li::marker { color: var(--accent); }
+
+  /* Widget cards */
+  .widget-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    margin-top: 24px;
+  }
+  .widget-card-head {
+    padding: 18px 24px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: baseline;
+    background: var(--soft);
+  }
+  .widget-card-head h3 { margin: 0; font-family: var(--display); font-size: 28px; letter-spacing: -0.8px; text-transform: lowercase; }
+  .widget-card-head .id { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+  .widget-card-body { padding: 32px; display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: start; }
+  .widget-card-stage { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .stage-cell { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .stage-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim); }
+  .widget-card-meta { display: flex; flex-direction: column; gap: 18px; min-width: 360px; }
+
+  .meta-block h4 {
+    margin: 0 0 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .meta-block p, .meta-block ul { margin: 0; font-size: 13px; line-height: 1.55; }
+  .meta-block ul { padding-left: 16px; }
+  .meta-block li::marker { color: var(--accent); }
+
+  .pill { display: inline-block; padding: 2px 7px; font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; background: var(--ink); color: var(--bg); margin-right: 4px; }
+  .pill.dim { background: var(--hair); color: var(--ink); }
+
+  /* Modes */
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .mode-block {
+    padding: 24px;
+    border: 1px solid var(--line);
+  }
+  .mode-block.dark { background: #0a0a0a; color: #efe9da; border-color: #0a0a0a; }
+  .mode-block h4 { margin: 0 0 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+  .mode-block.dark h4 { color: rgba(239,233,218,0.6); }
+  .mode-stage { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* Token table */
+  .tokens {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    border: 1px solid var(--line);
+  }
+  .tokens > div {
+    padding: 14px 18px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    display: flex; align-items: center;
+  }
+  .tokens > div:nth-child(-n+3) { border-top: 0; background: var(--soft); font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); }
+  .tokens .mono-v { font-family: var(--mono); font-size: 11px; }
+
+  /* Footer rules */
+  .rules { margin-top: 56px; padding: 28px 32px; background: var(--ink); color: var(--bg); }
+  .rules .eyebrow { color: rgba(239,233,218,0.6); }
+  .rules h3 { font-family: var(--display); font-size: 36px; letter-spacing: -1.2px; margin: 4px 0 18px; text-transform: lowercase; }
+  .rules ul { padding-left: 18px; font-size: 14px; line-height: 1.7; margin: 0; column-count: 2; column-gap: 48px; }
+  .rules li::marker { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="backlink">← atlas.core · back to canvas</a>
+
+  <div style="margin-top: 32px;">
+    <div class="eyebrow">/// atlas.core · ios · widgets · iOS 17+</div>
+    <h1 class="display">
+      glanceable, <span class="accent">not</span><br/>
+      <span class="stamp">a second app.</span>
+    </h1>
+    <p class="lede">
+      Five widgets across small, medium, large, and lock screen — designed against Apple's HIG.
+      One <strong>flagship Today widget</strong> in three sizes carries the daily dashboard onto the
+      home screen. The rest are focused: next workout, fuel rings, quick log, and a quiet weekly
+      load summary. <strong>No streaks. No leaderboards. No noise.</strong> Type ramp follows SF Pro
+      Display / Rounded; corner radius is the system 22pt; padding is Apple's default 16pt.
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════ SCREENS ══════════════════════════════ -->
+  <h2 class="section">in context.</h2>
+  <p class="section-sub">Home screen (light + dark) and lock screen, sized to iPhone 15 Pro. Widgets sit on real wallpaper, not a flat bg, so blur and contrast are honest.</p>
+  <div id="phones" class="phones"></div>
+
+  <!-- ══════════════════════════════ WIDGET 1 ══════════════════════════════ -->
+  <h2 class="section">today.</h2>
+  <p class="section-sub">The flagship. Mirrors the daily dashboard. Ships in all three home sizes; the large is the one Apple Featured editors would show.</p>
+
+  <div class="widget-card">
+    <div class="widget-card-head">
+      <h3>today</h3>
+      <span class="id">w1 · small / medium / large</span>
+    </div>
+    <div class="widget-card-body">
+      <div class="widget-card-stage" id="today-stage"></div>
+      <div class="widget-card-meta">
+        <div class="meta-block">
+          <h4>purpose</h4>
+          <p>One glance answers "what does today ask of me?" Workout queued, fuel progress, checklist of the day's commitments.</p>
+        </div>
+        <div class="meta-block">
+          <h4>data shown</h4>
+          <ul>
+            <li>Today's planned workout (name + exercise count + duration)</li>
+            <li>Calories logged / target with macro ring</li>
+            <li>Macros: protein, carbs, fat (large only)</li>
+            <li>Daily checklist with completion state (large only)</li>
+          </ul>
+        </div>
+        <div class="meta-block">
+          <h4>tap behavior</h4>
+          <ul>
+            <li><strong>Small:</strong> deep-link <span class="pill dim">atlascore://today</span></li>
+            <li><strong>Medium left half:</strong> <span class="pill dim">atlascore://workout/today</span> · right half: <span class="pill dim">atlascore://nutrition</span></li>
+            <li><strong>Large:</strong> per-row deep links — workout row, fuel row, each checklist item</li>
+          </ul>
+        </div>
+        <div class="meta-block">
+          <h4>states</h4>
+          <ul>
+            <li><strong>Empty:</strong> "No workout planned" · CTA "Pick a routine"</li>
+            <li><strong>Rest day:</strong> dim glyph + "Rest day · recover"</li>
+            <li><strong>Loading:</strong> skeleton bars at 30% opacity, no spinner (HIG)</li>
+            <li><strong>Error / no auth:</strong> atlas.core wordmark + "Open app to refresh"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ WIDGET 2 ══════════════════════════════ -->
+  <div class="widget-card">
+    <div class="widget-card-head">
+      <h3>next workout</h3>
+      <span class="id">w2 · small · accent variant</span>
+    </div>
+    <div class="widget-card-body">
+      <div class="widget-card-stage" id="next-stage"></div>
+      <div class="widget-card-meta">
+        <div class="meta-block">
+          <h4>purpose</h4>
+          <p>For users who only want one widget on the home screen. The accent fill makes it the "do this next" focal point — mirrors the brand's bolt mark.</p>
+        </div>
+        <div class="meta-block">
+          <h4>data shown</h4>
+          <ul>
+            <li>Day + scheduled time</li>
+            <li>Workout name (Push A, Pull B, etc.)</li>
+            <li>Program week / day position</li>
+          </ul>
+        </div>
+        <div class="meta-block">
+          <h4>tap behavior</h4>
+          <p>Deep-link <span class="pill dim">atlascore://workout/next</span>. App launches into the prepared session — first set primed.</p>
+        </div>
+        <div class="meta-block">
+          <h4>states</h4>
+          <ul>
+            <li><strong>Mid-workout:</strong> swaps to "In progress · 2 of 5"</li>
+            <li><strong>Rest day:</strong> "Rest · next: Pull B Wed"</li>
+            <li><strong>No program:</strong> "Browse routines →"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ WIDGET 3 ══════════════════════════════ -->
+  <div class="widget-card">
+    <div class="widget-card-head">
+      <h3>macros · fuel</h3>
+      <span class="id">w3 · small</span>
+    </div>
+    <div class="widget-card-body">
+      <div class="widget-card-stage" id="macros-stage"></div>
+      <div class="widget-card-meta">
+        <div class="meta-block">
+          <h4>purpose</h4>
+          <p>The single most-glanced number for nutrition users — calories logged vs target, with macros at the bottom. Ring fills as the day fills.</p>
+        </div>
+        <div class="meta-block">
+          <h4>refresh</h4>
+          <p>Updates on every meal log via WidgetCenter <span class="pill dim">reloadTimelines</span>. Background refresh budget: every 15 min when idle.</p>
+        </div>
+        <div class="meta-block">
+          <h4>tap behavior</h4>
+          <p>Deep-link <span class="pill dim">atlascore://nutrition/today</span></p>
+        </div>
+        <div class="meta-block">
+          <h4>states</h4>
+          <ul>
+            <li><strong>Empty:</strong> ring at 0%, "Log your first meal"</li>
+            <li><strong>Over target:</strong> ring fills past 100% in muted accent (no red — not punishing)</li>
+            <li><strong>No target set:</strong> shows raw kcal only, no ring</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ WIDGET 4 ══════════════════════════════ -->
+  <div class="widget-card">
+    <div class="widget-card-head">
+      <h3>quick log</h3>
+      <span class="id">w4 · medium · interactive (iOS 17)</span>
+    </div>
+    <div class="widget-card-body">
+      <div class="widget-card-stage" id="quicklog-stage"></div>
+      <div class="widget-card-meta">
+        <div class="meta-block">
+          <h4>purpose</h4>
+          <p>iOS 17 brought interactive widgets. This is the one place we use them — three taps to log a meal, cardio session, or weigh-in without launching the app.</p>
+        </div>
+        <div class="meta-block">
+          <h4>buttons</h4>
+          <ul>
+            <li><strong>Meal:</strong> opens a quick-add sheet via <span class="pill dim">AppIntent</span> (1 tap from home screen)</li>
+            <li><strong>Cardio:</strong> starts a cardio timer in background</li>
+            <li><strong>Weigh:</strong> presents number-pad sheet for body weight</li>
+            <li><strong>More:</strong> launches the app at quick-log root</li>
+          </ul>
+        </div>
+        <div class="meta-block">
+          <h4>fallback</h4>
+          <p>iOS 16 and earlier: buttons render as a non-interactive grid; tapping anywhere deep-links into the app's quick-log screen. No degraded feel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ WIDGET 5 ══════════════════════════════ -->
+  <div class="widget-card">
+    <div class="widget-card-head">
+      <h3>this week</h3>
+      <span class="id">w5 · medium · no streaks</span>
+    </div>
+    <div class="widget-card-body">
+      <div class="widget-card-stage" id="week-stage"></div>
+      <div class="widget-card-meta">
+        <div class="meta-block">
+          <h4>purpose</h4>
+          <p>Honest weekly load. Seven dots: completed / today / planned / rest. No flame icons, no streaks, no shame. The brand promises "calm by design" — this widget proves it.</p>
+        </div>
+        <div class="meta-block">
+          <h4>data shown</h4>
+          <ul>
+            <li>Week N of program</li>
+            <li>Completion ratio (e.g., 2 of 4 done)</li>
+            <li>Per-day status pip (Mon → Sun, week starts on user's preferred first day)</li>
+          </ul>
+        </div>
+        <div class="meta-block">
+          <h4>tap behavior</h4>
+          <p>Whole widget → <span class="pill dim">atlascore://program/week</span>. Each pip is a tap target on iOS 17 → that day's session.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ LOCK SCREEN ══════════════════════════════ -->
+  <h2 class="section">lock screen.</h2>
+  <p class="section-sub">All three Apple lock-screen complication shapes. Designed for <strong>materially translucent</strong> rendering — white-on-glass, no fills.</p>
+
+  <div class="widget-card">
+    <div class="widget-card-head">
+      <h3>lock complications</h3>
+      <span class="id">circular · rectangular · inline</span>
+    </div>
+    <div class="widget-card-body" style="background: linear-gradient(135deg, #2a1a14, #0a0604); color: #efe9da; padding: 56px;">
+      <div class="widget-card-stage" id="lock-stage"></div>
+      <div class="widget-card-meta" style="color: #efe9da;">
+        <div class="meta-block">
+          <h4 style="color: rgba(239,233,218,0.5)">circular · 72pt</h4>
+          <p>Two configurations: <strong>FUEL</strong> (calories % to target) and <strong>WEEK</strong> (workouts done / scheduled). Ring + label + value. Renders monochrome white per HIG.</p>
+        </div>
+        <div class="meta-block">
+          <h4 style="color: rgba(239,233,218,0.5)">rectangular · 158×72pt</h4>
+          <p>Next workout. Time, name, exercise count. Single tap unlocks → workout screen.</p>
+        </div>
+        <div class="meta-block">
+          <h4 style="color: rgba(239,233,218,0.5)">inline · single line</h4>
+          <p>Above the clock. Today's whole status in one sentence: workout · fuel · week. Clamps to ~50 chars; truncates with ellipsis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ VISUAL TOKENS ══════════════════════════════ -->
+  <h2 class="section">tokens.</h2>
+  <p class="section-sub">SwiftUI / WidgetKit-faithful values. Match these in the build.</p>
+
+  <div class="tokens">
+    <div>token</div><div>value</div><div>where</div>
+    <div class="mono-v">corner.radius</div><div class="mono-v">22pt (system)</div><div>all home widgets</div>
+    <div class="mono-v">corner.radius.lock</div><div class="mono-v">14pt (rect) · 36pt (circ)</div><div>lock complications</div>
+    <div class="mono-v">padding.inner</div><div class="mono-v">16pt all sides (small/medium) · 18pt (large)</div><div>Apple default</div>
+    <div class="mono-v">type.eyebrow</div><div class="mono-v">SF Pro 11/0.4 · uppercase · 700</div><div>section labels</div>
+    <div class="mono-v">type.value.hero</div><div class="mono-v">SF Pro Rounded 26–32 · -0.8 · 800</div><div>workout name, kcal</div>
+    <div class="mono-v">type.body</div><div class="mono-v">SF Pro 12–13 · 500–600</div><div>secondary lines</div>
+    <div class="mono-v">color.bg.light</div><div class="mono-v">#ffffff</div><div>system material thick</div>
+    <div class="mono-v">color.bg.dark</div><div class="mono-v">#1c1c1e</div><div>system material thick · dark</div>
+    <div class="mono-v">color.accent</div><div class="mono-v">#e8b500 (atlas sulfur)</div><div>rings, accent fills only</div>
+    <div class="mono-v">color.ink</div><div class="mono-v">#0a0a0a</div><div>fg on accent</div>
+    <div class="mono-v">ring.stroke</div><div class="mono-v">small 7 · medium 6 · large 9</div><div>activity-style</div>
+  </div>
+
+  <!-- ══════════════════════════════ INTELLIGENCE ══════════════════════════════ -->
+  <h2 class="section">smart suggestions.</h2>
+  <p class="section-sub">Which widgets the system should recommend, and when.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">first launch</div>
+      <div class="spec-val">After onboarding, donate <strong>WidgetKit intent</strong> for <strong>Today (medium)</strong> — Apple's Smart Stack picks it up. We don't nag with a permission sheet.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">7am – 10am local</div>
+      <div class="spec-val">Surface <strong>Next Workout</strong> in Smart Stack (rotation hint: <span class="pill dim">.relevance .high</span>) on workout days; <strong>Macros</strong> on rest days.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">11:30am – 1:30pm</div>
+      <div class="spec-val">Surface <strong>Quick Log</strong> medium. Lunch is the most-skipped meal log — proximity matters.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">workout in 30 min</div>
+      <div class="spec-val"><strong>Next Workout</strong> small bumps to top of Smart Stack with <span class="pill dim">.relevance .critical</span>. Lock screen <strong>rectangular</strong> goes live too.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">end of week</div>
+      <div class="spec-val"><strong>This Week</strong> surfaces Sunday evening. Quiet recap, not a push.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">personalization</div>
+      <div class="spec-val">User can <strong>configure</strong> Today widget via long-press → "Edit Widget" → toggle <em>show fuel</em> / <em>show checklist</em> / <em>compact</em>. Settings persist via App Group.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ MOTION & REFRESH ══════════════════════════════ -->
+  <h2 class="section">motion + refresh.</h2>
+  <p class="section-sub">Widgets don't animate. They <em>update</em>. Here's the cadence.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">timeline cadence</div>
+      <div class="spec-val">Standard: <strong>15 min</strong> between reloads (system budget). <strong>Today</strong> + <strong>Macros</strong> additionally trigger <span class="pill dim">WidgetCenter.reloadTimelines</span> on every meal/set log.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">subtle animation</div>
+      <div class="spec-val">iOS 17 <span class="pill dim">.contentTransition(.numericText)</span> on kcal value and ring fill — that's it. No bounces. No celebrations. (Celebrations live in-app via the ECG curve; widgets stay still.)</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">interactive feedback</div>
+      <div class="spec-val">Quick Log buttons: standard system tap (haptic + 80ms scale-down). After AppIntent fires: ring redraws, last-logged caption updates. No success toast — the change <em>is</em> the feedback.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">reduce motion</div>
+      <div class="spec-val">All numeric transitions become instant. Ring still fills but without the 320ms ease.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ MODES ══════════════════════════════ -->
+  <h2 class="section">light + dark.</h2>
+  <p class="section-sub">Side by side. Same hierarchy, same accent ratio.</p>
+
+  <div class="modes">
+    <div class="mode-block">
+      <h4>// light · system material thick</h4>
+      <div class="mode-stage" id="mode-light"></div>
+    </div>
+    <div class="mode-block dark">
+      <h4>// dark · system material thick</h4>
+      <div class="mode-stage" id="mode-dark"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ RULES ══════════════════════════════ -->
+  <div class="rules">
+    <div class="eyebrow">/// rules &amp; anti-patterns</div>
+    <h3>the short list.</h3>
+    <ul>
+      <li><strong>One number per widget.</strong> The hero glyph is whatever single thing the user came to glance at.</li>
+      <li><strong>Accent is a finger, not a wash.</strong> Sulfur fills only on Next Workout (small) and ring fills.</li>
+      <li><strong>No streaks. No flames. No "X days strong."</strong> Brand discipline.</li>
+      <li><strong>Type ramp is SF Pro Display + SF Pro Rounded only.</strong> Archivo Black stays in-app.</li>
+      <li><strong>Corner radius is system-given.</strong> Don't override. Apple's mask matches the wallpaper bevel.</li>
+      <li><strong>Lock screen is monochrome.</strong> Tints arrive from the wallpaper; we don't fight it.</li>
+      <li><strong>Tap targets ≥ 44pt.</strong> Quick Log buttons measure 50×50pt actual.</li>
+      <li><strong>Empty states get a verb.</strong> "Pick a routine," "Log your first meal." Never just "No data."</li>
+    </ul>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="widgets.jsx"></script>
+
+<script type="text/babel">
+  const labelCell = (label) => {
+    const el = document.createElement('div');
+    el.className = 'stage-label';
+    el.textContent = label;
+    return el;
+  };
+
+  function mountStage(rootId, items) {
+    const root = document.getElementById(rootId);
+    if (!root) return;
+    items.forEach(({ label, comp }) => {
+      const cell = document.createElement('div');
+      cell.className = 'stage-cell';
+      const lab = document.createElement('div');
+      lab.className = 'stage-label';
+      lab.textContent = label;
+      cell.appendChild(lab);
+      const host = document.createElement('div');
+      cell.appendChild(host);
+      root.appendChild(cell);
+      ReactDOM.createRoot(host).render(comp);
+    });
+  }
+
+  // Phones
+  ReactDOM.createRoot(document.getElementById('phones')).render(
+    <>
+      <window.HomeLight/>
+      <window.HomeDark/>
+      <window.LockScreen/>
+    </>
+  );
+
+  // W1 Today — small, medium, large
+  mountStage('today-stage', [
+    { label: 'small · 158×158',  comp: <window.WidgetTodaySmall/> },
+    { label: 'medium · 338×158', comp: <window.WidgetTodayMedium/> },
+    { label: 'large · 338×354',  comp: <window.WidgetTodayLarge/> },
+  ]);
+
+  // W2 Next workout
+  mountStage('next-stage', [
+    { label: 'small · accent',   comp: <window.WidgetNextWorkoutSmall/> },
+    { label: 'small · dark',     comp: <window.WidgetNextWorkoutSmall dark/> },
+  ]);
+
+  // W3 Macros
+  mountStage('macros-stage', [
+    { label: 'small · light',    comp: <window.WidgetMacrosSmall/> },
+    { label: 'small · dark',     comp: <window.WidgetMacrosSmall dark/> },
+  ]);
+
+  // W4 Quick log
+  mountStage('quicklog-stage', [
+    { label: 'medium · light',   comp: <window.WidgetQuickLogMedium/> },
+    { label: 'medium · dark',    comp: <window.WidgetQuickLogMedium dark/> },
+  ]);
+
+  // W5 This week
+  mountStage('week-stage', [
+    { label: 'medium · light',   comp: <window.WidgetThisWeekMedium/> },
+    { label: 'medium · dark',    comp: <window.WidgetThisWeekMedium dark/> },
+  ]);
+
+  // Lock complications on dark stage
+  mountStage('lock-stage', [
+    { label: 'circular · fuel',     comp: <window.LockCircular value={0.42} label="FUEL" num="42%"/> },
+    { label: 'circular · week',     comp: <window.LockCircular value={0.5} label="WEEK" num="2/4"/> },
+    { label: 'rectangular',         comp: <window.LockRectangular/> },
+    { label: 'inline (above clock)',comp: <window.LockInline/> },
+  ]);
+
+  // Modes
+  mountStage('mode-light', [
+    { label: 'today · medium',  comp: <window.WidgetTodayMedium/> },
+    { label: 'macros',          comp: <window.WidgetMacrosSmall/> },
+    { label: 'next',            comp: <window.WidgetNextWorkoutSmall/> },
+  ]);
+  mountStage('mode-dark', [
+    { label: 'today · medium',  comp: <window.WidgetTodayMedium dark/> },
+    { label: 'macros',          comp: <window.WidgetMacrosSmall dark/> },
+    { label: 'next',            comp: <window.WidgetNextWorkoutSmall dark/> },
+  ]);
+</script>
+</body>
+</html>

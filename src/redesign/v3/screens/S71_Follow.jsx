@@ -4,17 +4,15 @@ import {
   ACLabel, ACNum, ACTabBar,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+import { useT } from '@/lib/i18nContext';
 
 /* ── tab config ─────────────────────────────────────────────── */
-const TABS = [
-  { id: 'suggested',   label: 'Suggested' },
-  { id: 'leaderboard', label: 'Leaderboard' },
-  { id: 'search',      label: 'Search' },
-];
+const TAB_IDS = ['suggested', 'leaderboard', 'search'];
 
 /* ── user row (suggested / search) ──────────────────────────── */
-function UserRow({ u, c, onOpenUser, onFollow, showBio }) {
+function UserRow({ u, c, onOpenUser, onFollow, showBio, labels }) {
   const following = !!u.following;
+  const displayName = u.name || labels.unknownUser;
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12,
@@ -25,7 +23,7 @@ function UserRow({ u, c, onOpenUser, onFollow, showBio }) {
       <button
         type="button"
         onClick={() => { if (typeof onOpenUser === 'function') onOpenUser(u.id); }}
-        aria-label={`Open ${u.name || 'user'}`}
+        aria-label={labels.openUser.replace('{name}', displayName)}
         style={{
           width: 36, height: 36, borderRadius: 999, flexShrink: 0,
           background: c.card, border: `1px solid ${c.faint}`,
@@ -52,7 +50,7 @@ function UserRow({ u, c, onOpenUser, onFollow, showBio }) {
           letterSpacing: -0.2,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
-          {u.name || 'Unknown'}
+          {displayName}
         </div>
         {showBio && u.bio && (
           <div style={{
@@ -69,7 +67,7 @@ function UserRow({ u, c, onOpenUser, onFollow, showBio }) {
       <button
         type="button"
         onClick={() => { if (typeof onFollow === 'function') onFollow(u.id); }}
-        aria-label={following ? 'Unfollow' : 'Follow'}
+        aria-label={following ? labels.unfollow : labels.follow}
         style={{
           padding: '7px 14px', borderRadius: 999, flexShrink: 0,
           background: following ? 'transparent' : c.accent,
@@ -80,14 +78,15 @@ function UserRow({ u, c, onOpenUser, onFollow, showBio }) {
           cursor: 'pointer',
         }}
       >
-        {following ? 'Following' : 'Follow'}
+        {following ? labels.following : labels.follow}
       </button>
     </div>
   );
 }
 
 /* ── leaderboard row ────────────────────────────────────────── */
-function LeaderRow({ u, rank, c, onOpenUser }) {
+function LeaderRow({ u, rank, c, onOpenUser, labels }) {
+  const displayName = u.name || labels.unknownUser;
   return (
     <button
       type="button"
@@ -127,7 +126,7 @@ function LeaderRow({ u, rank, c, onOpenUser }) {
           fontSize: 14.5, fontWeight: 600, color: c.fg,
           letterSpacing: -0.2,
         }}>
-          {u.name || 'Unknown'}
+          {displayName}
         </div>
         {u.metric && (
           <div style={{
@@ -199,16 +198,25 @@ function S71_Follow({
   onBack,
 }) {
   const c = useACT(dark);
-  const _suggested = Array.isArray(suggested) && suggested.length > 0 ? suggested : DEMO_SUGGESTED;
-  const _leaderboard = Array.isArray(leaderboard) && leaderboard.length > 0 ? leaderboard : DEMO_LEADERBOARD;
+  const t = useT();
+  const _suggested = Array.isArray(suggested) ? suggested : DEMO_SUGGESTED;
+  const _leaderboard = Array.isArray(leaderboard) ? leaderboard : DEMO_LEADERBOARD;
   const _searchResults = Array.isArray(searchResults) ? searchResults : DEMO_SEARCH;
   const _friendCount = typeof friendCount === 'number' ? friendCount : 12;
+  const labels = {
+    openUser: t('social.follow.openUser'),
+    unknownUser: t('social.follow.unknownUser'),
+    follow: t('social.follow.follow'),
+    following: t('social.follow.following'),
+    unfollow: t('social.follow.unfollow'),
+  };
 
   const [activeTab, setActiveTab] = useState('suggested');
   const [query, setQuery] = useState('');
 
   const leaderboardLocked = _friendCount < LEADERBOARD_GATE;
   const neededFriends = Math.max(0, LEADERBOARD_GATE - _friendCount);
+  const friendWord = neededFriends === 1 ? t('social.follow.friend') : t('social.follow.friends');
 
   const handleSearchChange = (val) => {
     setQuery(val);
@@ -241,13 +249,13 @@ function S71_Follow({
           )}
           <div>
             <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-              Discover
+              {t('social.follow.discover')}
             </ACLabel>
             <div style={{
               fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700,
               letterSpacing: -0.8, color: c.fg, marginTop: 4,
             }}>
-              Find people
+              {t('social.follow.title')}
             </div>
           </div>
         </div>
@@ -259,15 +267,15 @@ function S71_Follow({
           padding: 4, display: 'flex', gap: 2,
           background: c.card, borderRadius: 10,
         }}>
-          {TABS.map((t) => (
-            <button key={t.id} type="button" onClick={() => setActiveTab(t.id)} style={{
+          {TAB_IDS.map((tabId) => (
+            <button key={tabId} type="button" onClick={() => setActiveTab(tabId)} style={{
               flex: 1, padding: '8px 0', textAlign: 'center',
-              background: activeTab === t.id ? c.fg : 'transparent',
-              color: activeTab === t.id ? c.bg : c.dim,
+              background: activeTab === tabId ? c.fg : 'transparent',
+              color: activeTab === tabId ? c.bg : c.dim,
               fontSize: 12, fontWeight: 600, borderRadius: 7,
               border: 'none', cursor: 'pointer',
             }}>
-              {t.label}
+              {t(`social.follow.tabs.${tabId}`)}
             </button>
           ))}
         </div>
@@ -286,7 +294,7 @@ function S71_Follow({
               fontFamily: ACFonts.mono, letterSpacing: 0.7,
               textTransform: 'uppercase', display: 'block', marginBottom: 8,
             }}>
-              People you may know
+              {t('social.follow.peopleYouMayKnow')}
             </ACLabel>
             {_suggested.length === 0 ? (
               <div style={{
@@ -297,16 +305,16 @@ function S71_Follow({
                   fontFamily: ACFonts.display, fontSize: 16, fontWeight: 700,
                   letterSpacing: -0.3, color: c.fg,
                 }}>
-                  Suggestions coming soon
+                  {t('social.follow.emptySuggestedTitle')}
                 </div>
                 <ACLabel size={12} color={c.dim} style={{ display: 'block', marginTop: 6, lineHeight: 1.6 }}>
-                  We will suggest users based on your training style once the social graph is live.
+                  {t('social.follow.emptySuggestedBody')}
                 </ACLabel>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {_suggested.map((u) => (
-                  <UserRow key={u.id} u={u} c={c} onOpenUser={onOpenUser} onFollow={onFollow} showBio />
+                  <UserRow key={u.id} u={u} c={c} onOpenUser={onOpenUser} onFollow={onFollow} showBio labels={labels} />
                 ))}
               </div>
             )}
@@ -339,10 +347,10 @@ function S71_Follow({
                   fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700,
                   letterSpacing: -0.4, color: c.fg,
                 }}>
-                  Leaderboards unlock at {LEADERBOARD_GATE} friends
+                  {t('social.follow.leaderboardLockedTitle', { count: LEADERBOARD_GATE })}
                 </div>
                 <ACLabel size={12} color={c.dim} style={{ display: 'block', marginTop: 6, lineHeight: 1.6 }}>
-                  Add {neededFriends} more friend{neededFriends === 1 ? '' : 's'} to unlock weekly training volume and streak leaderboards.
+                  {t('social.follow.leaderboardLockedBody', { count: neededFriends, friendWord })}
                 </ACLabel>
                 {/* Progress bar */}
                 <div style={{
@@ -359,7 +367,7 @@ function S71_Follow({
                   marginTop: 6, fontFamily: ACFonts.mono, fontSize: 10,
                   color: c.mute, letterSpacing: 0.3,
                 }}>
-                  {_friendCount} / {LEADERBOARD_GATE} friends
+                  {t('social.follow.friendProgress', { current: _friendCount, count: LEADERBOARD_GATE })}
                 </div>
               </div>
             ) : (
@@ -370,11 +378,11 @@ function S71_Follow({
                   letterSpacing: 0.7, textTransform: 'uppercase',
                   display: 'block', marginBottom: 8,
                 }}>
-                  Weekly volume · Top {_leaderboard.length}
+                  {t('social.follow.weeklyVolumeTop', { count: _leaderboard.length })}
                 </ACLabel>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {_leaderboard.map((u, i) => (
-                    <LeaderRow key={u.id} u={u} rank={i + 1} c={c} onOpenUser={onOpenUser} />
+                    <LeaderRow key={u.id} u={u} rank={i + 1} c={c} onOpenUser={onOpenUser} labels={labels} />
                   ))}
                 </div>
               </>
@@ -398,7 +406,7 @@ function S71_Follow({
               <input
                 type="text"
                 value={query}
-                placeholder="Search by name"
+                placeholder={t('social.follow.searchPlaceholder')}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 autoFocus
                 style={{
@@ -410,7 +418,7 @@ function S71_Follow({
               {query && (
                 <button
                   type="button"
-                  aria-label="Clear"
+                  aria-label={t('social.follow.clearSearch')}
                   onClick={() => handleSearchChange('')}
                   style={{
                     width: 22, height: 22, borderRadius: 999,
@@ -435,10 +443,10 @@ function S71_Follow({
                   fontFamily: ACFonts.display, fontSize: 16, fontWeight: 700,
                   letterSpacing: -0.3, color: c.fg,
                 }}>
-                  Find people on atlas.core
+                  {t('social.follow.searchEmptyTitle')}
                 </div>
                 <ACLabel size={12} color={c.dim} style={{ display: 'block', marginTop: 6, lineHeight: 1.6 }}>
-                  Search by name to discover other members.
+                  {t('social.follow.searchEmptyBody')}
                 </ACLabel>
               </div>
             ) : _searchResults.length === 0 ? (
@@ -450,16 +458,16 @@ function S71_Follow({
                   fontFamily: ACFonts.display, fontSize: 16, fontWeight: 700,
                   letterSpacing: -0.3, color: c.fg,
                 }}>
-                  No results
+                  {t('social.follow.noResultsTitle')}
                 </div>
                 <ACLabel size={12} color={c.dim} style={{ display: 'block', marginTop: 6, lineHeight: 1.6 }}>
-                  Nothing matched "{query}".
+                  {t('social.follow.noResultsBody', { query })}
                 </ACLabel>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {_searchResults.map((u) => (
-                  <UserRow key={u.id} u={u} c={c} onOpenUser={onOpenUser} onFollow={onFollow} showBio={false} />
+                  <UserRow key={u.id} u={u} c={c} onOpenUser={onOpenUser} onFollow={onFollow} showBio={false} labels={labels} />
                 ))}
               </div>
             )}

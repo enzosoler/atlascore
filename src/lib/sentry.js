@@ -6,18 +6,30 @@
  *
  * Same public API so callers never need to change.
  */
-import * as Sentry from '@sentry/react';
 import { supabase } from '@/lib/supabaseClient';
 
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN || '';
 let _sentryEnabled = false;
+let _sentry = null;
+let _sentryLoadPromise = null;
 let _userId = null;
-let _userEmail = null;
 
-export function initSentry() {
+async function loadSentry() {
+  if (_sentry) return _sentry;
+  if (!_sentryLoadPromise) {
+    _sentryLoadPromise = import('@sentry/react').then((module) => {
+      _sentry = module;
+      return module;
+    });
+  }
+  return _sentryLoadPromise;
+}
+
+export async function initSentry() {
   if (!SENTRY_DSN || !import.meta.env.PROD) return;
 
   try {
+    const Sentry = await loadSentry();
     Sentry.init({
       dsn: SENTRY_DSN,
       environment: import.meta.env.MODE || 'production',
@@ -26,11 +38,16 @@ export function initSentry() {
       replaysSessionSampleRate: 0,
       replaysOnErrorSampleRate: 0.5,
       beforeSend(event) {
-        // Strip PII from breadcrumbs if needed
+        if (event.user) {
+          delete event.user.email;
+        }
         return event;
       },
     });
     _sentryEnabled = true;
+    if (_userId) {
+      Sentry.setUser({ id: _userId });
+    }
   } catch (e) {
     console.warn('[sentry] init failed', e);
   }
@@ -38,10 +55,9 @@ export function initSentry() {
 
 export function setSentryUser(user) {
   _userId = user?.id ?? null;
-  _userEmail = user?.email ?? null;
 
   if (_sentryEnabled) {
-    Sentry.setUser(user ? { id: user.id, email: user.email } : null);
+    _sentry?.setUser(user ? { id: user.id } : null);
   }
 }
 
@@ -51,7 +67,7 @@ export async function captureException(error, context) {
 
   // Sentry
   if (_sentryEnabled) {
-    Sentry.captureException(error, { extra: context });
+    _sentry?.captureException(error, { extra: context });
   }
 
   // Supabase fallback

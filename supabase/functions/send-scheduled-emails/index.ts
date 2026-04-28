@@ -23,17 +23,13 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 const APP_URL = Deno.env.get('APP_URL') || 'https://useatlascore.com';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const SEND_EMAIL_URL = `${SUPABASE_URL}/functions/v1/send-email`;
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -354,8 +350,9 @@ async function runWeeklyReport(admin: ReturnType<typeof createClient>): Promise<
 // ─── Handler ─────────────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   // Verify this is a service-role call (cron or internal)
@@ -366,7 +363,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
     if (token !== anonKey) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...CORS, 'Content-Type': 'application/json' },
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
   }
@@ -394,6 +391,6 @@ Deno.serve(async (req) => {
   console.log(`send-scheduled-emails: done in ${elapsed}ms`, results);
 
   return new Response(JSON.stringify({ success: true, results, elapsed }), {
-    status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

@@ -3,6 +3,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACMono, ACNum, ACChip, ACBtn,
 } from '../lib/paper.jsx';
+import { useVirtualRows } from '../lib/useVirtualRows.js';
 
 /* ── demo data (gallery fallback) ─────────────────────────────── */
 
@@ -69,6 +70,15 @@ export default function S54_Workout_History({
     }
     return Object.keys(by).sort().reverse().map((k) => by[k]);
   }, [_sessions]);
+  const flatSessions = useMemo(() => grouped.flatMap((group) => [
+    { type: 'month', id: `month-${group.label}`, group },
+    ...group.items.map((session) => ({ type: 'session', id: session.id, session })),
+  ]), [grouped]);
+  const { parentRef: sessionListRef, virtualRows, totalSize } = useVirtualRows({
+    count: flatSessions.length,
+    estimateSize: 86,
+    overscan: 6,
+  });
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -164,26 +174,52 @@ export default function S54_Workout_History({
                 Completed workouts will appear here, newest first.
               </ACLabel>
             </div>
-          ) : grouped.map((group) => (
-            <div key={group.label} style={{ marginBottom: 22 }}>
-              <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                marginBottom: 10,
-              }}>
-                <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>
-                  {group.label}
-                </ACLabel>
-                <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono }}>
-                  {group.items.length} session{group.items.length !== 1 ? 's' : ''}
-                </ACLabel>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {group.items.map((s) => (
-                  <SessionRow key={s.id} s={s} c={c} dark={dark} onTap={() => handleOpen(s.id)} />
-                ))}
+          ) : (
+            <div
+              ref={sessionListRef}
+              style={{
+                maxHeight: Math.min(720, Math.max(220, totalSize)),
+                overflow: 'auto',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              <div style={{ height: totalSize, position: 'relative' }}>
+                {virtualRows.map((virtualRow) => {
+                  const item = flatSessions[virtualRow.index];
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        minHeight: virtualRow.size,
+                        transform: `translateY(${virtualRow.start}px)`,
+                        paddingBottom: 6,
+                      }}
+                    >
+                      {item.type === 'month' ? (
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          paddingTop: 10, marginBottom: 10,
+                        }}>
+                          <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>
+                            {item.group.label}
+                          </ACLabel>
+                          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono }}>
+                            {item.group.items.length} session{item.group.items.length !== 1 ? 's' : ''}
+                          </ACLabel>
+                        </div>
+                      ) : (
+                        <SessionRow s={item.session} c={c} dark={dark} onTap={() => handleOpen(item.session.id)} />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

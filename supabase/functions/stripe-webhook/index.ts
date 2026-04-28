@@ -20,12 +20,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
 import { writeSubscriptionByUserId } from '../_shared/subscription-write.js';
-
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'stripe-signature, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { getCorsHeaders, buildPreflightResponse } from '../_shared/cors.ts';
 
 function isTruthy(value: string | undefined | null): boolean {
   return ['1', 'true', 'yes', 'on'].includes((value || '').trim().toLowerCase());
@@ -185,8 +180,10 @@ async function sendSubscriptionCanceledEmail(
 // ── Main handler ─────────────────────────────────────────────────────────────
 
 serve(async (req) => {
+  const CORS = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {

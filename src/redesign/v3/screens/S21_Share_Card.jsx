@@ -32,7 +32,7 @@ function ShareBtn({ c, label, icon }) {
  *   dark         -- light/dark variant
  *   prData       -- { lift, weight, reps, date, e1rm, rpe, bodyweight, improvement, days }
  *   onClose      -- close handler
- *   onExport     -- (format) => void -- export as image/PDF
+ *   onExport     -- (format) => void -- export as image
  *   onShare      -- (platform) => void -- share to social platform
  *   onCopyLink   -- () => void -- copy shareable link
  *   theme        -- 'dark' | 'light' | 'minimal' -- card theme

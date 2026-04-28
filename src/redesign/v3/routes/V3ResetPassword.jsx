@@ -80,7 +80,7 @@ function ResetPasswordCard({
           <>
             <div style={{ marginTop: 34 }}>
               <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>
-                New password
+                {t('auth.form.newPasswordLabel')}
               </ACLabel>
               <div
                 style={{
@@ -118,7 +118,7 @@ function ResetPasswordCard({
 
             <div style={{ marginTop: 20 }}>
               <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>
-                Confirm password
+                {t('auth.form.confirmPasswordLabel')}
               </ACLabel>
               <div
                 style={{

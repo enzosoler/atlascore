@@ -26,6 +26,10 @@ async function loadHandler({
     .replace(
       "import { renderBrandedEmail, renderEmail } from '../_shared/templates.ts';",
       'const { renderBrandedEmail, renderEmail } = globalThis.__sendEmailTestMocks;',
+    )
+    .replace(
+      "import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';",
+      'const { buildPreflightResponse, getCorsHeaders } = globalThis.__sendEmailTestMocks;',
     );
 
   const transpiled = ts.transpileModule(source, {
@@ -71,6 +75,16 @@ async function loadHandler({
     },
     renderBrandedEmail({ subject }) {
       return { subject, html: '<p>email</p>', text: 'email' };
+    },
+    getCorsHeaders() {
+      return {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      };
+    },
+    buildPreflightResponse() {
+      return new Response(null, { status: 200 });
     },
   };
 

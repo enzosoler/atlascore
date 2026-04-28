@@ -109,7 +109,7 @@
       },
       "paywall": {
         "title": "Your Pro trial starts now",
-        "subtitle": "7 days of full access. See what your body data actually means.",
+        "subtitle": "Full access terms are confirmed before purchase. See what your body data actually means.",
         "todayLabel": "Today",
         "todayTitle": "Everything unlocked",
         "todayDesc": "AI coaching, smart plans, insights, and protocol tracking — all active from now.",
@@ -123,7 +123,7 @@
         "annualDesc": "The lowest monthly cost. Choose it anytime during or after your trial.",
         "socialProof": "4.9 · 500+ athletes",
         "testimonial": "\"Finally, one app that brings training, nutrition, and labs together in the same place.\"",
-        "cta": "Start my free trial",
+        "cta": "Continue",
         "noCreditCard": "No credit card · Cancel anytime"
       },
       "setup": {
@@ -151,7 +151,7 @@
       "subtitle": "Atlas tracks what actually matters — and adjusts every week so you stop guessing.",
       "cta": "Show me how",
       "secondary": "I already have an account",
-      "trustBadge": "Free 7-day trial • No credit card required"
+      "trustBadge": "Plan terms shown before payment"
     },
     "quiz": {
       "primaryGoal": {
@@ -338,7 +338,7 @@
       "secondaryCta": "I'll decide as I go"
     },
     "trial": {
-      "title": "How the 7-day free trial works.",
+      "title": "How the Terms shown at checkout works.",
       "subtitle": "No surprises. No tricks.",
       "today": "Today",
       "todayText": "Full access. No card required to start.",

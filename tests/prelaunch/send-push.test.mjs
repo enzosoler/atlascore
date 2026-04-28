@@ -24,6 +24,10 @@ async function loadHandler({
     .replace(
       "import { SignJWT, importPKCS8 } from 'https://deno.land/x/jose@v5.2.0/index.ts';",
       'const { SignJWT, importPKCS8 } = globalThis.__sendPushTestMocks;',
+    )
+    .replace(
+      "import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';",
+      'const { buildPreflightResponse, getCorsHeaders } = globalThis.__sendPushTestMocks;',
     );
 
   const transpiled = ts.transpileModule(source, {
@@ -64,6 +68,16 @@ async function loadHandler({
       async sign() { return 'jwt'; }
     },
     importPKCS8: async () => 'key',
+    getCorsHeaders() {
+      return {
+        'Access-Control-Allow-Origin': 'https://useatlascore.com',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      };
+    },
+    buildPreflightResponse() {
+      return new Response(null, { status: 200 });
+    },
   };
 
   globalThis.Deno = {

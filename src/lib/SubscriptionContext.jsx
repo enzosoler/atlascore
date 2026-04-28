@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { hasFeatureAccess } from '@/lib/entitlements';
 import {
+  initRevenueCat,
   checkEntitlement,
   onCustomerInfoUpdate,
   presentPaywall as rcPresentPaywall,
@@ -12,6 +13,8 @@ import {
   restorePurchases as rcRestorePurchases,
 } from '@/lib/revenueCat';
 import { isIgnorableSubscriptionError } from '@/services/billingService';
+import { hasSupabaseConfigFromEnv } from '@/lib/envGuards';
+import { mergeSubscriptionState, normalizeSupabaseSubscription, toDateOnly } from '@/lib/subscriptionState';
 
 const SubscriptionContext = createContext(null);
 
@@ -21,35 +24,7 @@ function isLocalMockUser(user) {
 }
 
 function hasSupabaseConfig() {
-  return Boolean(
-    import.meta.env.VITE_SUPABASE_URL &&
-      (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY)
-  );
-}
-
-function toDateOnly(value) {
-  if (!value) return null;
-  return String(value).split('T')[0];
-}
-
-function normalizeSupabaseSubscription(row) {
-  if (!row) return null;
-
-  return {
-    id: row.id,
-    user_email: row.user_email || null,
-    plan_code: row.tier || 'free',
-    tier: row.tier || 'free',
-    status: row.status || 'inactive',
-    started_at: toDateOnly(row.started_at) || toDateOnly(row.trial_starts_at) || toDateOnly(row.created_at),
-    trial_ends_at: toDateOnly(row.trial_ends_at),
-    expires_at: toDateOnly(row.current_period_ends_at) || toDateOnly(row.trial_ends_at),
-    stripe_subscription_id: row.stripe_subscription_id || null,
-    granted_by_admin: row.granted_by_admin || null,
-    grant_reason: row.grant_reason || null,
-    created_at: row.created_at,
-    source: 'supabase',
-  };
+  return hasSupabaseConfigFromEnv(import.meta.env);
 }
 
 // ── RevenueCat subscription (native iOS/Android) ─────────────────────────────
@@ -61,15 +36,30 @@ function useRevenueCatSubscription(user, isAuthenticated) {
   useEffect(() => {
     if (!isNative || !isAuthenticated || !user?.id) return;
 
-    // Initial check
-    checkEntitlement().then(setRcState);
+    let cancelled = false;
+
+    // Initialize RevenueCat SDK, then check entitlement
+    initRevenueCat(user.id)
+      .then(() => {
+        if (cancelled) return;
+        return checkEntitlement();
+      })
+      .then((state) => {
+        if (!cancelled && state) setRcState(state);
+      })
+      .catch((err) => {
+        console.warn('[SubscriptionContext] RevenueCat init/check failed:', err);
+      });
 
     // Listen for real-time updates (purchase, restore, expiry)
     const cleanup = onCustomerInfoUpdate((state) => {
       setRcState(state);
     });
 
-    return cleanup;
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
   }, [isNative, isAuthenticated, user?.id]);
 
   const subscription = useMemo(() => {
@@ -135,16 +125,7 @@ export function SubscriptionProvider({ children }) {
   }, [supabaseSubscriptions]);
 
   const subscription = useMemo(() => {
-    // On native, RevenueCat is the source of truth — but fall back to Supabase
-    // for Stripe web purchases that don't sync to RevenueCat.
-    if (isNative && rcSubscription?.status !== 'inactive') return rcSubscription;
-
-    // Use Supabase (web, or native fallback for Stripe purchases)
-    const active = subscriptions.filter((s) => ['active', 'trialing', 'granted'].includes(s.status));
-    if (active.length === 0) return subscriptions[0] || null;
-    return active.sort(
-      (a, b) => new Date(b.started_at || b.created_at || 0) - new Date(a.started_at || a.created_at || 0)
-    )[0];
+    return mergeSubscriptionState({ isNative, rcSubscription, subscriptions });
   }, [isNative, rcSubscription, subscriptions]);
 
   const can = (featureKey) => hasFeatureAccess(user, subscription, [], featureKey);

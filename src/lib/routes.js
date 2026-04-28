@@ -80,7 +80,7 @@ export const ROUTES = {
  * In the public MVP, professional routes are gated — all roles land on /Today
  * unless VITE_ENABLE_PRO_ROUTES is enabled (internal/staging builds).
  */
-const proRoutesEnabled = true;
+const proRoutesEnabled = import.meta.env.VITE_ENABLE_PRO_ROUTES === 'true';
 
 export const ROLE_HOME = {
   athlete:      ROUTES.today,

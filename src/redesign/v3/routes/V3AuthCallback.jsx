@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACFonts, useACT } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
@@ -10,6 +11,7 @@ import { seedOnboardingDraftFromIntent } from '@/services/onboardingService';
 function CallbackState() {
   const { theme } = useTheme();
   const { authState, user, authError } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dark = theme === 'dark';
@@ -62,17 +64,17 @@ function CallbackState() {
         }}
         >
         {authState === 'error'
-          ? 'Could not finish sign in.'
+          ? t('auth.callback.failed')
           : isResetMode
-            ? 'Opening reset password…'
-            : 'Finishing sign in…'}
+            ? t('auth.callback.openingReset')
+            : t('auth.callback.completing')}
       </div>
       <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5, maxWidth: 280 }}>
         {authState === 'error'
-          ? (authError?.message || 'Please try again.')
+          ? (authError?.message || t('auth.callback.genericError'))
           : isResetMode
-            ? 'Verifying your recovery session and opening the reset flow.'
-            : 'Verifying your session and opening the right flow.'}
+            ? t('auth.callback.verifyingReset')
+            : t('auth.callback.verifying')}
       </div>
     </div>
   );

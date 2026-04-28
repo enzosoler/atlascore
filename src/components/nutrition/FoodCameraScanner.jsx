@@ -4,11 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
+import { useAIConsent } from '@/redesign/v3/lib/useAIConsent.js';
 
 export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected }) {
+  const { user } = useAuth();
+  const t = useT();
+  const { consented, grant: grantConsent } = useAIConsent({
+    userId: user?.id,
+    kind: 'food_vision',
+    provider: 'Google Gemini or another third-party AI vision model',
+  });
   const [image, setImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSavingConsent, setIsSavingConsent] = useState(false);
   const [detectedFoods, setDetectedFoods] = useState([]);
   const [selectedFoods, setSelectedFoods] = useState(new Set());
   const fileInputRef = useRef(null);
@@ -39,6 +50,10 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
 
   const analyzeImage = useCallback(async () => {
     if (!image) return;
+    if (!consented) {
+      toast.error(t('nutrition.photoConsent.error'));
+      return;
+    }
 
     setIsAnalyzing(true);
     setDetectedFoods([]);
@@ -75,7 +90,19 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
     } finally {
       setIsAnalyzing(false);
     }
-  }, [image]);
+  }, [consented, image, t]);
+
+  const handleGrantConsent = useCallback(async () => {
+    setIsSavingConsent(true);
+    try {
+      await grantConsent();
+    } catch (error) {
+      console.error('[FoodCameraScanner] consent save failed:', error);
+      toast.error(t('nutrition.photoConsent.error'));
+    } finally {
+      setIsSavingConsent(false);
+    }
+  }, [grantConsent, t]);
 
   const toggleFoodSelection = useCallback((index) => {
     setSelectedFoods(prev => {
@@ -119,6 +146,23 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
           </DialogTitle>
         </DialogHeader>
 
+        {!consented ? (
+          <div className="space-y-4">
+            <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+              {t('nutrition.photoConsent.body')}
+            </p>
+            <Button
+              onClick={handleGrantConsent}
+              disabled={isSavingConsent}
+              className="w-full btn btn-primary"
+            >
+              {isSavingConsent ? t('common.loading') : t('nutrition.photoConsent.accept')}
+            </Button>
+            <Button variant="outline" onClick={handleClose} className="w-full">
+              {t('nutrition.photoConsent.decline')}
+            </Button>
+          </div>
+        ) : (
         <div className="space-y-4">
           {/* Hidden file input */}
           <input
@@ -293,6 +337,7 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
             </div>
           )}
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );

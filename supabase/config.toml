@@ -2,28 +2,34 @@
 # https://supabase.com/docs/guides/cli/config
 
 [functions.ai-coach-chat]
-verify_jwt = false
+verify_jwt = true
 
 [functions.ai-decision-engine]
-verify_jwt = false
+verify_jwt = true
 
 [functions.auth-webhook]
-verify_jwt = false
+verify_jwt = false  # Called by Supabase auth system, not user-initiated
 
 [functions.create-checkout]
-verify_jwt = false
+verify_jwt = true
 
 [functions.food-search]
-verify_jwt = false
+verify_jwt = true
+
+[functions.food-vision]
+verify_jwt = true
+
+[functions.parse-lab-pdf]
+verify_jwt = true
 
 [functions.send-email-v2]
 verify_jwt = true
 
 [functions.send-password-reset]
-verify_jwt = false
+verify_jwt = false  # Called pre-auth (user has no session yet)
 
 [functions.log-food-text]
-verify_jwt = false
+verify_jwt = true
 
 [functions.stripe-webhook]
-verify_jwt = false
+verify_jwt = false  # Called by Stripe with its own signature verification

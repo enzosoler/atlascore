@@ -353,7 +353,7 @@
     "athlete": "Para atletas e entusiastas",
     "professional": "Para profissionais",
     "professionalDesc": "Assinaturas separadas para treinadores e clínicos. Acesso profissional focado em monitoramento de clientes.",
-    "footer": "Todos os planos pagos incluem 7 dias de teste grátis · Cancele quando quiser · Sem taxas de cancelamento",
+    "footer": "Todos os planos pagos incluem Termos exibidos no checkout · Cancele quando quiser · Sem taxas de cancelamento",
     "footerPayment": "Pagamentos processados com segurança via Stripe",
     "plans": {
       "free": {
@@ -385,7 +385,7 @@
         "price": "R$ 29,90",
         "period": "/mês",
         "pitch": "Tudo que você precisa no dia a dia.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "popular": "Mais popular",
         "cta": "Assinar Pro",
         "features": [
@@ -408,7 +408,7 @@
         "price": "R$ 59,90",
         "period": "/mês",
         "pitch": "Hub de controle completo.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "cta": "Assinar Performance",
         "features": [
           "Tudo do Pro",
@@ -428,7 +428,7 @@
         "price": "R$ 99,90",
         "period": "/mês",
         "pitch": "Gerencie atletas com eficiência.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "note": "Por treinador · até 20 atletas",
         "cta": "Assinar como Treinador",
         "features": [
@@ -447,7 +447,7 @@
         "price": "R$ 79,90",
         "period": "/mês",
         "pitch": "Monitore nutrição de clientes.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "note": "Por nutricionista · até 25 clientes",
         "cta": "Assinar como Nutricionista",
         "features": [
@@ -466,7 +466,7 @@
         "price": "R$ 129,90",
         "period": "/mês",
         "pitch": "Visão clínica consolidada.",
-        "trial": "7 dias de teste grátis",
+        "trial": "Termos exibidos no checkout",
         "note": "Por clínico · até 30 pacientes",
         "cta": "Assinar como Clínico",
         "features": [

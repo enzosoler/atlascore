@@ -109,7 +109,7 @@
       },
       "paywall": {
         "title": "Seu trial Pro começa agora",
-        "subtitle": "7 dias de acesso completo. Veja o que seus dados realmente significam.",
+        "subtitle": "Os termos de acesso completo são confirmados antes da compra. Veja o que seus dados realmente significam.",
         "todayLabel": "Hoje",
         "todayTitle": "Tudo liberado",
         "todayDesc": "Coaching IA, planos inteligentes, insights e protocolos — tudo ativo agora.",
@@ -338,7 +338,7 @@
       "secondaryCta": "Vou decidir no caminho"
     },
     "trial": {
-      "title": "Como funciona o trial gratuito de 7 dias.",
+      "title": "Como funciona o termos da assinatura.",
       "subtitle": "Sem surpresas. Sem pegadinha.",
       "today": "Hoje",
       "todayText": "Acesso completo. Sem cartão para começar.",

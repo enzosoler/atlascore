@@ -8,12 +8,8 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sendWelcome } from '../_shared/email-service.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 async function authenticate(req: Request) {
   const authHeader = req.headers.get('Authorization') || '';
@@ -31,14 +27,15 @@ async function authenticate(req: Request) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -46,7 +43,7 @@ Deno.serve(async (req) => {
   if (!user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -56,7 +53,7 @@ Deno.serve(async (req) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -64,14 +61,14 @@ Deno.serve(async (req) => {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return new Response(JSON.stringify({ error: 'Valid email is required' }), {
       status: 400,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   if (user.email && email !== user.email.toLowerCase()) {
     return new Response(JSON.stringify({ error: 'Recipient email must match the authenticated user' }), {
       status: 403,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -83,7 +80,7 @@ Deno.serve(async (req) => {
   if (!result.success) {
     return new Response(JSON.stringify({ error: result.error || 'Email delivery failed' }), {
       status: 502,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -93,6 +90,6 @@ Deno.serve(async (req) => {
     mode: 'compatibility_wrapper',
   }), {
     status: 200,
-    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

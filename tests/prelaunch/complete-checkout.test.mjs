@@ -31,6 +31,10 @@ async function loadHandler({
     .replace(
       "import { writeSubscriptionByUserId } from '../_shared/subscription-write.js';",
       'const { writeSubscriptionByUserId } = globalThis.__completeCheckoutTestMocks;',
+    )
+    .replace(
+      "import { getCorsHeaders, buildPreflightResponse } from '../_shared/cors.ts';",
+      'const { getCorsHeaders, buildPreflightResponse } = globalThis.__completeCheckoutTestMocks;',
     );
 
   const transpiled = ts.transpileModule(source, {
@@ -91,6 +95,16 @@ async function loadHandler({
       writeCalls.push(row);
       if (writeError) throw writeError;
       return { action: 'update', data: row };
+    },
+    getCorsHeaders() {
+      return {
+        'Access-Control-Allow-Origin': 'https://useatlascore.com',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      };
+    },
+    buildPreflightResponse() {
+      return new Response(null, { status: 200 });
     },
   };
 

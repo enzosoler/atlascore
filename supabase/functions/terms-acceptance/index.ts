@@ -2,19 +2,17 @@
 // Handles terms acceptance tracking for signup and billing
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders, buildPreflightResponse } from '../_shared/cors.ts';
 
 const CURRENT_TERMS_VERSION = 'v2.1.0';
 const CURRENT_PRIVACY_VERSION = 'v1.3.0';
 const CURRENT_BILLING_TERMS_VERSION = 'v1.0.0';
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return buildPreflightResponse(req);
   }
 
   try {

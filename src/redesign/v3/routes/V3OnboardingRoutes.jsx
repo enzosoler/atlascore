@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import { ACBtn, ACFonts, ACLabel, ACRadii, useACT } from '../lib/paper.jsx';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S7_Onboard_Identity from '../screens/S7_Onboard_Identity.jsx';
@@ -71,17 +72,15 @@ export function V3OnboardingDietPreferences() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { data, update } = useOnboardingState();
+  const t = useT();
   const c = useACT(theme === 'dark');
   const [dietaryStyle, setDietaryStyle] = useState(data?.dietaryStyle || 'high_protein');
   const [restrictions, setRestrictions] = useState(() => new Set(data?.dietaryRestrictions || []));
   const [avoidFoods, setAvoidFoods] = useState(data?.avoidFoods || '');
-  const styles = [
-    ['high_protein', 'High protein'],
-    ['balanced', 'Balanced'],
-    ['low_carb', 'Lower carb'],
-    ['plant_forward', 'Plant-forward'],
-  ];
-  const restrictionOptions = ['Dairy-free', 'Gluten-free', 'Vegetarian', 'Vegan', 'No pork', 'No shellfish'];
+  const styleKeys = ['high_protein', 'balanced', 'low_carb', 'plant_forward'];
+  const styles = styleKeys.map((id) => [id, t(`onboarding.diet.styles.${id}`)]);
+  const restrictionKeys = ['dairy_free', 'gluten_free', 'vegetarian', 'vegan', 'no_pork', 'no_shellfish'];
+  const restrictionOptions = restrictionKeys.map((k) => ({ key: k, label: t(`onboarding.diet.restrictions.${k}`) }));
 
   function emit(nextPatch = {}) {
     update({
@@ -96,16 +95,16 @@ export function V3OnboardingDietPreferences() {
     <Wrap>
       <SplitOnboardingCard
         dark={theme === 'dark'}
-        stepLabel="Setup · nutrition"
-        title="How should food feel?"
-        body="Set the eating pattern, hard restrictions, and foods coach should avoid when building meals and reminders."
+        stepLabel={t('onboarding.diet.stepLabel')}
+        title={t('onboarding.diet.title')}
+        body={t('onboarding.diet.body')}
         footer={(
           <ACBtn primary block dark={theme === 'dark'} size="lg" pill onClick={() => {
             emit();
             navigate('/onboarding/goal');
           }}
           >
-            Continue →
+            {t('onboarding.diet.continue')}
           </ACBtn>
         )}
       >
@@ -138,18 +137,18 @@ export function V3OnboardingDietPreferences() {
 
         <div style={{ marginTop: 24 }}>
           <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
-            Restrictions
+            {t('onboarding.diet.restrictionsLabel')}
           </ACLabel>
           <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {restrictionOptions.map((item) => {
-              const active = restrictions.has(item);
+            {restrictionOptions.map(({ key, label }) => {
+              const active = restrictions.has(key);
               return (
                 <button
-                  key={item}
+                  key={key}
                   type="button"
                   onClick={() => {
                     const next = new Set(restrictions);
-                    next.has(item) ? next.delete(item) : next.add(item);
+                    next.has(key) ? next.delete(key) : next.add(key);
                     setRestrictions(next);
                     emit({ dietaryRestrictions: Array.from(next) });
                   }}
@@ -164,7 +163,7 @@ export function V3OnboardingDietPreferences() {
                     cursor: 'pointer',
                   }}
                 >
-                  {item}
+                  {label}
                 </button>
               );
             })}
@@ -173,7 +172,7 @@ export function V3OnboardingDietPreferences() {
 
         <div style={{ marginTop: 24 }}>
           <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
-            Foods to avoid
+            {t('onboarding.diet.avoidLabel')}
           </ACLabel>
           <textarea
             value={avoidFoods}
@@ -181,7 +180,7 @@ export function V3OnboardingDietPreferences() {
               setAvoidFoods(event.target.value);
               emit({ avoidFoods: event.target.value });
             }}
-            placeholder="Anything coach should keep out of your meal ideas?"
+            placeholder={t('onboarding.diet.avoidPlaceholder')}
             style={{
               marginTop: 12,
               width: '100%',
@@ -206,28 +205,22 @@ export function V3OnboardingCoachMatch() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { data, update } = useOnboardingState();
+  const t = useT();
   const c = useACT(theme === 'dark');
   const [coachTone, setCoachTone] = useState(data?.coachTone || 'direct');
   const [coachFocus, setCoachFocus] = useState(data?.coachFocus || 'consistency');
-  const tones = [
-    ['direct', 'Direct and concise'],
-    ['supportive', 'Supportive and steady'],
-    ['analytical', 'Analytical and data-first'],
-  ];
-  const focuses = [
-    ['consistency', 'Daily consistency'],
-    ['performance', 'Performance and PRs'],
-    ['body_comp', 'Body composition'],
-    ['recovery', 'Recovery and readiness'],
-  ];
+  const toneKeys = ['direct', 'supportive', 'analytical'];
+  const tones = toneKeys.map((id) => [id, t(`onboarding.coachMatch.tones.${id}`)]);
+  const focusKeys = ['consistency', 'performance', 'body_comp', 'recovery'];
+  const focuses = focusKeys.map((id) => [id, t(`onboarding.coachMatch.focuses.${id}`)]);
 
   return (
     <Wrap>
       <SplitOnboardingCard
         dark={theme === 'dark'}
-        stepLabel="Setup · coach matching"
-        title="Match the coach to the athlete."
-        body="Set the tone and primary coaching lens so chat, reminders, and plan nudges feel intentional instead of generic."
+        stepLabel={t('onboarding.coachMatch.stepLabel')}
+        title={t('onboarding.coachMatch.title')}
+        body={t('onboarding.coachMatch.body')}
         footer={(
           <ACBtn
             primary
@@ -240,13 +233,13 @@ export function V3OnboardingCoachMatch() {
               navigate('/onboarding/tour');
             }}
           >
-            Continue →
+            {t('onboarding.coachMatch.continue')}
           </ACBtn>
         )}
       >
         <div>
           <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
-            Tone
+            {t('onboarding.coachMatch.toneLabel')}
           </ACLabel>
           <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
             {tones.map(([id, label]) => {
@@ -275,7 +268,7 @@ export function V3OnboardingCoachMatch() {
 
         <div style={{ marginTop: 24 }}>
           <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
-            Primary focus
+            {t('onboarding.coachMatch.focusLabel')}
           </ACLabel>
           <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
             {focuses.map(([id, label]) => {
@@ -480,6 +473,7 @@ export function V3OnboardingTour() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useAuth();
+  const t = useT();
 
   async function completeOnboarding() {
     if (!user?.id) {
@@ -491,8 +485,8 @@ export function V3OnboardingTour() {
       await finalizeOnboarding(user.id);
       navigate('/app/today', { replace: true });
     } catch (error) {
-      toast.error('Could not finish onboarding', {
-        description: error?.message || 'Please try again.',
+      toast.error(t('onboarding.tourError.title'), {
+        description: error?.message || t('onboarding.tourError.fallback'),
       });
     }
   }

@@ -14,22 +14,19 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -37,7 +34,7 @@ serve(async (req) => {
   if (!authHeader) {
     return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
       status: 401,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -57,7 +54,7 @@ serve(async (req) => {
   if (authError || !caller) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -71,7 +68,7 @@ serve(async (req) => {
   if (profile?.role !== 'admin') {
     return new Response(JSON.stringify({ error: 'Forbidden — admin only' }), {
       status: 403,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -81,7 +78,7 @@ serve(async (req) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -90,7 +87,7 @@ serve(async (req) => {
   if (!userId || typeof userId !== 'string') {
     return new Response(JSON.stringify({ error: 'userId is required' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -98,7 +95,7 @@ serve(async (req) => {
   if (userId === caller.id) {
     return new Response(JSON.stringify({ error: 'Cannot delete your own account' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -112,7 +109,7 @@ serve(async (req) => {
   if (!targetProfile) {
     return new Response(JSON.stringify({ error: 'User not found' }), {
       status: 404,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -120,7 +117,7 @@ serve(async (req) => {
   if (targetProfile.role === 'admin') {
     return new Response(JSON.stringify({ error: 'Cannot delete admin accounts' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -131,7 +128,7 @@ serve(async (req) => {
     console.error('admin-delete-user: Failed to delete:', deleteError);
     return new Response(JSON.stringify({ error: deleteError.message }), {
       status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -154,6 +151,6 @@ serve(async (req) => {
 
   return new Response(JSON.stringify({ success: true, deletedUserId: userId }), {
     status: 200,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

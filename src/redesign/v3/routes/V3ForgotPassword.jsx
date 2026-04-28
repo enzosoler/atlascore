@@ -125,7 +125,7 @@ function ForgotPasswordCard({
           <>
             <div style={{ marginTop: 34 }}>
               <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>
-                Email
+                {t('auth.form.emailLabel')}
               </ACLabel>
               <div
                 style={{

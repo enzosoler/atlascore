@@ -83,7 +83,7 @@ export default function AdminShell() {
           padding: '8px 4px 20px', cursor: 'pointer',
           justifyContent: collapsed ? 'center' : 'flex-start',
         }} onClick={() => setCollapsed(!collapsed)}>
-          <HeartMark size={20} color={c.accent} />
+          <HeartMark size={20} color={c.accent} accent={c.accent} />
           {!collapsed && (
             <span style={{
               fontFamily: ACFonts.brand, fontSize: 15, letterSpacing: -0.4,

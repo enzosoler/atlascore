@@ -244,7 +244,7 @@ export default function S72_Insights({
               background: c.accent, color: c.ink,
               border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', width: '100%',
             }}>
-              Start 7-day free trial
+              Continue
             </button>
           </div>
         </div>

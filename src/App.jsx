@@ -33,7 +33,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { DailyStoreProvider } from '@/store/dailyStore';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
-import { I18nProvider } from '@/lib/i18nContext';
+import { I18nProvider, useT } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Capacitor } from '@capacitor/core';
@@ -61,8 +61,12 @@ const V3RoutinePresets = lazy(() => import('@/redesign/v3/routes/V3RoutinePreset
 const V3RoutinePresetDetail = lazy(() => import('@/redesign/v3/routes/V3RoutinePresetDetail.jsx'));
 // v3 design preview — paper+ink+amber screens translated from Claude Design.
 // Lazy so the 35-screen gallery only loads when /v3 is visited.
-const V3Gallery  = lazy(() => import('@/redesign/v3/gallery/V3Gallery.jsx'));
-const V3DesignHandoff = lazy(() => import('@/redesign/v3/routes/V3DesignHandoff.jsx'));
+const V3Gallery = import.meta.env.DEV
+  ? lazy(() => import('@/redesign/v3/gallery/V3Gallery.jsx'))
+  : lazy(() => Promise.resolve({ default: () => <Navigate to="/404" replace /> }));
+const V3DesignHandoff = import.meta.env.DEV
+  ? lazy(() => import('@/redesign/v3/routes/V3DesignHandoff.jsx'))
+  : lazy(() => Promise.resolve({ default: () => <Navigate to="/404" replace /> }));
 // v3 running app — bottom-tab shell + core-loop routes (today/train/eat/body/you)
 const V3AppShell = lazy(() => import('@/redesign/v3/layouts/V3AppShell.jsx'));
 // Platform gate — eagerly loaded so Category B fullscreen flows can be wrapped
@@ -175,7 +179,6 @@ const V3OnboardingTour = lazyOnboardingRoute('V3OnboardingTour');
 const V3LabExamDetail = lazy(() => import('@/redesign/v3/routes/V3LabExamDetail.jsx'));
 const V3LabHistory = lazy(() => import('@/redesign/v3/routes/V3LabHistory.jsx'));
 const V3LabUpload = lazy(() => import('@/redesign/v3/routes/V3LabUpload.jsx'));
-const SmartOnboarding = lazy(() => import('@/components/onboarding/SmartOnboarding.jsx'));
 const WeightEntryRoute = lazy(() => import('@/routes/app/WeightEntryRoute.jsx'));
 const MeasurementsRoute = lazy(() => import('@/routes/app/MeasurementsRoute.jsx'));
 
@@ -183,15 +186,17 @@ const MeasurementsRoute = lazy(() => import('@/routes/app/MeasurementsRoute.jsx'
 const AdminShell = lazy(() => import('@/pages/admin/AdminShell.jsx'));
 const AdminOverview = lazy(() => import('@/pages/admin/AdminOverview.jsx'));
 const AdminPlaceholder = lazy(() => import('@/pages/admin/AdminPlaceholder.jsx'));
+const AdminGDPR = lazy(() => import('@/pages/admin/AdminGDPR.jsx'));
 const BodyCheckInRoute = lazy(() => import('@/routes/app/BodyCheckInRoute.jsx'));
 
 // ─── ComingSoon stub (no v2 equivalent; keeps /help and fallback routes alive) ─
 function ComingSoon({ routeName, onGoHome, onBack }) {
+  const t = useT();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', padding: '24px', gap: 16 }}>
       <p style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{routeName}</p>
-      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>Coming soon</p>
-      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>Go back</button>
+      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>{t('appShell.comingSoon.status')}</p>
+      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>{t('appShell.comingSoon.back')}</button>
     </div>
   );
 }
@@ -323,7 +328,7 @@ function AppRoutes() {
           <Route path="invites" element={<AdminPlaceholder title="Invites & Beta" description="Beta invite codes, redemption tracking, onboarding funnel." />} />
           <Route path="ops" element={<AdminPlaceholder title="Ops Health" description="Error logs, webhooks, AI costs, feature flags." />} />
           <Route path="audit" element={<AdminPlaceholder title="Audit Log" description="Admin action audit trail with filters." />} />
-          <Route path="compliance" element={<AdminPlaceholder title="Compliance" description="GDPR export/delete tools, terms acceptance log." />} />
+          <Route path="compliance" element={<AdminGDPR />} />
           <Route path="settings" element={<AdminPlaceholder title="Settings" description="Admin panel configuration and role management." />} />
         </Route>
 
@@ -467,7 +472,7 @@ function AppRoutes() {
         <Route path="/method"  element={<V3MethodPage />} />
         <Route path="/labs"    element={<Navigate to="/science" replace />} />
         <Route path="/science" element={<V3LabsPage />} />
-        <Route path="/pricing" element={<V3PricingPage />} />
+        <Route path="/pricing" element={Capacitor.isNativePlatform() && isAuthed ? <Navigate to="/app/paywall" replace /> : <V3PricingPage />} />
         <Route path="/terms"   element={<V3Terms />} />
         <Route path="/privacy" element={<V3Privacy />} />
         <Route path="/faq"     element={<V3PricingPage />} />
@@ -500,7 +505,6 @@ function AppRoutes() {
         <Route path="/onboarding/coach-match" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingCoachMatch />) : <Navigate to="/auth/signup" replace />} />
         <Route path="/onboarding/paywall" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <Navigate to="/onboarding/tour" replace />) : <Navigate to="/auth/signup" replace />} />
         <Route path="/onboarding/tour" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingTour />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/smart" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <SmartOnboarding onContinue={() => {}} />) : <Navigate to="/auth/signup" replace />} />
 
         {/* Public profile lives outside the shell (no auth guard on view) */}
         <Route path="/app/u/:username" element={<V3PublicProfile />} />
@@ -519,8 +523,8 @@ function AppRoutes() {
           <Route key={from} path={from} element={<Navigate to={to} replace />} />
         ))}
 
-        {/* ── Help (still referenced from marketing footer) ──────── */}
-        <Route path="/help"     element={<ComingSoonNav name="Help center" />} />
+        {/* ── Help — redirect to settings which contains support/contact ── */}
+        <Route path="/help"     element={<Navigate to="/app/settings" replace />} />
 
         {/* ── 404 catch-all — MUST be the last route ───────────────── */}
         <Route path="*" element={<V3NotFound />} />
@@ -558,7 +562,10 @@ function App() {
     try { initAnalytics(); } catch (e) { /* non-fatal */ }
   }, []);
 
-  // Native OAuth deep-link (atlascore://auth/callback)
+  // Native OAuth deep-link handler.
+  // Primary mechanism: Universal Links via Associated Domains (apple-app-site-association).
+  // Fallback: custom URL scheme (atlascore://auth/callback) for older iOS or misconfigured domains.
+  // Both paths funnel through Capacitor's appUrlOpen listener below.
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     let listener;

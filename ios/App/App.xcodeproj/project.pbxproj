@@ -172,6 +172,7 @@
 			isa = PBXGroup;
 			children = (
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
+				7B9D4E6A2C8F41A9B3D5E7C1 /* AtlasCore.storekit */,
 				399D953A1BDBFA8C8C11E1A1 /* App.entitlements */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				4D22ABEA2AF431CB00220026 /* NativeAuthSession.swift */,
@@ -215,6 +216,10 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXFileReference section */
+		7B9D4E6A2C8F41A9B3D5E7C1 /* AtlasCore.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = AtlasCore.storekit; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
 /* Begin PBXNativeTarget section */
 		504EC3031FED79650016851F /* atlas.core */ = {
@@ -289,6 +294,11 @@
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
+						};
 					};
 					93ECFAE2290E4FF00DFC8EAB = {
 						CreatedOnToolsVersion = 15.0;
@@ -450,7 +460,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1";
 			};
 			name = Release;
 		};
@@ -513,7 +523,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1";
 			};
 			name = Debug;
 		};
@@ -659,7 +669,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1";
 			};
 			name = Debug;
 		};
@@ -684,7 +694,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1";
 			};
 			name = Release;
 		};

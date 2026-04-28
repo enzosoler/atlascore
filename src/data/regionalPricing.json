@@ -1,0 +1,1149 @@
+{
+  "NG": {
+    "region": "Nigeria",
+    "currency": "NGN",
+    "symbol": "₦",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 2890,
+      "athlete_performance": 5900,
+      "coach": 8900,
+      "nutritionist": 7400,
+      "clinician": 11900
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 24900,
+      "athlete_performance": 50900,
+      "coach": 76900,
+      "nutritionist": 63900,
+      "clinician": 102900
+    }
+  },
+  "IN": {
+    "region": "India",
+    "currency": "INR",
+    "symbol": "₹",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 199,
+      "athlete_performance": 399,
+      "coach": 599,
+      "nutritionist": 499,
+      "clinician": 799
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 1699,
+      "athlete_performance": 3399,
+      "coach": 5199,
+      "nutritionist": 4299,
+      "clinician": 6899
+    }
+  },
+  "TR": {
+    "region": "Turkey",
+    "currency": "TRY",
+    "symbol": "₺",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 89.9,
+      "athlete_performance": 189.9,
+      "coach": 289.9,
+      "nutritionist": 239.9,
+      "clinician": 389.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 779.9,
+      "athlete_performance": 1639.9,
+      "coach": 2499.9,
+      "nutritionist": 2069.9,
+      "clinician": 3359.9
+    }
+  },
+  "PH": {
+    "region": "Philippines",
+    "currency": "PHP",
+    "symbol": "₱",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 149,
+      "athlete_performance": 299,
+      "coach": 449,
+      "nutritionist": 379,
+      "clinician": 599
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 1290,
+      "athlete_performance": 2590,
+      "coach": 3890,
+      "nutritionist": 3290,
+      "clinician": 5190
+    }
+  },
+  "ID": {
+    "region": "Indonesia",
+    "currency": "IDR",
+    "symbol": "Rp",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 41900,
+      "athlete_performance": 88900,
+      "coach": 135900,
+      "nutritionist": 112900,
+      "clinician": 183900
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 361900,
+      "athlete_performance": 767900,
+      "coach": 1173900,
+      "nutritionist": 975900,
+      "clinician": 1587900
+    }
+  },
+  "TH": {
+    "region": "Thailand",
+    "currency": "THB",
+    "symbol": "฿",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 99,
+      "athlete_performance": 199,
+      "coach": 299,
+      "nutritionist": 249,
+      "clinician": 399
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 859,
+      "athlete_performance": 1719,
+      "coach": 2579,
+      "nutritionist": 2149,
+      "clinician": 3449
+    }
+  },
+  "CO": {
+    "region": "Colombia",
+    "currency": "COP",
+    "symbol": "COL$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 11900,
+      "athlete_performance": 25900,
+      "coach": 39900,
+      "nutritionist": 32900,
+      "clinician": 53900
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 102900,
+      "athlete_performance": 223900,
+      "coach": 344900,
+      "nutritionist": 284900,
+      "clinician": 465900
+    }
+  },
+  "ZA": {
+    "region": "South Africa",
+    "currency": "ZAR",
+    "symbol": "R",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 57.9,
+      "athlete_performance": 121.9,
+      "coach": 185.9,
+      "nutritionist": 153.9,
+      "clinician": 249.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 499.9,
+      "athlete_performance": 1049.9,
+      "coach": 1599.9,
+      "nutritionist": 1329.9,
+      "clinician": 2159.9
+    }
+  },
+  "PE": {
+    "region": "Peru",
+    "currency": "PEN",
+    "symbol": "S/",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 13.9,
+      "athlete_performance": 27.9,
+      "coach": 42.9,
+      "nutritionist": 34.9,
+      "clinician": 56.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 119.9,
+      "athlete_performance": 239.9,
+      "coach": 369.9,
+      "nutritionist": 299.9,
+      "clinician": 489.9
+    }
+  },
+  "AR": {
+    "region": "Argentina",
+    "currency": "ARS",
+    "symbol": "ARS",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 2599,
+      "athlete_performance": 5499,
+      "coach": 8499,
+      "nutritionist": 6999,
+      "clinician": 11499
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 22499,
+      "athlete_performance": 47499,
+      "coach": 73499,
+      "nutritionist": 60499,
+      "clinician": 99499
+    }
+  },
+  "MX": {
+    "region": "Mexico",
+    "currency": "MXN",
+    "symbol": "MX$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 82.9,
+      "athlete_performance": 173.9,
+      "coach": 264.9,
+      "nutritionist": 219.9,
+      "clinician": 354.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 719.9,
+      "athlete_performance": 1499.9,
+      "coach": 2289.9,
+      "nutritionist": 1899.9,
+      "clinician": 3069.9
+    }
+  },
+  "PL": {
+    "region": "Poland",
+    "currency": "PLN",
+    "symbol": "zł",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 15.9,
+      "athlete_performance": 33.9,
+      "coach": 51.9,
+      "nutritionist": 42.9,
+      "clinician": 69.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 139.9,
+      "athlete_performance": 292.9,
+      "coach": 449.9,
+      "nutritionist": 369.9,
+      "clinician": 604.9
+    }
+  },
+  "CL": {
+    "region": "Chile",
+    "currency": "CLP",
+    "symbol": "CL$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 3990,
+      "athlete_performance": 8690,
+      "coach": 13290,
+      "nutritionist": 10990,
+      "clinician": 17890
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 34490,
+      "athlete_performance": 75090,
+      "coach": 114890,
+      "nutritionist": 94990,
+      "clinician": 154490
+    }
+  },
+  "BR": {
+    "region": "Brazil",
+    "currency": "BRL",
+    "symbol": "R$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmERieY0K8YEgKSb7bAoi",
+      "athlete_performance": "price_1TEMmGRieY0K8YEg8Pg3NqOY",
+      "coach": "price_1TEMmIRieY0K8YEg2WjVn4PR",
+      "nutritionist": "price_1TEMmJRieY0K8YEggJKE9kFt",
+      "clinician": "price_1TEMmLRieY0K8YEgG3wigwi8"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmERieY0K8YEgpyi6mvgU",
+      "athlete_performance": "price_1TEMmGRieY0K8YEgxdZ0yTut",
+      "coach": "price_1TEMmIRieY0K8YEgx6H5m2IE",
+      "nutritionist": "price_1TEMmKRieY0K8YEg8dEQidTM",
+      "clinician": "price_1TEMmLRieY0K8YEgkptDOoPK"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 25.9,
+      "athlete_performance": 53.9,
+      "coach": 81.9,
+      "nutritionist": 67.9,
+      "clinician": 109.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 223.9,
+      "athlete_performance": 465.9,
+      "coach": 707.9,
+      "nutritionist": 587.9,
+      "clinician": 949.9
+    }
+  },
+  "PT": {
+    "region": "Portugal",
+    "currency": "EUR",
+    "symbol": "€",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 4.99,
+      "athlete_performance": 10.99,
+      "coach": 16.99,
+      "nutritionist": 13.99,
+      "clinician": 22.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 42.99,
+      "athlete_performance": 94.99,
+      "coach": 146.99,
+      "nutritionist": 120.99,
+      "clinician": 198.99
+    }
+  },
+  "ES": {
+    "region": "Spain",
+    "currency": "EUR",
+    "symbol": "€",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 5.99,
+      "athlete_performance": 11.99,
+      "coach": 17.99,
+      "nutritionist": 14.99,
+      "clinician": 23.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 51.99,
+      "athlete_performance": 103.99,
+      "coach": 155.99,
+      "nutritionist": 129.99,
+      "clinician": 207.99
+    }
+  },
+  "KR": {
+    "region": "South Korea",
+    "currency": "KRW",
+    "symbol": "₩",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 7900,
+      "athlete_performance": 17900,
+      "coach": 26900,
+      "nutritionist": 22900,
+      "clinician": 36900
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 68900,
+      "athlete_performance": 154900,
+      "coach": 232900,
+      "nutritionist": 197900,
+      "clinician": 318900
+    }
+  },
+  "IT": {
+    "region": "Italy",
+    "currency": "EUR",
+    "symbol": "€",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 5.99,
+      "athlete_performance": 12.99,
+      "coach": 18.99,
+      "nutritionist": 15.99,
+      "clinician": 25.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 51.99,
+      "athlete_performance": 112.99,
+      "coach": 163.99,
+      "nutritionist": 137.99,
+      "clinician": 224.99
+    }
+  },
+  "JP": {
+    "region": "Japan",
+    "currency": "JPY",
+    "symbol": "¥",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 980,
+      "athlete_performance": 2080,
+      "coach": 3080,
+      "nutritionist": 2580,
+      "clinician": 4080
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 8480,
+      "athlete_performance": 17980,
+      "coach": 26580,
+      "nutritionist": 22280,
+      "clinician": 35280
+    }
+  },
+  "FR": {
+    "region": "France",
+    "currency": "EUR",
+    "symbol": "€",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 6.99,
+      "athlete_performance": 13.99,
+      "coach": 20.99,
+      "nutritionist": 16.99,
+      "clinician": 27.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 59.99,
+      "athlete_performance": 120.99,
+      "coach": 181.99,
+      "nutritionist": 146.99,
+      "clinician": 241.99
+    }
+  },
+  "DE": {
+    "region": "Germany",
+    "currency": "EUR",
+    "symbol": "€",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 6.99,
+      "athlete_performance": 13.99,
+      "coach": 20.99,
+      "nutritionist": 16.99,
+      "clinician": 27.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 59.99,
+      "athlete_performance": 120.99,
+      "coach": 181.99,
+      "nutritionist": 146.99,
+      "clinician": 241.99
+    }
+  },
+  "SE": {
+    "region": "Sweden",
+    "currency": "SEK",
+    "symbol": "kr",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 76.9,
+      "athlete_performance": 161.9,
+      "coach": 246.9,
+      "nutritionist": 204.9,
+      "clinician": 331.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 664.9,
+      "athlete_performance": 1399.9,
+      "coach": 2132.9,
+      "nutritionist": 1770.9,
+      "clinician": 2867.9
+    }
+  },
+  "GB": {
+    "region": "United Kingdom",
+    "currency": "GBP",
+    "symbol": "£",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 5.99,
+      "athlete_performance": 12.99,
+      "coach": 19.99,
+      "nutritionist": 15.99,
+      "clinician": 25.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 51.99,
+      "athlete_performance": 112.99,
+      "coach": 172.99,
+      "nutritionist": 137.99,
+      "clinician": 224.99
+    }
+  },
+  "CA": {
+    "region": "Canada",
+    "currency": "CAD",
+    "symbol": "CA$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 10.99,
+      "athlete_performance": 23.99,
+      "coach": 35.99,
+      "nutritionist": 29.99,
+      "clinician": 47.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 94.99,
+      "athlete_performance": 207.99,
+      "coach": 310.99,
+      "nutritionist": 259.99,
+      "clinician": 414.99
+    }
+  },
+  "IE": {
+    "region": "Ireland",
+    "currency": "EUR",
+    "symbol": "€",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 6.99,
+      "athlete_performance": 14.99,
+      "coach": 22.99,
+      "nutritionist": 18.99,
+      "clinician": 30.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 59.99,
+      "athlete_performance": 129.99,
+      "coach": 198.99,
+      "nutritionist": 163.99,
+      "clinician": 267.99
+    }
+  },
+  "NZ": {
+    "region": "New Zealand",
+    "currency": "NZD",
+    "symbol": "NZ$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 13.99,
+      "athlete_performance": 28.99,
+      "coach": 43.99,
+      "nutritionist": 36.99,
+      "clinician": 58.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 120.99,
+      "athlete_performance": 250.99,
+      "coach": 379.99,
+      "nutritionist": 319.99,
+      "clinician": 509.99
+    }
+  },
+  "DK": {
+    "region": "Denmark",
+    "currency": "DKK",
+    "symbol": "kr",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 54.9,
+      "athlete_performance": 114.9,
+      "coach": 174.9,
+      "nutritionist": 144.9,
+      "clinician": 234.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 474.9,
+      "athlete_performance": 994.9,
+      "coach": 1509.9,
+      "nutritionist": 1254.9,
+      "clinician": 2029.9
+    }
+  },
+  "AU": {
+    "region": "Australia",
+    "currency": "AUD",
+    "symbol": "A$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 12.99,
+      "athlete_performance": 27.99,
+      "coach": 41.99,
+      "nutritionist": 34.99,
+      "clinician": 55.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 112.99,
+      "athlete_performance": 241.99,
+      "coach": 362.99,
+      "nutritionist": 302.99,
+      "clinician": 483.99
+    }
+  },
+  "NO": {
+    "region": "Norway",
+    "currency": "NOK",
+    "symbol": "kr",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 92.9,
+      "athlete_performance": 194.9,
+      "coach": 297.9,
+      "nutritionist": 246.9,
+      "clinician": 399.9
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 802.9,
+      "athlete_performance": 1684.9,
+      "coach": 2573.9,
+      "nutritionist": 2133.9,
+      "clinician": 3455.9
+    }
+  },
+  "CH": {
+    "region": "Switzerland",
+    "currency": "CHF",
+    "symbol": "CHF",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 7.99,
+      "athlete_performance": 16.99,
+      "coach": 25.99,
+      "nutritionist": 21.99,
+      "clinician": 34.99
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 68.99,
+      "athlete_performance": 146.99,
+      "coach": 224.99,
+      "nutritionist": 189.99,
+      "clinician": 302.99
+    }
+  },
+  "US": {
+    "region": "United States",
+    "currency": "USD",
+    "symbol": "$",
+    "stripe_prices": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+      "athlete_performance": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+      "coach": "price_1TEMmIRieY0K8YEgOWz60BYr",
+      "nutritionist": "price_1TEMmKRieY0K8YEgceRTHz1A",
+      "clinician": "price_1TEMmMRieY0K8YEg2UGz2GyC"
+    },
+    "stripe_prices_yearly": {
+      "free": null,
+      "athlete_pro": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+      "athlete_performance": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+      "coach": "price_1TEMmJRieY0K8YEgxEkmjXic",
+      "nutritionist": "price_1TEMmKRieY0K8YEgY1FmnInH",
+      "clinician": "price_1TEMmMRieY0K8YEgjsGOAeqy"
+    },
+    "prices": {
+      "free": 0,
+      "athlete_pro": 9,
+      "athlete_performance": 19,
+      "coach": 29,
+      "nutritionist": 24,
+      "clinician": 39
+    },
+    "prices_yearly": {
+      "free": 0,
+      "athlete_pro": 79,
+      "athlete_performance": 159,
+      "coach": 249,
+      "nutritionist": 199,
+      "clinician": 319
+    }
+  }
+}

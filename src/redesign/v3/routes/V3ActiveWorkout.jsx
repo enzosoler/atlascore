@@ -10,6 +10,7 @@ import { fetchRecentWorkoutHistory, computePersonalRecords } from '@/services/wo
 import { loadSession } from '@/lib/workoutSession';
 import { DEMO_EXERCISES } from '@/redesign/v3/lib/exerciseCatalog.js';
 import { listRoutines, markRoutineUsed, saveWorkoutSession } from '@/lib/workoutsService';
+import V3LoadingSplash from '@/redesign/v3/routes/V3LoadingSplash.jsx';
 
 function normalizeText(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -176,7 +177,7 @@ export default function V3ActiveWorkout() {
 
   const personalRecords = useMemo(() => computePersonalRecords(history), [history]);
 
-  if (loading) return null;
+  if (loading) return <V3LoadingSplash phase="syncing" />;
 
   return (
     <WorkoutExecutionScreen

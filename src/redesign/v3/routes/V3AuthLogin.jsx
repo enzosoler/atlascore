@@ -32,7 +32,7 @@ export default function V3AuthLogin() {
   const [loading, setLoading] = useState(false);
   const [rateLimitRemaining, setRateLimitRemaining] = useState(0);
   const submitLockRef = useRef(false);
-  const isAuthBypassEnabled = import.meta.env.VITE_ENABLE_AUTH_BYPASS === 'true';
+  const isAuthBypassEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_AUTH_BYPASS === 'true';
 
   // Show a clear message when the production build lacks Supabase env vars
   const isConfigured = import.meta.env.VITE_SUPABASE_URL &&
@@ -150,7 +150,7 @@ export default function V3AuthLogin() {
           setError('');
         }}
         loading={loading}
-        error={rateLimitRemaining > 0 ? `Too many attempts. Try again in ${formatCountdown(rateLimitRemaining)}` : error}
+        error={rateLimitRemaining > 0 ? t('auth.login.rateLimitedCountdown', { time: formatCountdown(rateLimitRemaining) }) : error}
         submitDisabled={loading || rateLimitRemaining > 0}
       />
     </V3StandaloneLayout>

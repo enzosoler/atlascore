@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 // ── TIPOS ─────────────────────────────────────────────────────────
 interface CheckoutRequest {
@@ -25,12 +26,7 @@ interface CheckoutResponse {
   error?: string;
 }
 
-// ── CORS ──────────────────────────────────────────────────────────
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// ── CORS (uses shared origin allowlist) ──────────────────────────
 
 function isTruthy(value: string | undefined | null): boolean {
   return ['1', 'true', 'yes', 'on'].includes((value || '').trim().toLowerCase());
@@ -107,24 +103,24 @@ function log(stage: string, message: string, data?: unknown) {
   console.log(`[${timestamp}] [create-checkout] [${stage}] ${message} ${dataStr}`);
 }
 
-function errorResponse(error: string, status: number): Response {
+function errorResponse(error: string, status: number, corsHeaders: Record<string, string>): Response {
   log('ERROR', `Returning ${status}`, { error });
   return new Response(
     JSON.stringify({ success: false, error } as CheckoutResponse),
-    { 
-      status, 
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } 
+    {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     }
   );
 }
 
-function successResponse(data: Omit<CheckoutResponse, 'success' | 'error'>): Response {
+function successResponse(data: Omit<CheckoutResponse, 'success' | 'error'>, corsHeaders: Record<string, string>): Response {
   log('SUCCESS', 'Checkout session created', data);
   return new Response(
     JSON.stringify({ success: true, ...data } as CheckoutResponse),
-    { 
-      status: 200, 
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } 
+    {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     }
   );
 }
@@ -181,16 +177,17 @@ function resolveAllowedAppOrigin(appUrl: string, candidateUrl?: string): string 
 
 // ── MAIN HANDLER ──────────────────────────────────────────────────
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   const requestId = crypto.randomUUID();
   log('START', `Request ${requestId}`, { method: req.method });
 
   // ── 1. CORS PREFLIGHT ─────────────────────────────────────────
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
-    return errorResponse('Method not allowed', 405);
+    return errorResponse('Method not allowed', 405, corsHeaders);
   }
 
   // ── 2. VALIDAR JWT E OBTER USUÁRIO ────────────────────────────
@@ -199,19 +196,19 @@ serve(async (req: Request) => {
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) {
     log('AUTH', 'No Authorization header present');
-    return errorResponse('Missing Authorization header', 401);
+    return errorResponse('Missing Authorization header', 401, corsHeaders);
   }
 
   if (!authHeader.startsWith('Bearer ')) {
     log('AUTH', 'Invalid Authorization format', { header: authHeader.substring(0, 30) });
-    return errorResponse('Invalid Authorization format. Expected: Bearer <token>', 401);
+    return errorResponse('Invalid Authorization format. Expected: Bearer <token>', 401, corsHeaders);
   }
 
   const jwt = authHeader.replace('Bearer ', '').trim();
   
   if (!jwt || jwt.length < 50) {
     log('AUTH', 'JWT too short or empty', { length: jwt?.length });
-    return errorResponse('Invalid or empty JWT token', 401);
+    return errorResponse('Invalid or empty JWT token', 401, corsHeaders);
   }
 
   log('AUTH', 'JWT extracted', { length: jwt.length, prefix: jwt.substring(0, 20) });
@@ -222,7 +219,7 @@ serve(async (req: Request) => {
   
   if (!supabaseUrl || !supabaseServiceKey) {
     log('CONFIG', 'Missing Supabase env vars');
-    return errorResponse('Server configuration error: Missing Supabase env vars', 500);
+    return errorResponse('Server configuration error: Missing Supabase env vars', 500, corsHeaders);
   }
 
   // Criar cliente com service role para bypass RLS
@@ -239,10 +236,10 @@ serve(async (req: Request) => {
     
     if (authError) {
       log('AUTH', 'JWT validation error from getUser', { error: authError?.message, code: authError?.status });
-      return errorResponse('Invalid or expired session. Please log in again.', 401);
+      return errorResponse('Invalid or expired session. Please log in again.', 401, corsHeaders);
     } else if (!user) {
       log('AUTH', 'JWT validation returned no user');
-      return errorResponse('Invalid or expired session. Please log in again.', 401);
+      return errorResponse('Invalid or expired session. Please log in again.', 401, corsHeaders);
     } else {
       userId = user.id;
       userEmail = user.email || '';
@@ -251,7 +248,7 @@ serve(async (req: Request) => {
   } catch (e: unknown) {
     const errorMsg = e instanceof Error ? e.message : 'Unknown error';
     log('AUTH', 'Exception during JWT validation', { error: errorMsg });
-    return errorResponse('Authentication validation failed', 500);
+    return errorResponse('Authentication validation failed', 500, corsHeaders);
   }
 
   // ── 4. PARSE BODY ─────────────────────────────────────────────
@@ -267,12 +264,12 @@ serve(async (req: Request) => {
     });
   } catch (e: unknown) {
     log('BODY', 'Failed to parse JSON body');
-    return errorResponse('Invalid JSON body', 400);
+    return errorResponse('Invalid JSON body', 400, corsHeaders);
   }
 
   // ── 5. VALIDAR CAMPOS ─────────────────────────────────────────
   if (!body.plan) {
-    return errorResponse('Missing required field: plan', 400);
+    return errorResponse('Missing required field: plan', 400, corsHeaders);
   }
 
   // Validar que user_id do body corresponde ao JWT (segurança)
@@ -281,7 +278,7 @@ serve(async (req: Request) => {
       fromBody: body.user_id, 
       fromJWT: userId 
     });
-    return errorResponse('User ID mismatch. Cannot subscribe for another user.', 403);
+    return errorResponse('User ID mismatch. Cannot subscribe for another user.', 403, corsHeaders);
   }
 
   // ── 6. VERIFICAR CONFIG STRIPE ────────────────────────────────
@@ -293,22 +290,22 @@ serve(async (req: Request) => {
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Invalid Stripe mode configuration';
     log('CONFIG', errorMsg);
-    return errorResponse(errorMsg, 500);
+    return errorResponse(errorMsg, 500, corsHeaders);
   }
 
   if (!resolvedStripeSecretKey) {
     log('CONFIG', 'Missing Stripe secret key', { testMode });
-    return errorResponse('Server configuration error: Stripe not configured', 500);
+    return errorResponse('Server configuration error: Stripe not configured', 500, corsHeaders);
   }
 
   if (!publishableKey) {
     log('CONFIG', 'Missing Stripe publishable key', { testMode });
-    return errorResponse('Server configuration error: Stripe publishable key missing', 500);
+    return errorResponse('Server configuration error: Stripe publishable key missing', 500, corsHeaders);
   }
 
   if (!publishableKey.startsWith('pk_')) {
     log('CONFIG', 'Invalid Stripe publishable key prefix', { testMode });
-    return errorResponse('Server configuration error: invalid Stripe publishable key', 500);
+    return errorResponse('Server configuration error: invalid Stripe publishable key', 500, corsHeaders);
   }
 
   const stripe = new Stripe(resolvedStripeSecretKey, {
@@ -332,7 +329,8 @@ serve(async (req: Request) => {
   if (!priceId) {
     return errorResponse(
       `Price not configured for plan: ${body.plan}, billing: ${billing}, mode: ${testMode ? 'test' : 'live'}`,
-      500
+      500,
+      corsHeaders,
     );
   }
 
@@ -387,7 +385,7 @@ serve(async (req: Request) => {
   } catch (e: unknown) {
     const errorMsg = e instanceof Error ? e.message : 'Unknown error';
     log('STRIPE', 'Error with customer lookup/creation', { error: errorMsg });
-    return errorResponse(`Stripe customer error: ${errorMsg}`, 500);
+    return errorResponse(`Stripe customer error: ${errorMsg}`, 500, corsHeaders);
   }
 
   // ── 9. CRIAR CHECKOUT SESSION ─────────────────────────────────
@@ -430,7 +428,7 @@ serve(async (req: Request) => {
   } catch (e: unknown) {
     const errorMsg = e instanceof Error ? e.message : 'Unknown error';
     log('STRIPE', 'Error creating checkout session', { error: errorMsg });
-    return errorResponse(`Stripe checkout error: ${errorMsg}`, 500);
+    return errorResponse(`Stripe checkout error: ${errorMsg}`, 500, corsHeaders);
   }
 
   // ── 10. RETORNAR SUCESSO ──────────────────────────────────────
@@ -439,5 +437,5 @@ serve(async (req: Request) => {
     sessionId: checkoutSession.id,
     publishableKey,
     testMode,
-  });
+  }, corsHeaders);
 });

@@ -42,9 +42,9 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>atlas.core uses speech recognition to turn your voice meal logs into text.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>atlas.core reads your health data to track progress, sync workouts, and personalize coaching recommendations.</string>
+	<string>atlas.core reads your health data to track progress, sync workouts, and generate personalized coaching recommendations. Aggregated, de-identified health metrics may be processed by third-party AI providers to power these recommendations.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>atlas.core saves your workouts, body measurements, and nutrition data to Apple Health so all your health data stays in one place.</string>
+	<string>atlas.core saves your workouts, body measurements, and nutrition data to Apple Health so your health data stays in one place. AI-generated insights derived from these metrics may be produced using third-party AI providers.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>atlas.core uses your location to show current weather conditions.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

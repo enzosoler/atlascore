@@ -9,16 +9,14 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 serve(async (req) => {
+  const CORS_HEADERS = getCorsHeaders(req);
+  const json = makeJson(CORS_HEADERS);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
@@ -156,12 +154,14 @@ function mapOpenFoodFactsProduct(product: any) {
   };
 }
 
-function json(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: {
-      ...CORS_HEADERS,
-      'Content-Type': 'application/json',
-    },
-  });
+function makeJson(corsHeaders: Record<string, string>) {
+  return function json(payload: unknown, status = 200) {
+    return new Response(JSON.stringify(payload), {
+      status,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
+    });
+  };
 }

@@ -1,9 +1,17 @@
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 function manualChunks(id) {
+  if (id.includes('/src/i18n/messages/') || id.includes('/src/i18n/patches/')) {
+    return 'i18n-dictionaries'
+  }
+
+  if (id.includes('/src/data/regionalPricing.json')) {
+    return 'regional-pricing-data'
+  }
+
   if (!id.includes('node_modules')) return
 
   if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) {
@@ -84,7 +92,23 @@ function manualChunks(id) {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode, command }) => {
+  // Fail the build early when critical Supabase env vars are missing.
+  // loadEnv reads .env / .env.local / .env.[mode] so the check sees real values.
+  if (command === 'build') {
+    const env = loadEnv(mode, process.cwd(), 'VITE_');
+    const url = env.VITE_SUPABASE_URL;
+    const key = env.VITE_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) {
+      throw new Error(
+        '[atlas.core] Production build requires Supabase env vars.\n' +
+        'Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in .env.local\n' +
+        'See .env.example for required variables.'
+      );
+    }
+  }
+
+  return {
   plugins: [
     react(),
     VitePWA({
@@ -185,4 +209,5 @@ export default defineConfig({
       },
     },
   },
+  };
 });

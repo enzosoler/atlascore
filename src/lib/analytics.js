@@ -11,7 +11,6 @@
  *   VITE_GA_MEASUREMENT_ID    — GA4 measurement ID (optional, only if running Google Ads)
  */
 
-import posthog from 'posthog-js';
 import { Capacitor } from '@capacitor/core';
 
 // ─── Feature flags ───────────────────────────────────────────────────────────
@@ -23,45 +22,131 @@ const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY || '';
 const POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com';
 const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID || '';
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || '';
+export const ANALYTICS_CONSENT_KEY = 'atlas.analytics.consent.v1';
 
+// posthog-js is loaded dynamically — this holds the instance once ready.
+let _posthog = null;
 let _posthogReady = false;
 let _pixelReady = false;
 let _gaReady = false;
 
+function hasWindow() {
+  return typeof window !== 'undefined';
+}
+
+export function getAnalyticsConsent() {
+  if (!hasWindow()) return false;
+  try {
+    return window.localStorage.getItem(ANALYTICS_CONSENT_KEY) === 'granted';
+  } catch {
+    return false;
+  }
+}
+
+function emitAnalyticsConsentChanged(allowed) {
+  if (!hasWindow()) return;
+  window.dispatchEvent(new CustomEvent('atlas:analytics-consent', { detail: { allowed } }));
+}
+
+export function setAnalyticsConsent(allowed) {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, allowed ? 'granted' : 'denied');
+  } catch {
+    // Storage failures keep analytics disabled by the guards below.
+  }
+
+  if (GA_ID) {
+    window[`ga-disable-${GA_ID}`] = !allowed;
+  }
+
+  if (!allowed) {
+    if (_posthogReady && _posthog) {
+      try {
+        _posthog.opt_out_capturing?.();
+        _posthog.reset?.();
+      } catch {}
+    }
+    if (typeof window.fbq === 'function') {
+      try { window.fbq('consent', 'revoke'); } catch {}
+    }
+    if (typeof window.gtag === 'function') {
+      try {
+        window.gtag('consent', 'update', {
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+        });
+      } catch {}
+    }
+    _pixelReady = false;
+    _gaReady = false;
+  } else {
+    if (_posthogReady && _posthog) {
+      try { _posthog.opt_in_capturing?.(); } catch {}
+    }
+    if (typeof window.fbq === 'function') {
+      try { window.fbq('consent', 'grant'); } catch {}
+    }
+    initAnalytics();
+  }
+
+  emitAnalyticsConsentChanged(allowed);
+}
+
+export function subscribeAnalyticsConsent(listener) {
+  if (!hasWindow()) return () => {};
+  const handler = (event) => listener(Boolean(event.detail?.allowed));
+  window.addEventListener('atlas:analytics-consent', handler);
+  return () => window.removeEventListener('atlas:analytics-consent', handler);
+}
+
 // ─── PostHog ─────────────────────────────────────────────────────────────────
 
 export function initPostHog() {
+  if (!getAnalyticsConsent()) return;
   if (!POSTHOG_KEY || !IS_WEB) return;
   // Allow explicit dev opt-in via VITE_POSTHOG_DEV=true
   if (!IS_PRODUCTION && import.meta.env.VITE_POSTHOG_DEV !== 'true') return;
 
-  try {
-    posthog.init(POSTHOG_KEY, {
-      api_host: POSTHOG_HOST,
-      autocapture: false,
-      capture_pageview: false,   // we fire manually on route change
-      capture_pageleave: true,
-      persistence: 'localStorage+cookie',
-      loaded: () => { _posthogReady = true; },
-    });
-  } catch (e) {
-    console.warn('[analytics] PostHog init failed', e);
-  }
+  // Dynamic import keeps posthog-js out of the initial bundle.
+  import('posthog-js').then(({ default: posthog }) => {
+    try {
+      posthog.init(POSTHOG_KEY, {
+        api_host: POSTHOG_HOST,
+        autocapture: false,
+        capture_pageview: false,   // we fire manually on route change
+        capture_pageleave: true,
+        persistence: 'localStorage+cookie',
+        loaded: () => {
+          _posthog = posthog;
+          _posthogReady = true;
+        },
+      });
+    } catch (e) {
+      console.warn('[analytics] PostHog init failed', e);
+    }
+  }).catch((e) => {
+    console.warn('[analytics] PostHog load failed', e);
+  });
 }
 
 export function identifyPostHog(userId, traits) {
-  if (!_posthogReady) return;
-  posthog.identify(userId, traits);
+  if (!getAnalyticsConsent()) return;
+  if (!_posthogReady || !_posthog) return;
+  _posthog.identify(userId, traits);
 }
 
 export function resetPostHog() {
-  if (!_posthogReady) return;
-  posthog.reset();
+  if (!_posthogReady || !_posthog) return;
+  _posthog.reset();
 }
 
 // ─── Meta Pixel ──────────────────────────────────────────────────────────────
 
 export function initMetaPixel() {
+  if (!getAnalyticsConsent()) return;
   if (!META_PIXEL_ID || !IS_WEB || !IS_PRODUCTION) return;
   if (typeof window === 'undefined') return;
 
@@ -80,6 +165,7 @@ export function initMetaPixel() {
 }
 
 function fbqTrack(eventName, params) {
+  if (!getAnalyticsConsent()) return;
   if (!_pixelReady || typeof window.fbq !== 'function') return;
   if (params) {
     window.fbq('track', eventName, params);
@@ -91,6 +177,7 @@ function fbqTrack(eventName, params) {
 // ─── GA4 (optional) ──────────────────────────────────────────────────────────
 
 export function initGA4() {
+  if (!getAnalyticsConsent()) return;
   if (!GA_ID || !IS_WEB || !IS_PRODUCTION) return;
   if (typeof window === 'undefined') return;
 
@@ -107,6 +194,7 @@ export function initGA4() {
 }
 
 function gtagEvent(name, params) {
+  if (!getAnalyticsConsent()) return;
   if (!_gaReady || typeof window.gtag !== 'function') return;
   window.gtag('event', name, params);
 }
@@ -117,6 +205,7 @@ function gtagEvent(name, params) {
  * Initialize all analytics providers. Call once at app boot.
  */
 export function initAnalytics() {
+  if (!getAnalyticsConsent()) return;
   initPostHog();
   initMetaPixel();
   initGA4();
@@ -126,8 +215,9 @@ export function initAnalytics() {
  * Track a page view across all providers. Call on every route change.
  */
 export function trackPageView(path) {
-  if (_posthogReady) {
-    posthog.capture('$pageview', { $current_url: window.location.href });
+  if (!getAnalyticsConsent()) return;
+  if (_posthogReady && _posthog) {
+    _posthog.capture('$pageview', { $current_url: window.location.href });
   }
   if (_pixelReady) {
     window.fbq('track', 'PageView');
@@ -141,6 +231,7 @@ export function trackPageView(path) {
  * Identify a user across all providers.
  */
 export function identifyUser(userId, traits = {}) {
+  if (!getAnalyticsConsent()) return;
   identifyPostHog(userId, traits);
 }
 
@@ -159,8 +250,9 @@ export function resetAnalyticsUser() {
  * @param {object} props   — optional properties
  */
 export function track(event, props = {}) {
-  if (_posthogReady) {
-    posthog.capture(event, props);
+  if (!getAnalyticsConsent()) return;
+  if (_posthogReady && _posthog) {
+    _posthog.capture(event, props);
   }
   if (_gaReady) {
     gtagEvent(event, props);

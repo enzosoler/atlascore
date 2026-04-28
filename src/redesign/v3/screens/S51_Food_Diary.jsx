@@ -3,6 +3,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACNum, ACMono, ACChip, ACBtn,
 } from '../lib/paper.jsx';
+import { useVirtualRows } from '../lib/useVirtualRows.js';
 
 /**
  * S51_Food_Diary — historical food diary with date navigation.
@@ -142,6 +143,41 @@ export default function S51_Food_Diary({
       return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
     }),
   [activeMeals]);
+  const diaryRows = useMemo(() => sortedMeals.flatMap((meal) => {
+    const items = Array.isArray(meal.items) ? meal.items : [];
+    const mealKcal = items.reduce((s, it) => s + (Number(it.kcal) || 0), 0);
+    const slotName = SLOT_LABEL[meal.slot] || meal.slot || 'Meal';
+    const rows = [{
+      type: 'meal',
+      id: `meal-${meal.id}`,
+      meal,
+      items,
+      mealKcal,
+      slotName,
+      empty: items.length === 0,
+    }];
+
+    if (items.length > 0) {
+      rows.push(...items.map((item) => ({
+        type: 'item',
+        id: `item-${item.id}`,
+        item,
+      })));
+    } else {
+      rows.push({
+        type: 'empty-action',
+        id: `empty-${meal.id}`,
+        slotName,
+      });
+    }
+
+    return rows;
+  }), [sortedMeals]);
+  const { parentRef: diaryListRef, virtualRows, totalSize } = useVirtualRows({
+    count: diaryRows.length,
+    estimateSize: 64,
+    overscan: 8,
+  });
 
   const kcalCur = Math.round(activeTotals.kcal?.current || 0);
   const kcalTgt = Math.round(activeTotals.kcal?.target || 0);
@@ -158,6 +194,89 @@ export default function S51_Food_Diary({
   const handleOpenItem = (id) => { if (typeof onOpenItem === 'function') onOpenItem(id); };
   const handleCapture = () => { if (typeof onCapture === 'function') onCapture(); };
   const handleBack = () => { if (typeof onBack === 'function') onBack(); };
+  const renderDiaryRow = (row) => {
+    if (row.type === 'meal') {
+      return (
+        <button
+          type="button"
+          onClick={() => handleOpenMeal(row.meal.id)}
+          style={{
+            display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+            width: '100%', padding: '10px 0', background: 'transparent',
+            border: 'none', cursor: 'pointer', textAlign: 'left',
+          }}
+        >
+          <div style={{
+            fontFamily: ACFonts.display, fontSize: 17, fontWeight: 600,
+            color: c.fg, letterSpacing: -0.2,
+          }}>
+            {row.slotName}
+          </div>
+          <ACLabel size={12} color={row.empty ? c.mute : c.fg} style={{ fontWeight: 500 }}>
+            {row.empty ? 'Empty' : `${Math.round(row.mealKcal)} kcal`}
+          </ACLabel>
+        </button>
+      );
+    }
+
+    if (row.type === 'empty-action') {
+      return (
+        <button
+          type="button"
+          onClick={handleCapture}
+          style={{
+            padding: '12px 0', display: 'flex', alignItems: 'center', gap: 10,
+            color: c.accent, fontSize: 13, fontWeight: 600,
+            borderTop: `1px solid ${c.hair}`,
+            background: 'transparent', border: 'none', borderTopStyle: 'solid',
+            borderTopWidth: 1, borderTopColor: c.hair,
+            width: '100%', textAlign: 'left', cursor: 'pointer',
+          }}
+        >
+          <span style={{
+            width: 20, height: 20, borderRadius: 6,
+            background: c.accent, color: c.ink,
+            textAlign: 'center', lineHeight: '20px',
+            fontSize: 16, fontWeight: 600,
+          }}>+</span>
+          Add to {row.slotName.toLowerCase()}
+        </button>
+      );
+    }
+
+    const it = row.item;
+    return (
+      <button
+        type="button"
+        onClick={() => handleOpenItem(it.id)}
+        style={{
+          display: 'flex', width: '100%', padding: '12px 0',
+          alignItems: 'center', background: 'transparent',
+          border: 'none', borderTop: `1px solid ${c.hair}`,
+          cursor: 'pointer', textAlign: 'left', gap: 10,
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 14.5, fontWeight: 500, color: c.fg,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            {it.name}
+          </div>
+          <ACLabel size={11} color={c.dim}>{it.portion || '\u2014'}</ACLabel>
+        </div>
+        <span style={{
+          fontFamily: ACFonts.display, fontSize: 13, fontWeight: 600,
+          color: c.fg, fontVariantNumeric: 'tabular-nums', flexShrink: 0,
+        }}>
+          {Math.round(Number(it.kcal) || 0)}
+        </span>
+        <svg width="12" height="12" viewBox="0 0 12 12" style={{ flexShrink: 0 }}>
+          <path d="M4 2l4 4-4 4" stroke={c.mute} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    );
+  };
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -325,95 +444,35 @@ export default function S51_Food_Diary({
             </ACLabel>
           </div>
         ) : (
-          sortedMeals.map((meal) => {
-            const items = Array.isArray(meal.items) ? meal.items : [];
-            const mealKcal = items.reduce((s, it) => s + (Number(it.kcal) || 0), 0);
-            const slotName = SLOT_LABEL[meal.slot] || meal.slot || 'Meal';
-            const empty = items.length === 0;
-
-            return (
-              <div key={meal.id} style={{ marginBottom: 18 }}>
-                {/* Meal header */}
-                <button
-                  type="button"
-                  onClick={() => handleOpenMeal(meal.id)}
-                  style={{
-                    display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
-                    width: '100%', padding: '0 0 10px', background: 'transparent',
-                    border: 'none', cursor: 'pointer', textAlign: 'left',
-                  }}
-                >
-                  <div style={{
-                    fontFamily: ACFonts.display, fontSize: 17, fontWeight: 600,
-                    color: c.fg, letterSpacing: -0.2,
-                  }}>
-                    {slotName}
+          <div
+            ref={diaryListRef}
+            style={{
+              maxHeight: Math.min(620, Math.max(180, totalSize)),
+              overflow: 'auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            <div style={{ height: totalSize, position: 'relative' }}>
+              {virtualRows.map((virtualRow) => {
+                const row = diaryRows[virtualRow.index];
+                return (
+                  <div
+                    key={row.id}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    {renderDiaryRow(row)}
                   </div>
-                  <ACLabel size={12} color={empty ? c.mute : c.fg} style={{ fontWeight: 500 }}>
-                    {empty ? 'Empty' : `${Math.round(mealKcal)} kcal`}
-                  </ACLabel>
-                </button>
-
-                {/* Items */}
-                {items.map((it) => (
-                  <button
-                    key={it.id}
-                    type="button"
-                    onClick={() => handleOpenItem(it.id)}
-                    style={{
-                      display: 'flex', width: '100%', padding: '12px 0',
-                      alignItems: 'center', background: 'transparent',
-                      border: 'none', borderTop: `1px solid ${c.hair}`,
-                      cursor: 'pointer', textAlign: 'left', gap: 10,
-                    }}
-                  >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontSize: 14.5, fontWeight: 500, color: c.fg,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      }}>
-                        {it.name}
-                      </div>
-                      <ACLabel size={11} color={c.dim}>{it.portion || '\u2014'}</ACLabel>
-                    </div>
-                    <span style={{
-                      fontFamily: ACFonts.display, fontSize: 13, fontWeight: 600,
-                      color: c.fg, fontVariantNumeric: 'tabular-nums', flexShrink: 0,
-                    }}>
-                      {Math.round(Number(it.kcal) || 0)}
-                    </span>
-                    <svg width="12" height="12" viewBox="0 0 12 12" style={{ flexShrink: 0 }}>
-                      <path d="M4 2l4 4-4 4" stroke={c.mute} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                ))}
-
-                {/* Add-to-slot action */}
-                {empty && (
-                  <button
-                    type="button"
-                    onClick={handleCapture}
-                    style={{
-                      padding: '12px 0', display: 'flex', alignItems: 'center', gap: 10,
-                      color: c.accent, fontSize: 13, fontWeight: 600,
-                      borderTop: `1px solid ${c.hair}`,
-                      background: 'transparent', border: 'none', borderTopStyle: 'solid',
-                      borderTopWidth: 1, borderTopColor: c.hair,
-                      width: '100%', textAlign: 'left', cursor: 'pointer',
-                    }}
-                  >
-                    <span style={{
-                      width: 20, height: 20, borderRadius: 6,
-                      background: c.accent, color: c.ink,
-                      textAlign: 'center', lineHeight: '20px',
-                      fontSize: 16, fontWeight: 600,
-                    }}>+</span>
-                    Add to {slotName.toLowerCase()}
-                  </button>
-                )}
-              </div>
-            );
-          })
+                );
+              })}
+            </div>
+          </div>
         )}
 
         {/* ── Trajectory / insight strip ──────────────────────── */}

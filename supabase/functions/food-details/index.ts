@@ -6,16 +6,14 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  const json = makeJson(corsHeaders);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
@@ -136,12 +134,14 @@ serve(async (req) => {
   }
 });
 
-function json(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: {
-      ...CORS_HEADERS,
-      'Content-Type': 'application/json',
-    },
-  });
+function makeJson(corsHeaders: Record<string, string>) {
+  return function json(payload: unknown, status = 200) {
+    return new Response(JSON.stringify(payload), {
+      status,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
+    });
+  };
 }

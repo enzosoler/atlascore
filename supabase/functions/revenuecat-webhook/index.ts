@@ -27,12 +27,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { writeSubscriptionByUserId } from '../_shared/subscription-write.js';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 // All active RevenueCat products grant the 'pro' tier today. The RevenueCat
 // SDK layer (src/lib/revenueCat.js) uses a single entitlement `atlas.core Pro`
@@ -58,14 +54,15 @@ const REVOKING_EVENTS = new Set([
 ]);
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -75,7 +72,7 @@ serve(async (req) => {
     console.error('revenuecat-webhook: REVENUECAT_WEBHOOK_SECRET not configured');
     return new Response(JSON.stringify({ error: 'Webhook not configured' }), {
       status: 503,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -88,7 +85,7 @@ serve(async (req) => {
     console.error('revenuecat-webhook: Invalid authorization');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -99,7 +96,7 @@ serve(async (req) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -108,7 +105,7 @@ serve(async (req) => {
     console.error('revenuecat-webhook: Missing event data in payload');
     return new Response(JSON.stringify({ error: 'Invalid payload' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -147,7 +144,7 @@ serve(async (req) => {
     console.log(`revenuecat-webhook: Event ${eventId} already processed, skipping`);
     return new Response(JSON.stringify({ received: true, idempotency: 'skipped' }), {
       status: 200,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -176,14 +173,14 @@ serve(async (req) => {
       console.log(`revenuecat-webhook: Event ${eventId} already processed by another worker, skipping`);
       return new Response(JSON.stringify({ received: true, idempotency: 'skipped' }), {
         status: 200,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     console.error('revenuecat-webhook: Failed to insert event:', insertError);
     // Return 500 so RevenueCat retries — we haven't actually processed it.
     return new Response(JSON.stringify({ error: 'Failed to record event' }), {
       status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -236,13 +233,13 @@ serve(async (req) => {
     // subscription_events unique constraint above.
     return new Response(JSON.stringify({ error: 'Processing failed' }), {
       status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   return new Response(JSON.stringify({ received: true }), {
     status: 200,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });
 

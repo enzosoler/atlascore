@@ -81,7 +81,7 @@ export function OnboardingTour() {
       localStorage.getItem(TOUR_STORAGE_KEY) ||
       localStorage.getItem(TOUR_STORAGE_KEY_LEGACY);
     if (!done) {
-      console.log('[OnboardingTour] showing tour for user:', user?.id);
+      if (import.meta.env.DEV) console.log('[OnboardingTour] showing tour for user:', user?.id);
       timerRef.current = setTimeout(() => setIsVisible(true), 600);
     }
     return () => clearTimeout(timerRef.current);

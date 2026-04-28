@@ -1,0 +1,42 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    setup_ci if ENV["CI"]
+
+    app_store_connect_api_key(
+      key_id: "9UYK82J243",
+      issuer_id: "38e294c4-9db6-4a74-9cdf-96d1da9a8413",
+      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_9UYK82J243.p8"),
+      in_house: false
+    )
+
+    build_app(
+      project: "App.xcodeproj",
+      scheme: "App",
+      export_method: "app-store",
+      clean: true,
+      output_directory: "./build",
+      output_name: "AtlasCore.ipa",
+      xcargs: "-allowProvisioningUpdates"
+    )
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build only (no upload)"
+  lane :build do
+    build_app(
+      project: "App.xcodeproj",
+      scheme: "App",
+      export_method: "app-store",
+      clean: true,
+      output_directory: "./build",
+      output_name: "AtlasCore.ipa",
+      xcargs: "-allowProvisioningUpdates"
+    )
+  end
+end

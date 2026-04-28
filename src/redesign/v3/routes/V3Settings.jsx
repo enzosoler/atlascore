@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
+import { getAnalyticsConsent, setAnalyticsConsent, subscribeAnalyticsConsent } from '@/lib/analytics';
 import { getDefaultUserPreferences, loadUserPreferences, updateUserPreferences } from '@/services/userPreferencesService';
 import {
   WEBAPP_BILLING,
@@ -48,6 +49,7 @@ export default function V3Settings() {
   const { user, logout } = useAuth();
   const realUser = buildRealUser(user);
   const [preferences, setPreferences] = useState(getDefaultUserPreferences);
+  const [analyticsAllowed, setAnalyticsAllowedState] = useState(() => getAnalyticsConsent());
   const [prefsLoading, setPrefsLoading] = useState(true);
   const [prefsSaving, setPrefsSaving] = useState(false);
   const currentLanguageLabel = locale === 'pt-BR'
@@ -76,6 +78,8 @@ export default function V3Settings() {
     };
   }, [user?.id]);
 
+  useEffect(() => subscribeAnalyticsConsent(setAnalyticsAllowedState), []);
+
   async function setDailyCheckinRequired(nextValue) {
     if (prefsSaving) return;
     const optimistic = { ...preferences, dailyCheckinRequired: nextValue };
@@ -91,6 +95,12 @@ export default function V3Settings() {
     } finally {
       setPrefsSaving(false);
     }
+  }
+
+  function setAnalyticsAllowed(nextValue) {
+    setAnalyticsConsent(nextValue);
+    setAnalyticsAllowedState(nextValue);
+    toast(nextValue ? t('settings.v3.toasts.analyticsOn') : t('settings.v3.toasts.analyticsOff'));
   }
 
   const groups = [
@@ -154,6 +164,17 @@ export default function V3Settings() {
       l: t('settings.v3.sections.dataPrivacy'),
       rows: [
         { k: 'export', t: t('settings.v3.rows.exportData'),      d: t('settings.v3.rows.desktopExportDesc'), chevron: true },
+        {
+          k: 'analytics-consent',
+          t: t('settings.v3.rows.analyticsConsent'),
+          d: analyticsAllowed
+            ? t('settings.v3.rows.analyticsConsentDescOn')
+            : t('settings.v3.rows.analyticsConsentDescOff'),
+          toggle: {
+            checked: analyticsAllowed,
+            ariaLabel: t('settings.v3.rows.analyticsConsentAriaLabel'),
+          },
+        },
         { k: 'photos', t: t('settings.v3.rows.progressPhotos'),  d: t('settings.v3.rows.progressPhotosDesc'), chevron: true, chip: t('settings.v3.rows.localChip') },
         { k: 'delete', t: t('settings.v3.rows.dangerZone'),      d: t('settings.v3.rows.desktopDangerDesc'), chevron: true, danger: true },
       ],
@@ -179,6 +200,10 @@ export default function V3Settings() {
       onOpenRow={async (key) => {
         if (key === 'daily-checkin-required') {
           await setDailyCheckinRequired(!dailyCheckinRequired);
+          return;
+        }
+        if (key === 'analytics-consent') {
+          setAnalyticsAllowed(!analyticsAllowed);
           return;
         }
         // Theme toggle works directly — no sub-screen needed
@@ -218,6 +243,9 @@ export default function V3Settings() {
       onToggleRow={async (key, checked) => {
         if (key === 'daily-checkin-required') {
           await setDailyCheckinRequired(checked);
+        }
+        if (key === 'analytics-consent') {
+          setAnalyticsAllowed(checked);
         }
       }}
       onSignOut={async () => {

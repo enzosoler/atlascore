@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { HeartMark } from '@/redesign/v3/lib/brandMarks.jsx';
 import { useI18n, useT } from '@/lib/i18nContext';
@@ -122,7 +123,9 @@ function CTA({ to, children, primary = false }) {
 
 export default function V3MarketingLayout({ eyebrow, title, intro, children, hideCTAs = false }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const t = useT();
+  const isNative = Capacitor.isNativePlatform();
   return (
     <div style={{ minHeight: '100vh', background: ACBrand.paper, color: ACBrand.ink, fontFamily: ACFonts.body }}>
       <style>{`
@@ -158,37 +161,73 @@ export default function V3MarketingLayout({ eyebrow, title, intro, children, hid
           .mkt-footer { flex-direction: column !important; text-align: center !important; gap: 12px !important; }
         }
       `}</style>
-      <div
-        className="mkt-pad"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 28,
-          padding: '22px 56px',
-          borderBottom: MC.border,
-          flexWrap: 'wrap',
-        }}
-      >
-        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
-          <HeartMark size={34} stroke={2} />
-          <span style={{ fontFamily: ACFonts.brand, fontSize: 22, letterSpacing: -0.5, textTransform: 'lowercase' }}>
+      {isNative ? (
+        /* ── Native header: simple back chevron + brand mark ── */
+        <div
+          className="mkt-pad"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            padding: '16px 20px',
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+            borderBottom: MC.border,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            aria-label={t('common.back')}
+            style={{
+              width: 34, height: 34, borderRadius: 999,
+              background: 'rgba(10,10,10,0.06)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: 'none', cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
+              <path d="M8.5 1L1.5 8l7 7" stroke={ACBrand.ink} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <HeartMark size={26} stroke={2} />
+          <span style={{ fontFamily: ACFonts.brand, fontSize: 18, letterSpacing: -0.4, textTransform: 'lowercase' }}>
             atlas.<span style={{ color: ACBrand.accent }}>core</span>
           </span>
-        </Link>
-
-        <div className="mkt-nav-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          <NavItem to="/#what-it-does">{t('marketing.nav.theApp')}</NavItem>
-          <NavItem to="/method">{t('marketing.nav.method')}</NavItem>
-          <NavItem to="/science">{t('marketing.nav.labs')}</NavItem>
-          <NavItem to="/pricing">{t('marketing.nav.pricing')}</NavItem>
         </div>
+      ) : (
+        /* ── Web header: full marketing nav ── */
+        <div
+          className="mkt-pad"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 28,
+            padding: '22px 56px',
+            borderBottom: MC.border,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
+            <HeartMark size={34} stroke={2} />
+            <span style={{ fontFamily: ACFonts.brand, fontSize: 22, letterSpacing: -0.5, textTransform: 'lowercase' }}>
+              atlas.<span style={{ color: ACBrand.accent }}>core</span>
+            </span>
+          </Link>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <LocaleToggle />
-          <CTA to="/auth/login?mode=password">{t('marketing.cta.signIn')}</CTA>
-          <CTA to="/?quiz=start" primary>{t('welcome.createAccount')}</CTA>
+          <div className="mkt-nav-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <NavItem to="/#what-it-does">{t('marketing.nav.theApp')}</NavItem>
+            <NavItem to="/method">{t('marketing.nav.method')}</NavItem>
+            <NavItem to="/science">{t('marketing.nav.labs')}</NavItem>
+            <NavItem to="/pricing">{t('marketing.nav.pricing')}</NavItem>
+          </div>
+
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <LocaleToggle />
+            <CTA to="/auth/login?mode=password">{t('marketing.cta.signIn')}</CTA>
+            <CTA to="/?quiz=start" primary>{t('welcome.createAccount')}</CTA>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mkt-pad" key={pathname} style={{ maxWidth: 1180, margin: '0 auto', padding: '72px 56px 96px', animation: 'mktFadeIn 0.4s ease-out' }}>
         <div style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 2.5, textTransform: 'uppercase', color: MC.dim }}>

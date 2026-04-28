@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
@@ -10,6 +10,18 @@ import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S12_Coach_Chat from '../screens/S12_Coach_Chat.jsx';
 
 const COACH_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach-chat`;
+const AI_CONSENT_KEY = 'atlas.ai_consent_given';
+
+function useAIConsent() {
+  const [consented, setConsented] = useState(() => {
+    try { return localStorage.getItem(AI_CONSENT_KEY) === '1'; } catch { return false; }
+  });
+  const grant = useCallback(() => {
+    try { localStorage.setItem(AI_CONSENT_KEY, '1'); } catch { /* noop */ }
+    setConsented(true);
+  }, []);
+  return { consented, grant };
+}
 
 export default function V3CoachChat() {
   const navigate = useNavigate();
@@ -18,6 +30,7 @@ export default function V3CoachChat() {
   const { user } = useAuth();
   const [params] = useSearchParams();
   const ask = params.get('ask');
+  const { consented, grant: grantConsent } = useAIConsent();
 
   // Daily state for context
   const { workoutDone, nutrition, checkin } = useDailyStateV2();
@@ -120,6 +133,47 @@ export default function V3CoachChat() {
   const visibleMessages = loading
     ? [...messages, { text: '…', meta: t('coach.chat.runtime.typingMeta') }]
     : messages;
+
+  if (!consented) {
+    const dark = theme === 'dark';
+    return (
+      <V3StandaloneLayout>
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          flex: 1, padding: 32, textAlign: 'center',
+          color: dark ? '#fff' : '#111', background: dark ? '#111' : '#fff',
+        }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
+            {t('coach.chat.consent.title')}
+          </h2>
+          <p style={{ fontSize: 15, lineHeight: 1.6, opacity: 0.8, maxWidth: 360, marginBottom: 32 }}>
+            {t('coach.chat.consent.body')}
+          </p>
+          <button
+            onClick={grantConsent}
+            style={{
+              padding: '14px 28px', borderRadius: 12, border: 'none', cursor: 'pointer',
+              fontSize: 16, fontWeight: 600, marginBottom: 12, width: '100%', maxWidth: 320,
+              background: dark ? '#fff' : '#111', color: dark ? '#111' : '#fff',
+            }}
+          >
+            {t('coach.chat.consent.accept')}
+          </button>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              padding: '14px 28px', borderRadius: 12, border: '1px solid',
+              borderColor: dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+              cursor: 'pointer', fontSize: 16, fontWeight: 500, width: '100%', maxWidth: 320,
+              background: 'transparent', color: dark ? '#fff' : '#111',
+            }}
+          >
+            {t('coach.chat.consent.decline')}
+          </button>
+        </div>
+      </V3StandaloneLayout>
+    );
+  }
 
   return (
     <V3StandaloneLayout>

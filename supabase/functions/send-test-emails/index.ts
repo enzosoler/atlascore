@@ -8,6 +8,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { previewVariables, renderEmail, templates } from '../_shared/templates.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 type Locale = 'pt-BR' | 'en';
 
@@ -33,10 +34,11 @@ function derivePreviewRecipient(to: string, locale: Locale) {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
-      headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' },
+      headers: corsHeaders,
     });
   }
 
@@ -82,6 +84,6 @@ serve(async (req) => {
 
   return new Response(JSON.stringify({ to, sent, total: results.length, results }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

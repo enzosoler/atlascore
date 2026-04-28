@@ -14,6 +14,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { mapAICoachError } from '@/lib/aiCoachErrors';
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-decision-engine`;
 const STALE_TIME = 4 * 60 * 60 * 1000; // 4 hours
@@ -34,24 +35,8 @@ async function fetchCoachingOutput() {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     
-    // More specific error handling for common issues
-    if (res.status === 503) {
-      console.error('[AI Coach] Service unavailable (503):', err);
-      throw new Error('AI coaching service is temporarily unavailable. Please try again in a few minutes.');
-    }
-    
-    if (res.status === 429) {
-      console.error('[AI Coach] Rate limit exceeded (429):', err);
-      throw new Error('AI coaching rate limit exceeded. Please try again later.');
-    }
-    
-    if (res.status === 401) {
-      console.error('[AI Coach] Unauthorized (401):', err);
-      throw new Error('Authentication failed. Please sign in again.');
-    }
-    
     console.error('[AI Coach] Engine error:', res.status, err);
-    throw new Error(err.error ?? `AI service error ${res.status}`);
+    throw new Error(mapAICoachError(res.status, err));
   }
 
   return res.json();

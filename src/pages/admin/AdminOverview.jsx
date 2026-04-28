@@ -8,7 +8,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ACFonts, ACBrand, useACT, ACNum, ACLabel, ACMono } from '@/redesign/v3/lib/paper.jsx';
+import { ACFonts, ACBrand, useACT, ACMono } from '@/redesign/v3/lib/paper.jsx';
 import {
   getEnhancedAdminMetrics,
   fetchRecentSignups,
@@ -19,7 +19,7 @@ import {
 import AdminSparkline from '@/components/admin/AdminSparkline';
 import AdminFunnelBar from '@/components/admin/AdminFunnelBar';
 
-function KPICard({ label, value, sub, accent, c }) {
+function KPICard({ label, value, sub = null, accent = false, c }) {
   return (
     <div style={{
       padding: 20, borderRadius: 14,
@@ -38,7 +38,7 @@ function KPICard({ label, value, sub, accent, c }) {
   );
 }
 
-function RecentList({ title, items, emptyText, c, onClickItem }) {
+function RecentList({ title, items, emptyText, c, onClickItem = null }) {
   return (
     <div style={{
       padding: 20, borderRadius: 14,
@@ -103,6 +103,7 @@ export default function AdminOverview() {
     staleTime: 60_000,
   });
 
+  /** @type {Record<string, any>} */
   const m = metrics || {};
   const maxFunnel = funnel?.[0]?.count || 1;
 
@@ -177,7 +178,7 @@ export default function AdminOverview() {
                 key={step.label || i}
                 label={step.label}
                 count={step.count}
-                conversionPct={step.conversionPct}
+                conversionPct={step.conversionFromPrev}
                 dropoffPct={step.dropoffPct}
                 maxCount={maxFunnel}
                 isFirst={i === 0}

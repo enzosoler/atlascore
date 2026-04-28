@@ -57,7 +57,8 @@ const ChartStyle = ({
   }
 
   return (
-    (<style
+    (// Safe: CSS from developer-controlled chart config, not user input
+    <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(([theme, prefix]) => `

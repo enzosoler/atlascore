@@ -19,11 +19,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { SignJWT, importPKCS8 } from 'https://deno.land/x/jose@v5.2.0/index.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 // APNs endpoints
 const APNS_HOST_PROD = 'https://api.push.apple.com';
@@ -109,8 +106,9 @@ async function sendToAPNs(
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   // Only allow service_role or authenticated calls
@@ -132,7 +130,7 @@ serve(async (req) => {
     body = await req.json();
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-      status: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -141,7 +139,7 @@ serve(async (req) => {
 
   if (!userIds.length || !title || !messageBody) {
     return new Response(JSON.stringify({ error: 'user_id(s), title, and body are required' }), {
-      status: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -165,7 +163,7 @@ serve(async (req) => {
       message: 'Push skipped because the user has no registered iOS device token.',
       errors: dbError?.message || 'No tokens found',
     }), {
-      status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -198,6 +196,6 @@ serve(async (req) => {
   }
 
   return new Response(JSON.stringify({ sent, failed, cleaned: staleTokenIds.length }), {
-    status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

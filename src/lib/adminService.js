@@ -646,7 +646,7 @@ export async function fetchUserMeasurements(userId) {
 export async function fetchUserPhotos(userId) {
   const { data, error } = await supabase
     .from('progress_photos')
-    .select('id, photo_url, date, category, created_at, notes')
+    .select('id, photo_url, date, category, created_at, notes, weight')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -757,7 +757,7 @@ export async function fetchUserTimeline(userId) {
     events.push({ type: 'audit', date: a.created_at, label: a.action_type, detail: typeof a.action_detail === 'string' ? a.action_detail : JSON.stringify(a.action_detail || ''), raw: a });
   });
 
-  events.sort((a, b) => new Date(b.date) - new Date(a.date));
+  events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   return events;
 }
 
@@ -826,7 +826,7 @@ export async function fetchRecentSignups(limit = 5) {
 export async function fetchRecentErrors(limit = 5) {
   const { data, error } = await supabase
     .from('error_logs')
-    .select('id, message, component, route, user_id, created_at')
+    .select('id, message, error_message, component, route, user_id, created_at')
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;

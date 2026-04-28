@@ -13,6 +13,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { renderEmail } from '../_shared/templates.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 const APP_URL = Deno.env.get('APP_URL') || 'https://useatlascore.com';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -20,11 +21,6 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'atlas.core <noreply@useatlascore.com>';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 function sanitizeLogValue(value: unknown): unknown {
   if (typeof value !== 'string') return value;
@@ -48,13 +44,14 @@ function getClientIp(req: Request): string | null {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -63,7 +60,7 @@ Deno.serve(async (req) => {
     body = await req.json();
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-      status: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -71,7 +68,7 @@ Deno.serve(async (req) => {
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return new Response(JSON.stringify({ error: 'Valid email required' }), {
-      status: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -89,7 +86,7 @@ Deno.serve(async (req) => {
   if (rateLimitError) {
     console.error('send-password-reset: rate limit check failed:', sanitizeLogValue(rateLimitError.message));
     return new Response(JSON.stringify({ error: 'Password reset temporarily unavailable' }), {
-      status: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -98,7 +95,7 @@ Deno.serve(async (req) => {
     const retryAfter = String(rateLimit.retry_after_seconds ?? 3600);
     return new Response(JSON.stringify({ error: 'Too many password reset requests. Try again later.' }), {
       status: 429,
-      headers: { ...CORS, 'Content-Type': 'application/json', 'Retry-After': retryAfter },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': retryAfter },
     });
   }
 
@@ -125,7 +122,7 @@ Deno.serve(async (req) => {
       console.error('send-password-reset: generateLink error:', linkError?.message);
       // Don't reveal whether the user exists or not (security)
       return new Response(JSON.stringify({ success: true }), {
-        status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -134,14 +131,14 @@ Deno.serve(async (req) => {
     console.error('send-password-reset: generateLink exception:', e);
     // Silent success to prevent email enumeration
     return new Response(JSON.stringify({ success: true }), {
-      status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   if (!RESEND_API_KEY) {
     console.error('send-password-reset: RESEND_API_KEY not configured');
     return new Response(JSON.stringify({ error: 'Email delivery not configured' }), {
-      status: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -182,7 +179,7 @@ Deno.serve(async (req) => {
         email: normalizedEmail,
       });
       return new Response(JSON.stringify({ error: 'Email delivery failed' }), {
-        status: 502, headers: { ...CORS, 'Content-Type': 'application/json' },
+        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -194,12 +191,12 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.error('send-password-reset: resend exception:', e);
     return new Response(JSON.stringify({ error: 'Email delivery failed' }), {
-      status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   console.log(`send-password-reset: ✓ reset email sent to ${normalizedEmail}`);
   return new Response(JSON.stringify({ success: true }), {
-    status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

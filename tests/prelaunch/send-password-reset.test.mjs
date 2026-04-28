@@ -34,6 +34,10 @@ async function loadHandler({
     .replace(
       "import { renderEmail } from '../_shared/templates.ts';",
       'const { renderEmail } = globalThis.__sendPasswordResetTestMocks;',
+    )
+    .replace(
+      "import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';",
+      'const { buildPreflightResponse, getCorsHeaders } = globalThis.__sendPasswordResetTestMocks;',
     );
 
   const transpiled = ts.transpileModule(rewritten, {
@@ -84,6 +88,16 @@ async function loadHandler({
     renderEmail(type, lang, vars) {
       renderCalls.push({ type, lang, vars });
       return renderEmailImpl(type, lang, vars);
+    },
+    getCorsHeaders() {
+      return {
+        'Access-Control-Allow-Origin': 'https://useatlascore.com',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      };
+    },
+    buildPreflightResponse() {
+      return new Response(null, { status: 200 });
     },
   };
 

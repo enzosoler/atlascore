@@ -69,6 +69,7 @@ export default function V3ExerciseDetail() {
   const exercise = useMemo(() => findExerciseById(id), [id]);
   const [sets, setSets] = useState([]);
   const [best, setBest] = useState(null);
+  const savedExercisesKey = 'atlas.exercise_saves.v1';
 
   useEffect(() => {
     let cancelled = false;
@@ -107,8 +108,25 @@ export default function V3ExerciseDetail() {
         cues={buildCues(exercise)}
         muscleEngagement={buildMuscleEngagement(exercise)}
         onBack={() => navigate(-1)}
-        onSave={() => toast(t('exercises.detail.favoritingComingSoon'))}
-        onOpenHistory={() => toast(t('exercises.detail.historyComingSoon'))}
+        onSave={() => {
+          try {
+            const saved = JSON.parse(localStorage.getItem(savedExercisesKey) || '[]');
+            const next = Array.from(new Set([...saved, id]));
+            localStorage.setItem(savedExercisesKey, JSON.stringify(next));
+          } catch { /* storage unavailable */ }
+          toast.success(t('exercises.detail.savedToast'));
+        }}
+        onFavorite={({ favorite }) => {
+          try {
+            const saved = JSON.parse(localStorage.getItem(savedExercisesKey) || '[]');
+            const next = favorite
+              ? Array.from(new Set([...saved, id]))
+              : saved.filter((exerciseId) => exerciseId !== id);
+            localStorage.setItem(savedExercisesKey, JSON.stringify(next));
+          } catch { /* storage unavailable */ }
+          toast.success(favorite ? t('exercises.detail.favoritedToast') : t('exercises.detail.unfavoritedToast'));
+        }}
+        onOpenHistory={() => navigate('/app/workouts/history', { state: { exerciseId: id } })}
         onLogSet={() => navigate('/app/workouts/active')}
       />
     </V3StandaloneLayout>

@@ -84,6 +84,7 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
               src={currentPhoto.photo_url}
               alt={`Progress photo ${currentIndex + 1}`}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-[hsl(var(--fg-2))]">
@@ -187,6 +188,7 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
                     src={photo.photo_url}
                     alt={`Thumbnail ${idx + 1}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[hsl(var(--shell))] text-[hsl(var(--fg-3))]">

@@ -170,7 +170,7 @@ test('billing service still creates checkout, returns success, and confirms chec
   );
 
   assert.match(source, /functions\.invoke\('create-checkout'/);
-  assert.match(source, /return data\.url;/);
+  assert.match(source, /url:\s*data\.url/);
   assert.match(source, /functions\.invoke\('complete-checkout'/);
   assert.match(source, /return data;/);
 });

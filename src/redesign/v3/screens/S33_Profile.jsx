@@ -58,6 +58,7 @@ export default function S33_Profile({
   recent,
   badges,
   quickLinks = [],
+  labels = {},
   onGoBack,
   onOpenSettings,
   onOpenProgram,
@@ -70,6 +71,15 @@ export default function S33_Profile({
   const compositionCard = composition === undefined ? MOCK_COMPOSITION : composition;
   const recentRows = recent === undefined ? MOCK_RECENT : recent;
   const badgeRows = badges === undefined ? MOCK_BADGES : badges;
+  const text = {
+    bigFour: 'The big four',
+    composition90d: 'Composition · 90d',
+    weight: 'Weight',
+    recent: 'Recent',
+    moreFromProfile: 'More from profile',
+    open: 'Open',
+    ...labels,
+  };
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -147,7 +157,7 @@ export default function S33_Profile({
             return (
               <>
                 <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                  The big four
+                  {text.bigFour}
                 </ACLabel>
                 <div style={{
                   marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6,
@@ -207,13 +217,13 @@ export default function S33_Profile({
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
                 <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                  Composition · 90d
+                  {text.composition90d}
                 </ACLabel>
                 <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.body, fontWeight: 700, letterSpacing: 0.1 }}>{compositionCard.label}</ACLabel>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
                 <div>
-                  <ACLabel size={9} color={c.mute} style={{ fontFamily: ACFonts.body, letterSpacing: 0.4, textTransform: 'uppercase' }}>Weight</ACLabel>
+                  <ACLabel size={9} color={c.mute} style={{ fontFamily: ACFonts.body, letterSpacing: 0.4, textTransform: 'uppercase' }}>{text.weight}</ACLabel>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
                     <ACNum size={22} color={c.fg} weight={700}>{compositionCard.weight}</ACNum>
                     <span style={{ fontFamily: ACFonts.body, fontSize: 9, color: c.dim }}>{compositionCard.unit}</span>
@@ -230,7 +240,7 @@ export default function S33_Profile({
           {Array.isArray(recentRows) && recentRows.length > 0 ? (
             <div style={{ marginTop: 14 }}>
             <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-              Recent
+              {text.recent}
             </ACLabel>
             <div style={{ marginTop: 8 }}>
               {recentRows.map((r, i) => (
@@ -258,7 +268,7 @@ export default function S33_Profile({
           {Array.isArray(quickLinks) && quickLinks.length > 0 ? (
             <div style={{ marginTop: 14 }}>
               <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                More from profile
+                {text.moreFromProfile}
               </ACLabel>
               <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {quickLinks.map((link) => (
@@ -276,7 +286,7 @@ export default function S33_Profile({
                     }}
                   >
                     <ACLabel size={10} color={link.meta ? c.accent : c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.35, textTransform: 'uppercase', fontWeight: 700 }}>
-                      {link.meta || 'Open'}
+                      {link.meta || text.open}
                     </ACLabel>
                     <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: c.fg }}>
                       {link.label}

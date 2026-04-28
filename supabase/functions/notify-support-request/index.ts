@@ -9,11 +9,8 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 const TYPE_LABELS: Record<string, string> = {
   bug: '🐛 Bug Report',
@@ -23,8 +20,9 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   try {
@@ -47,7 +45,7 @@ serve(async (req) => {
       console.error('[notify-support-request] RESEND_API_KEY not set');
       return new Response(JSON.stringify({ error: 'Email service not configured' }), {
         status: 503,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -90,7 +88,7 @@ serve(async (req) => {
       console.error('[notify-support-request] Resend error:', res.status, errText);
       return new Response(JSON.stringify({ error: `Email send failed (${res.status})` }), {
         status: 502,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -98,13 +96,13 @@ serve(async (req) => {
     console.log('[notify-support-request] Email sent:', data.id);
 
     return new Response(JSON.stringify({ success: true, emailId: data.id }), {
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
     console.error('[notify-support-request] Error:', err);
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

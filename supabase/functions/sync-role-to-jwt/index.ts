@@ -9,12 +9,8 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -25,9 +21,10 @@ interface SyncRoleRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS
+  const corsHeaders = getCorsHeaders(req);
+  // Handle corsHeaders
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   try {
@@ -35,7 +32,7 @@ serve(async (req) => {
     if (req.method !== 'POST') {
       return new Response(
         JSON.stringify({ error: 'Method not allowed' }),
-        { status: 405, headers: { ...CORS, 'Content-Type': 'application/json' } }
+        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -46,7 +43,7 @@ serve(async (req) => {
     if (!user_id) {
       return new Response(
         JSON.stringify({ error: 'user_id is required' }),
-        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -62,7 +59,7 @@ serve(async (req) => {
       console.error('Failed to fetch user:', fetchError?.message);
       return new Response(
         JSON.stringify({ error: 'User not found' }),
-        { status: 404, headers: { ...CORS, 'Content-Type': 'application/json' } }
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -105,7 +102,7 @@ serve(async (req) => {
       console.error('Failed to update user app_metadata:', updateError.message);
       return new Response(
         JSON.stringify({ error: 'Failed to update user metadata', details: updateError.message }),
-        { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -117,13 +114,13 @@ serve(async (req) => {
         message: `Role synced to user ${user_id}`,
         role: roleToSet,
       }),
-      { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error', details: String(error) }),
-      { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

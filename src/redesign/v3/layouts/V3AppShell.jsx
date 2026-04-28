@@ -2,22 +2,18 @@
  * v3 app shell — wraps the paper+ink+amber screens with a real React Router
  * outlet and a persistent bottom tab bar.
  *
- * Platform gate (CLAUDE.md §12–15):
- *   On web (non-native), only billing routes are publicly accessible.
- *   All other product routes redirect to /download-app UNLESS:
- *     - Running on a native device (Capacitor)
- *     - URL contains ?dev=1 (sets a persistent localStorage flag)
- *     - localStorage has "atlas.dev" set to "1"
- *   This keeps the public web as conversion/billing only while allowing
- *   internal dev/QA/design review access.
+ * Platform gate delegated to the canonical PlatformGate component
+ * (CLAUDE.md §12–15).
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import React from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PaperThemeProvider, ACTabBar, ACFonts, ACBrand, useACT } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { useTheme } from '@/lib/ThemeContext';
-import { Capacitor } from '@capacitor/core';
+import { PlatformGate } from '../lib/PlatformGate.jsx';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useT } from '@/lib/i18nContext';
 
 const TAB_ROUTES = {
   today: '/app/today',
@@ -26,36 +22,6 @@ const TAB_ROUTES = {
   coach: '/app/coach',
   profile: '/app/profile',
 };
-
-/** Routes allowed on public web (account management, billing, export). */
-const WEB_ALLOWED_PREFIXES = [
-  '/webapp',
-];
-
-function isWebAllowedRoute(pathname) {
-  return WEB_ALLOWED_PREFIXES.some((p) => pathname.startsWith(p));
-}
-
-/**
- * Check if dev mode is active. Sets the persistent flag when ?dev=1 is present.
- * Returns true if dev access should be granted on web.
- */
-function useDevMode() {
-  const location = useLocation();
-  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
-
-  useEffect(() => {
-    if (params.get('dev') === '1') {
-      try { localStorage.setItem('atlas.dev', '1'); } catch {}
-    }
-  }, [params]);
-
-  // Auto-bypass on localhost / dev server
-  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) return true;
-  if (import.meta.env.DEV) return true;
-  if (params.get('dev') === '1') return true;
-  try { return localStorage.getItem('atlas.dev') === '1'; } catch { return false; }
-}
 
 function tabFromPath(pathname) {
   if (pathname === '/app' || pathname.startsWith('/app/today') || pathname.startsWith('/app/insights') || pathname.startsWith('/app/diary') || pathname.startsWith('/app/weekly')) return 'today';
@@ -86,6 +52,8 @@ function V3ShellInner() {
   const c = useACT(dark);
   const active = tabFromPath(location.pathname);
   const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 768 : true;
+  const { isOnline } = useOnlineStatus();
+  const t = useT();
 
   return (
     <div
@@ -128,6 +96,20 @@ function V3ShellInner() {
       >
         <div style={{ height: 'calc(env(safe-area-inset-top, 0px) + 6px)' }} />
 
+        {!isOnline && (
+          <div style={{
+            background: '#e8b500',
+            color: '#0a0a0a',
+            textAlign: 'center',
+            padding: '6px 12px',
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: ACFonts.body,
+          }}>
+            {t('status.noInternetConnection')}
+          </div>
+        )}
+
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <Outlet />
         </div>
@@ -144,28 +126,6 @@ function V3ShellInner() {
       </div>
     </div>
   );
-}
-
-/**
- * Platform gate — redirects web users to /download-app for product routes.
- * Billing routes always pass. Dev mode (?dev=1 or localStorage) bypasses.
- */
-function PlatformGate({ children }) {
-  const location = useLocation();
-  const isNative = Capacitor.isNativePlatform();
-  const isDev = useDevMode();
-
-  // Native always passes
-  if (isNative) return children;
-
-  // Dev mode bypasses the gate
-  if (isDev) return children;
-
-  // Billing routes are allowed on web
-  if (isWebAllowedRoute(location.pathname)) return children;
-
-  // All other product routes → redirect to download
-  return <Navigate to="/download-app" replace />;
 }
 
 export default function V3AppShell() {

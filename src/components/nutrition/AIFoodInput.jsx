@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Sparkles, Loader2, AlertCircle, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { toast } from 'sonner';
 
 /**
@@ -114,6 +114,7 @@ function getConfidenceLabel(confidence = 0) {
 }
 
 export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefillText, onPrefillConsumed }) {
+  const t = useT();
   const { locale } = useI18n();
   const [text, setText] = useState('');
 
@@ -287,7 +288,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
       setSuggestedSearch(rawText);
 
       if (msg.includes('429') || msg.includes('rate')) {
-        setError('Too many requests. AI is busy -- try search below or wait a moment.');
+        setError(t('errors.aiFoodTooManyRequests'));
       } else if (msg.includes('limit') || msg.includes('cap')) {
         setError('Daily AI limit reached. Use the search feature to find your food.');
       } else if (msg && !msg.includes('fetch') && !msg.includes('network') && msg.length < 200) {
@@ -298,7 +299,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
     } finally {
       setIsAnalyzing(false);
     }
-  }, [text, locale]);
+  }, [text, locale, t]);
 
   const handleConfirm = useCallback(() => {
     if (editableItems.length === 0) return;

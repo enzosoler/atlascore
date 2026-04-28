@@ -322,9 +322,10 @@ export default function V3BodyPhotoCapture() {
               marginBottom: 30,
               border: `2px solid ${c.accent}`
             }}>
-              <img 
-                src={capturedPhoto} 
+              <img
+                src={capturedPhoto}
                 alt={`${activeView} body photo`}
+                loading="lazy"
                 style={{
                   width: '100%',
                   height: '100%',

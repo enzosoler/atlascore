@@ -371,7 +371,7 @@
     "athlete": "For athletes & enthusiasts",
     "professional": "For professionals",
     "professionalDesc": "For coaches and clinicians managing multiple clients. Professional features are available separately — contact us for access.",
-    "footer": "Try Pro free for 7 days — no commitment · Cancel anytime",
+    "footer": "Plan terms, price, and renewal details are confirmed before purchase.",
     "footerPayment": "Payments processed securely via Stripe",
     "plans": {
       "free": {
@@ -398,11 +398,11 @@
         "price": "$14.99",
         "period": "/month",
         "pitch": "Understand what's working",
-        "trial": "7-day free trial",
+        "trial": "Terms shown at checkout",
         "popular": "Most popular",
         "aiBadge": "AI-powered insights",
         "tagline": "Most users upgrade to understand their progress and stay consistent",
-        "cta": "Start Pro free trial",
+        "cta": "Continue to Pro",
         "features": [
           "AI workout & nutrition insights",
           "Complete training & meal plans",
@@ -417,7 +417,7 @@
         "price": "$29.99",
         "period": "/month",
         "pitch": "Full control and intelligence",
-        "trial": "7-day free trial",
+        "trial": "Terms shown at checkout",
         "aiBadge": "AI-powered insights",
         "tagline": "For users who want full control, advanced tracking, and deeper insights",
         "cta": "Unlock full system",
@@ -435,7 +435,7 @@
         "price": "$49.99",
         "period": "/month",
         "pitch": "Manage athletes effectively.",
-        "trial": "7 free trial days",
+        "trial": "Terms shown at checkout",
         "note": "Per coach · up to 20 athletes",
         "cta": "Subscribe as Coach",
         "features": [
@@ -454,7 +454,7 @@
         "price": "$39.99",
         "period": "/month",
         "pitch": "Monitor client nutrition.",
-        "trial": "7 free trial days",
+        "trial": "Terms shown at checkout",
         "note": "Per nutritionist · up to 25 clients",
         "cta": "Subscribe as Nutritionist",
         "features": [
@@ -473,7 +473,7 @@
         "price": "$64.99",
         "period": "/month",
         "pitch": "Consolidated clinical view.",
-        "trial": "7 free trial days",
+        "trial": "Terms shown at checkout",
         "note": "Per clinician · up to 30 patients",
         "cta": "Subscribe as Clinician",
         "features": [
@@ -1408,7 +1408,7 @@
       "subtitle": "Atlas tracks what actually matters — and adjusts every week so you stop guessing.",
       "cta": "Show me how",
       "secondary": "I already have an account",
-      "trustBadge": "Free 7-day trial • No credit card required"
+      "trustBadge": "Plan terms shown before payment"
     },
     "quiz": {
       "primaryGoal": {
@@ -1595,7 +1595,7 @@
       "secondaryCta": "I'll decide as I go"
     },
     "trial": {
-      "title": "How the 7-day free trial works.",
+      "title": "How the Terms shown at checkout works.",
       "subtitle": "No surprises. No tricks.",
       "today": "Today",
       "todayText": "Full access. No card required to start.",

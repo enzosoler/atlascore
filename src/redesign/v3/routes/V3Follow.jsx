@@ -9,6 +9,10 @@ export default function V3Follow() {
   return (
     <S71_Follow
       dark={theme === 'dark'}
+      suggested={[]}
+      leaderboard={[]}
+      searchResults={[]}
+      friendCount={0}
       onOpenUser={(id) => navigate(`/app/u/${id}`)}
       onFollow={() => {}}
       onBack={() => navigate(-1)}

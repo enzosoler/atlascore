@@ -217,11 +217,11 @@ function S44_Protocols_Empty_Locked({
 
             <div style={{ marginBottom: 10 }}>
               <ACBtn primary dark={dark} block size="lg" onClick={onStartTrial}>
-                Start 7-day trial
+                Continue
               </ACBtn>
             </div>
             <div style={{ textAlign: 'center', paddingBottom: 20 }}>
-              <ACMono size={10} color={c.dim}>$9.99 / MO AFTER \u00b7 CANCEL ANYTIME</ACMono>
+              <ACMono size={10} color={c.dim}>PLAN TERMS SHOWN BEFORE PURCHASE</ACMono>
             </div>
           </div>
         )}

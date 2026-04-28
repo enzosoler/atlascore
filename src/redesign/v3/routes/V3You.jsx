@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { getInitials, loadLocalProfile } from '@/lib/profileUtils';
 import { listMeasurements } from '@/services/bodyProgressService';
@@ -29,7 +30,7 @@ function relativeAgeLabel(dateValue) {
   return `${days}d`;
 }
 
-function displayNameFromUser(user, profileData) {
+function displayNameFromUser(user, profileData, t) {
   const meta = user?.user_metadata || user?.raw_user?.user_metadata || {};
   return (
     meta.display_name ||
@@ -38,28 +39,31 @@ function displayNameFromUser(user, profileData) {
     profileData?.full_name ||
     profileData?.display_name ||
     user?.email?.split('@')[0] ||
-    'Athlete'
+    t('you.v3.athlete')
   );
 }
 
-function joinedLabel(user) {
+function joinedLabel(user, t) {
   const created = user?.created_at ? new Date(user.created_at) : null;
-  if (!created || Number.isNaN(created.getTime())) return 'joined recently';
-  return `joined ${created.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()}`;
+  if (!created || Number.isNaN(created.getTime())) return t('you.v3.joinedRecently');
+  return t('you.v3.joinedDate', {
+    date: created.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }).toUpperCase(),
+  });
 }
 
-function fallbackLiftRows() {
+function fallbackLiftRows(t) {
   return [
-    { l: 'Deadlift', v: '—', u: 'lb' },
-    { l: 'Squat', v: '—', u: 'lb' },
-    { l: 'Bench', v: '—', u: 'lb' },
-    { l: 'OHP', v: '—', u: 'lb' },
+    { l: t('you.v3.lifts.deadlift'), v: '—', u: 'lb' },
+    { l: t('you.v3.lifts.squat'), v: '—', u: 'lb' },
+    { l: t('you.v3.lifts.bench'), v: '—', u: 'lb' },
+    { l: t('you.v3.lifts.ohp'), v: '—', u: 'lb' },
   ];
 }
 
 export default function V3You() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const t = useT();
   const daily = useDailyStateV2();
   const navigate = useNavigate();
 
@@ -93,7 +97,7 @@ export default function V3You() {
     enabled: !!user?.id,
   });
 
-  const name = displayNameFromUser(user, profileData);
+  const name = displayNameFromUser(user, profileData, t);
   const handleBase = (user?.email?.split('@')[0] || name || 'athlete')
     .toString()
     .toLowerCase()
@@ -116,29 +120,31 @@ export default function V3You() {
     const rows = [];
     (daily.recentSessions || []).slice(0, 3).forEach((session) => {
       rows.push({
-        t: `Completed ${session.note?.trim() || 'workout session'}`,
+        t: t('you.v3.recent.completedSession', { session: session.note?.trim() || t('you.v3.workoutSession') }),
         d: relativeAgeLabel(session.started_at || session.created_at || session.completed_at),
         hi: rows.length === 0,
       });
     });
     if ((daily.todayMeals || []).length > 0) {
       rows.push({
-        t: `Logged ${(daily.todayMeals || []).length} meal${daily.todayMeals.length === 1 ? '' : 's'} today`,
-        d: 'today',
+        t: t(daily.todayMeals.length === 1 ? 'you.v3.recent.loggedMealToday' : 'you.v3.recent.loggedMealsToday', {
+          count: daily.todayMeals.length,
+        }),
+        d: t('you.v3.today'),
       });
     }
     if (latest?.date) {
       rows.push({
-        t: 'Updated body checkpoint',
+        t: t('you.v3.recent.updatedBodyCheckpoint'),
         d: relativeAgeLabel(latest.date),
       });
     }
     return rows.slice(0, 4);
-  }, [daily.recentSessions, daily.todayMeals, latest]);
+  }, [daily.recentSessions, daily.todayMeals, latest, t]);
 
   const program = daily.plan?.name
     ? {
-        badge: 'Active plan',
+        badge: t('you.v3.program.activePlan'),
         title: daily.plan.name,
         mark: `D${(daily.plan.todayDayIndex ?? 0) + 1}`,
         total: daily.plan.totalDays || 1,
@@ -146,7 +152,7 @@ export default function V3You() {
       }
     : routines[0]
       ? {
-          badge: 'Recent routine',
+          badge: t('you.v3.program.recentRoutine'),
           title: routines[0].name,
           mark: `R${Math.min(99, (Array.isArray(routines[0].days) ? routines[0].days.length : 0) || 1)}`,
           total: Math.max(1, (Array.isArray(routines[0].days) ? routines[0].days.length : 0) || 1),
@@ -157,26 +163,26 @@ export default function V3You() {
   const bio = profileData?.training_goal
     ? String(profileData.training_goal).slice(0, 140)
     : profileData?.fitness_level
-      ? `${profileData.fitness_level} athlete focused on consistency and measurable progress.`
+      ? t('you.v3.bioByFitnessLevel', { level: profileData.fitness_level })
       : '';
 
   const badges = [
-    daily.workoutStreak > 0 ? `${daily.workoutStreak}-day streak` : null,
-    measurements.length > 0 ? `${measurements.length} checkpoints` : null,
-    routines.length > 0 ? `${routines.length} saved routines` : null,
+    daily.workoutStreak > 0 ? t('you.v3.badges.dayStreak', { days: daily.workoutStreak }) : null,
+    measurements.length > 0 ? t(measurements.length === 1 ? 'you.v3.badges.checkpoint' : 'you.v3.badges.checkpoints', { count: measurements.length }) : null,
+    routines.length > 0 ? t(routines.length === 1 ? 'you.v3.badges.savedRoutine' : 'you.v3.badges.savedRoutines', { count: routines.length }) : null,
     daily.nutritionMode ? String(daily.nutritionMode).replace(/_/g, ' ') : null,
   ].filter(Boolean);
 
-  const liftRows = fallbackLiftRows();
+  const liftRows = fallbackLiftRows(t);
   const safeRecent = recent.length > 0 ? recent : [
-    { t: sessionCount > 0 ? `${sessionCount} sessions logged so far` : 'No sessions logged yet', d: 'now', hi: true },
-    { t: measurements.length > 0 ? `${measurements.length} body checkpoint${measurements.length === 1 ? '' : 's'} recorded` : 'Add your first checkpoint to unlock body trends', d: measurements.length > 0 ? 'body' : 'start' },
-    { t: routines.length > 0 ? `${routines.length} routine${routines.length === 1 ? '' : 's'} saved` : 'Save a routine to surface it here', d: routines.length > 0 ? 'train' : 'plan' },
+    { t: sessionCount > 0 ? t('you.v3.recent.sessionsLogged', { count: sessionCount }) : t('you.v3.recent.noSessions'), d: t('you.v3.now'), hi: true },
+    { t: measurements.length > 0 ? t(measurements.length === 1 ? 'you.v3.recent.bodyCheckpointRecorded' : 'you.v3.recent.bodyCheckpointsRecorded', { count: measurements.length }) : t('you.v3.recent.addFirstCheckpoint'), d: measurements.length > 0 ? t('you.v3.body') : t('you.v3.start') },
+    { t: routines.length > 0 ? t(routines.length === 1 ? 'you.v3.recent.routineSaved' : 'you.v3.recent.routinesSaved', { count: routines.length }) : t('you.v3.recent.saveRoutine'), d: routines.length > 0 ? t('you.v3.train') : t('you.v3.plan') },
   ];
-  const safeBadges = badges.length > 0 ? badges : ['Profile live', 'Core loop active'];
+  const safeBadges = badges.length > 0 ? badges : [t('you.v3.badges.profileLive'), t('you.v3.badges.coreLoopActive')];
   const safeProgram = program || {
-    badge: 'Next up',
-    title: routines.length > 0 ? 'Pick a routine to start training.' : 'Create or import a routine to bring this profile to life.',
+    badge: t('you.v3.program.nextUp'),
+    title: routines.length > 0 ? t('you.v3.program.pickRoutine') : t('you.v3.program.createRoutine'),
     mark: 'GO',
     total: 1,
     current: 1,
@@ -184,44 +190,44 @@ export default function V3You() {
   const quickLinks = [
     {
       key: 'body',
-      label: 'Body',
-      meta: 'Track',
-      description: 'Measurements, photos, and weight trend.',
+      label: t('you.v3.links.body.label'),
+      meta: t('you.v3.links.body.meta'),
+      description: t('you.v3.links.body.description'),
       onClick: () => navigate('/app/body'),
     },
     {
       key: 'labs',
-      label: 'Labs',
-      meta: 'Premium',
-      description: 'Panels, biomarkers, and analysis.',
+      label: t('you.v3.links.labs.label'),
+      meta: t('you.v3.links.labs.meta'),
+      description: t('you.v3.links.labs.description'),
       onClick: () => navigate('/app/labs'),
     },
     {
       key: 'protocols',
-      label: 'Protocols',
-      meta: 'Advanced',
-      description: 'Stacks, schedules, and dose logging.',
+      label: t('you.v3.links.protocols.label'),
+      meta: t('you.v3.links.protocols.meta'),
+      description: t('you.v3.links.protocols.description'),
       onClick: () => navigate('/app/protocols'),
     },
     {
       key: 'social',
-      label: 'Social',
-      meta: 'Community',
-      description: 'Crew, friends, and accountability.',
+      label: t('you.v3.links.social.label'),
+      meta: t('you.v3.links.social.meta'),
+      description: t('you.v3.links.social.description'),
       onClick: () => navigate('/app/social'),
     },
     {
       key: 'settings',
-      label: 'Settings',
-      meta: 'Account',
-      description: 'Preferences, integrations, and exports.',
+      label: t('you.v3.links.settings.label'),
+      meta: t('you.v3.links.settings.meta'),
+      description: t('you.v3.links.settings.description'),
       onClick: () => navigate('/app/settings'),
     },
     {
       key: 'billing',
-      label: 'Billing',
-      meta: 'Manage',
-      description: 'Subscription status and payment details.',
+      label: t('you.v3.links.billing.label'),
+      meta: t('you.v3.links.billing.meta'),
+      description: t('you.v3.links.billing.description'),
       onClick: () => navigate('/webapp/billing'),
     },
   ];
@@ -231,15 +237,15 @@ export default function V3You() {
       dark={theme === 'dark'}
       showTabBar={false}
       handle={handle}
-      profileStatus="athlete"
+      profileStatus={t('you.v3.athleteStatus')}
       initials={getInitials(name)}
       name={name}
-      joinedLabel={joinedLabel(user)}
+      joinedLabel={joinedLabel(user, t)}
       bio={bio}
       stats={[
-        { k: 'Sessions', v: String(sessionCount || (daily.recentSessions || []).length) },
-        { k: 'Routines', v: String(routines.length) },
-        { k: 'Checks', v: String(measurements.length) },
+        { k: t('you.v3.stats.sessions'), v: String(sessionCount || (daily.recentSessions || []).length) },
+        { k: t('you.v3.stats.routines'), v: String(routines.length) },
+        { k: t('you.v3.stats.checks'), v: String(measurements.length) },
       ]}
       lifts={liftRows}
       program={safeProgram}
@@ -247,7 +253,7 @@ export default function V3You() {
         label: [
           latestWeight != null && oldestWeight != null ? `${latestWeight - oldestWeight > 0 ? '+' : ''}${(latestWeight - oldestWeight).toFixed(1)} kg` : null,
           latestLeanMass != null && oldestLeanMass != null ? `${latestLeanMass - oldestLeanMass > 0 ? '+' : ''}${(latestLeanMass - oldestLeanMass).toFixed(1)} LBM` : null,
-        ].filter(Boolean).join(' · ') || 'Latest body trend',
+        ].filter(Boolean).join(' · ') || t('you.v3.latestBodyTrend'),
         weight: latestWeight.toFixed(1),
         unit: 'kg',
         trend: weightTrend,
@@ -255,6 +261,14 @@ export default function V3You() {
       recent={safeRecent}
       badges={safeBadges}
       quickLinks={quickLinks}
+      labels={{
+        bigFour: t('you.v3.labels.bigFour'),
+        composition90d: t('you.v3.labels.composition90d'),
+        weight: t('you.v3.labels.weight'),
+        recent: t('you.v3.labels.recent'),
+        moreFromProfile: t('you.v3.labels.moreFromProfile'),
+        open: t('you.v3.labels.open'),
+      }}
       onGoBack={() => navigate('/app/today')}
       onOpenSettings={() => navigate('/app/settings')}
       onOpenProgram={() => navigate(program ? '/app/workouts' : '/app/routines')}

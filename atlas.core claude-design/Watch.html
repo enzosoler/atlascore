@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>atlas.core — watchOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --bg:  #efe9da;
+    --accent: #e8b500;
+    --dim: rgba(10,10,10,0.55);
+    --line: rgba(10,10,10,0.12);
+    --soft: rgba(10,10,10,0.04);
+    --hair: rgba(10,10,10,0.08);
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--accent); color: var(--ink); }
+
+  .page { max-width: 1200px; margin: 0 auto; padding: 64px 48px 120px; }
+
+  .backlink { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); text-decoration: none; }
+  .backlink:hover { color: var(--ink); }
+
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+  h1.display { margin: 10px 0 20px; font-family: var(--display); font-size: 88px; letter-spacing: -3.6px; line-height: 0.92; text-transform: lowercase; }
+  h1.display .accent { color: var(--accent); }
+  h1.display .stamp { background: var(--ink); color: var(--bg); padding: 0 14px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 760px; color: rgba(10,10,10,0.82); }
+
+  h2.section { font-family: var(--display); font-size: 44px; letter-spacing: -1.6px; line-height: 1; text-transform: lowercase; margin: 96px 0 8px; }
+  .section-sub { font-size: 14px; color: var(--dim); margin-bottom: 28px; max-width: 640px; line-height: 1.5; }
+
+  .watches { display: flex; flex-wrap: wrap; gap: 36px 24px; justify-content: flex-start; margin-top: 16px; }
+
+  /* Spec rows */
+  .spec { border: 1px solid var(--line); background: var(--bg); margin-top: 24px; }
+  .spec-row { display: grid; grid-template-columns: 220px 1fr; border-top: 1px solid var(--line); }
+  .spec-row:first-child { border-top: 0; }
+  .spec-key { padding: 18px 20px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); background: var(--soft); border-right: 1px solid var(--line); }
+  .spec-val { padding: 18px 20px; font-size: 14px; line-height: 1.55; }
+  .spec-val strong { font-weight: 700; }
+  .spec-val ul { margin: 4px 0; padding-left: 18px; }
+  .spec-val li { margin: 4px 0; }
+  .spec-val li::marker { color: var(--accent); }
+
+  .pill { display: inline-block; padding: 2px 7px; font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; background: var(--ink); color: var(--bg); margin-right: 4px; }
+  .pill.dim { background: var(--hair); color: var(--ink); }
+
+  .face-card { background: var(--bg); border: 1px solid var(--line); margin-top: 24px; padding: 32px; }
+  .face-card h3 { margin: 0 0 4px; font-family: var(--display); font-size: 28px; letter-spacing: -0.8px; text-transform: lowercase; }
+  .face-card .id { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+  .face-grid { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; margin-top: 18px; }
+  .face-meta h4 { margin: 0 0 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); }
+  .face-meta p, .face-meta ul { margin: 0 0 14px; font-size: 13px; line-height: 1.55; }
+  .face-meta ul { padding-left: 16px; }
+  .face-meta li::marker { color: var(--accent); }
+
+  .complications { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
+  .comp-cell {
+    background: #000; border-radius: 16px;
+    padding: 16px; height: 130px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .comp-cell.wide { grid-column: span 2; }
+  .comp-label { margin-top: 8px; }
+  .comp-label .name { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim); }
+  .comp-label .what { font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+  /* Footer rules */
+  .rules { margin-top: 56px; padding: 28px 32px; background: var(--ink); color: var(--bg); }
+  .rules .eyebrow { color: rgba(239,233,218,0.6); }
+  .rules h3 { font-family: var(--display); font-size: 36px; letter-spacing: -1.2px; margin: 4px 0 18px; text-transform: lowercase; }
+  .rules ul { padding-left: 18px; font-size: 14px; line-height: 1.7; margin: 0; column-count: 2; column-gap: 48px; }
+  .rules li::marker { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="backlink">← atlas.core · back to canvas</a>
+
+  <div style="margin-top: 32px;">
+    <div class="eyebrow">/// atlas.core · watchOS · Series 10 / Ultra 2 · 45mm + 49mm</div>
+    <h1 class="display">
+      not the iPhone, <span class="accent">smaller</span>.<br/>
+      <span class="stamp">a wrist tool.</span>
+    </h1>
+    <p class="lede">
+      atlas.core on Apple Watch is a <strong>workout companion</strong>, not a compressed mobile app.
+      Three things, fast: <strong>log a set</strong>, <strong>see what's next</strong>,
+      <strong>start a quick log</strong>. Everything else lives on the phone. List-based root,
+      page-based glance, full-screen workout. Crown for the one place it earns its keep — weigh-in.
+      No menus deeper than two taps. Black background, OLED honest, sulfur for accents only.
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════ SCREENS ══════════════════════════════ -->
+  <h2 class="section">screens.</h2>
+  <p class="section-sub">Nine screens. The whole app. Anything more belongs on the phone.</p>
+
+  <div id="watches" class="watches"></div>
+
+  <!-- ══════════════════════════════ STRUCTURE ══════════════════════════════ -->
+  <h2 class="section">structure.</h2>
+  <p class="section-sub">List root → page-based glance for "today" → full-screen for active workout. Three nav patterns, used surgically.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">root</div>
+      <div class="spec-val"><strong>S1 · Main list</strong>. Big-tap rows: today's workout (accent fill = primary CTA), log meal, weigh-in, water. Crown scrolls. Tap = go.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">workout flow</div>
+      <div class="spec-val">List row → <strong>S2 · Pre</strong> (one button: Start) → <strong>S3 · Logging</strong> (full-screen, set-by-set) ↔ <strong>S4 · Rest timer</strong> → … → <strong>S9 · Complete</strong>. <span class="pill dim">2 taps from raised wrist to lifting</span></div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">today glance</div>
+      <div class="spec-val">Page-based, 3 pages, swipe horizontally: <strong>Fuel ring</strong> · <strong>Week status</strong> · <strong>Body weight</strong>. Reachable via complication tap or app launch.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">quick log</div>
+      <div class="spec-val">List row → <strong>S5 · Suggestions</strong> (last 3 meals + Custom) or <strong>S6 · Weigh-in</strong>. One tap from suggestion = logged. No confirmation screen.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">notifications</div>
+      <div class="spec-val">Long-look <strong>S8</strong> with Start / Snooze actions. Workout reminders only — no streak, no nag, no marketing.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SCREEN SPECS ══════════════════════════════ -->
+  <h2 class="section">screen specs.</h2>
+  <p class="section-sub">For each: purpose · interaction · data shown · states.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">S1 · Main list</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> root. The 4 things you came for.<br/>
+        <strong>Interaction:</strong> Crown to scroll, tap to enter. Today's workout always row 1, in accent fill.<br/>
+        <strong>States:</strong> rest day → row 1 dims to "Rest · recover"; offline → all rows still tappable, queued ops sync later.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S2 · Workout pre</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> commit screen. One affordance: Start.<br/>
+        <strong>Data:</strong> week·day, name, exercise count, est duration, exercise list (compact).<br/>
+        <strong>Interaction:</strong> tap Start = haptic <span class="pill dim">.start</span>, transition to S3.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S3 · Logging (HERO)</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> the only place we'd be fired for getting wrong. Log a set without looking twice.<br/>
+        <strong>Data:</strong> exercise name, set N of M, last performance, current weight × reps.<br/>
+        <strong>Interaction:</strong> minus / check / plus. Crown adjusts active value (weight or reps — toggled by tap on the number). Check = haptic <span class="pill dim">.success</span> + advance to S4.<br/>
+        <strong>States:</strong> PR detected → number flashes accent, haptic <span class="pill dim">.success ×2</span>; bodyweight exercise → kg field hidden.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S4 · Rest timer</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> count down. Resume.<br/>
+        <strong>Data:</strong> ring at % remaining, MM:SS, next set hint.<br/>
+        <strong>Interaction:</strong> minus 15s / play-pause / plus 15s. At 0:00 → haptic <span class="pill dim">.notification</span> + auto-advance to S3.<br/>
+        <strong>Always-On:</strong> ring + time stay visible at 1Hz refresh, tinted at 40%.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S5 · Quick meal</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> log a typical meal in one tap.<br/>
+        <strong>Data:</strong> top 3 frequent meals (per time of day), kcal each, "Custom" footer.<br/>
+        <strong>Interaction:</strong> tap row = logged. Haptic <span class="pill dim">.click</span> + dismiss to S1. Custom → opens full picker on phone (Handoff).
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S6 · Weigh-in</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> capture body weight. The one Crown-driven number screen.<br/>
+        <strong>Interaction:</strong> Crown = ±0.1 kg. Tap = save (haptic <span class="pill dim">.success</span>). Initial value defaults to last weight.<br/>
+        <strong>States:</strong> first ever → no delta line; offline → "Will sync when connected."
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S7 · Today (page glance)</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> daily check-in. Page 1 fuel · Page 2 week · Page 3 weight.<br/>
+        <strong>Interaction:</strong> swipe H. Crown is no-op here (paging is for thumbs).<br/>
+        <strong>Data:</strong> ring + center number + macros / day pips / latest weight.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S8 · Notification (long-look)</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> reminder for scheduled workouts only.<br/>
+        <strong>Actions:</strong> Start now (deep-link S3) · Snooze 15 min · dismiss.<br/>
+        <strong>Suppression:</strong> never fires during another workout, never within 30 min of last reminder, never between 22:00–07:00 user time.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">S9 · Complete</div>
+      <div class="spec-val">
+        <strong>Purpose:</strong> close the loop. Earned, not celebratory.<br/>
+        <strong>Data:</strong> total sets, duration, PRs detected.<br/>
+        <strong>Motion:</strong> single ECG-curve scale-in on the check mark (320ms). No confetti.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ COMPLICATIONS ══════════════════════════════ -->
+  <h2 class="section">complications.</h2>
+  <p class="section-sub">The watch face is the front door. atlas.core ships four — designed for clarity, not branding.</p>
+
+  <div id="faces"></div>
+
+  <!-- complication detail spec -->
+  <h3 style="font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin: 48px 0 16px;">// per complication</h3>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">circular small</div>
+      <div class="spec-val">
+        <strong>FUEL · 42%</strong> · ring + percentage. Updates on every meal log + every 15 min via push.<br/>
+        <strong>Why:</strong> single-tap glance to "am I on track today." Replaces the activity ring people don't fill.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">circular small (alt)</div>
+      <div class="spec-val">
+        <strong>WEEK · 2/4</strong> · ring + ratio. Updates after each completed workout.<br/>
+        <strong>Why:</strong> honest weekly load. No streak emoji.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">corner / inline</div>
+      <div class="spec-val">
+        <strong>NEXT · Push A</strong> · workout name only.<br/>
+        <strong>Why:</strong> answer "what's lifting today" without launching anything. Tap = S2.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">rectangular</div>
+      <div class="spec-val">
+        <strong>NEXT 6:30 · Push A · 5 ex · 48 min.</strong><br/>
+        <strong>Why:</strong> the most useful slot. Time, name, scope. Tap = S2.
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">smart stack widget</div>
+      <div class="spec-val">
+        Same payload as rectangular complication, but presented in Series 10's vertical stack with relevance hints: <span class="pill dim">.relevance .critical 30 min before workout</span>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ INTERACTION DESIGN ══════════════════════════════ -->
+  <h2 class="section">interaction.</h2>
+  <p class="section-sub">Crown, gesture, haptic, voice. Each used only where it earns its keep.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">digital crown</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>S6 weigh-in:</strong> ±0.1 kg per detent</li>
+          <li><strong>S3 logging:</strong> adjusts the active number (weight ↔ reps via tap-to-toggle); ±2.5 kg or ±1 rep per detent</li>
+          <li><strong>S1 list:</strong> standard scroll</li>
+          <li><strong>Everywhere else:</strong> no-op. The Crown is never a hidden surprise.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">gestures</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>Tap:</strong> primary action everywhere</li>
+          <li><strong>Horizontal swipe:</strong> S7 page navigation only</li>
+          <li><strong>Edge swipe right:</strong> system back (S2 → S1, S6 → S1)</li>
+          <li><strong>Long press:</strong> not used. Watch users miss it.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">haptics</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>.click:</strong> tap a list row, log a meal — quick acknowledgment</li>
+          <li><strong>.start:</strong> begin workout</li>
+          <li><strong>.success:</strong> set logged · weigh saved</li>
+          <li><strong>.success ×2 (paired):</strong> PR detected</li>
+          <li><strong>.notification:</strong> rest timer hits 0:00 — distinct from system tap</li>
+          <li><strong>Never:</strong> on screen entry, on Crown rotation, on Always-On wake</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">siri / voice</div>
+      <div class="spec-val">
+        Three intents donated:
+        <ul>
+          <li><strong>"Start my workout"</strong> → launches today's session</li>
+          <li><strong>"Log lunch"</strong> → S5 with meal-time bias</li>
+          <li><strong>"What's next?"</strong> → speaks workout name + time</li>
+        </ul>
+        Suggestions surface in Smart Stack at relevant times.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ VISUAL ══════════════════════════════ -->
+  <h2 class="section">visual.</h2>
+  <p class="section-sub">Type ramp, color, icon usage. Watch-specific — not phone reuse.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">type ramp</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>Hero number:</strong> SF Pro Rounded · 56–64 · weight 800 · -2 to -2.8 letter-spacing</li>
+          <li><strong>Section title:</strong> SF Pro Rounded · 32 · 800 · -1</li>
+          <li><strong>Body / row title:</strong> SF Pro · 14–15 · 600–700</li>
+          <li><strong>Meta / caption:</strong> SF Pro · 11–12 · 500–700, gray-2 (#8e8e93)</li>
+          <li><strong>Eyebrow:</strong> SF Pro · 11 · 800 · 0.4 letter-spacing · uppercase, gray-2</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">color</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>Background:</strong> pure #000 (OLED). Never an off-black gradient.</li>
+          <li><strong>Surface:</strong> g6 #1c1c1e for cards, g5 #2c2c2e for list rows.</li>
+          <li><strong>Text:</strong> white primary, g2 #8e8e93 secondary. No tertiary tier on watch.</li>
+          <li><strong>Accent (sulfur #e8b500):</strong> reserved for the primary CTA, the active ring, and PR moments. Never decorative.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">iconography (sf symbols)</div>
+      <div class="spec-val">
+        <ul>
+          <li><span class="pill dim">figure.strengthtraining</span> workout</li>
+          <li><span class="pill dim">fork.knife</span> meals · <span class="pill dim">scale.3d</span> weigh · <span class="pill dim">drop.fill</span> water</li>
+          <li><span class="pill dim">play.fill / pause.fill</span> timer · <span class="pill dim">checkmark</span> set done</li>
+          <li><span class="pill dim">bolt.fill</span> = atlas.core mark in complications and notifications only</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">spacing</div>
+      <div class="spec-val">Edge padding 14–16pt · row padding 10×12pt · row corner 16–18pt · card corner 12–14pt. Touch targets ≥ 38pt high.</div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">always-on</div>
+      <div class="spec-val">S3 + S4 dim to 40%, ring/timer keep updating at 1Hz. Numbers tabular so digits don't shift width on transition.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SIMPLIFY ══════════════════════════════ -->
+  <h2 class="section">what we cut.</h2>
+  <p class="section-sub">A watch app is half-as-much, twice-as-fast.</p>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">cut entirely</div>
+      <div class="spec-val">
+        <ul>
+          <li>Routine browsing / building (phone)</li>
+          <li>Coach chat / video (phone)</li>
+          <li>Body measurements beyond weight (phone)</li>
+          <li>PR gallery, share cards, history graphs (phone)</li>
+          <li>Settings of any kind (phone, paired iPhone app)</li>
+          <li>Sign-in screens — watch inherits auth via Wallet</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">simplified</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>Today dashboard</strong> → 3 swipeable cards, no more</li>
+          <li><strong>Meal log</strong> → 3 suggestions or "Custom" hand-off</li>
+          <li><strong>Workout</strong> → set-only view; no warm-up calculator, no notes (those exist on the phone for review)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">must be instant</div>
+      <div class="spec-val">
+        <ul>
+          <li>Wrist raise → see next workout (≤ 1s, complication)</li>
+          <li>Tap from S3 to logged → next set primed (≤ 800ms)</li>
+          <li>Quick meal tap → logged + dismissed (≤ 1s, optimistic write)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ NOTIFICATIONS ══════════════════════════════ -->
+  <h2 class="section">smart features.</h2>
+
+  <div class="spec">
+    <div class="spec-row">
+      <div class="spec-key">notifications</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>30 min before scheduled workout:</strong> long-look with Start / Snooze. Quiet hours respected.</li>
+          <li><strong>Rest timer:</strong> distinct haptic, no banner (already in app)</li>
+          <li><strong>PR detected:</strong> in-session only — never as a push</li>
+          <li><strong>Never:</strong> "Don't forget!" / "X day streak!" / "Your friend just…" — none of it</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">context-aware</div>
+      <div class="spec-val">
+        <ul>
+          <li><strong>Time:</strong> meal suggestions reorder by time of day (breakfast 6–10, lunch 11–14, dinner 17–21)</li>
+          <li><strong>Activity:</strong> if workout HRM detected (CMMotionActivity), S3 stays awake longer between sets</li>
+          <li><strong>Location:</strong> at gym → Start workout suggestion in Smart Stack (geofence opt-in, on-device)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="spec-row">
+      <div class="spec-key">handoff</div>
+      <div class="spec-val">Workout in progress → swiping the phone unlocks directly to S3 mirror. Quick log Custom → opens full meal picker on phone where you left off.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ RULES ══════════════════════════════ -->
+  <div class="rules">
+    <div class="eyebrow">/// rules &amp; anti-patterns</div>
+    <h3>the short list.</h3>
+    <ul>
+      <li><strong>Two taps from raised wrist to logged.</strong> If a flow needs three, push it to the phone.</li>
+      <li><strong>Black background. Always.</strong> No gradients. OLED owes us nothing else.</li>
+      <li><strong>Crown is for one number per screen, max.</strong> Never hidden behind a tap-to-reveal.</li>
+      <li><strong>Confirmation = haptic, not a sheet.</strong> If you have to ask "are you sure?" you've already lost.</li>
+      <li><strong>Accent ≤ one element per screen.</strong> The CTA, or the active ring, or the PR — never two.</li>
+      <li><strong>Numbers are tabular.</strong> Always. Reps shouldn't dance.</li>
+      <li><strong>No streaks. No flames. No social.</strong> Same rule as phone, doubled on watch.</li>
+      <li><strong>Always-On is a contract.</strong> The number you saw 30s ago is the same number now — or it has updated truthfully.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="watch.jsx"></script>
+
+<script type="text/babel">
+  function mountWatches() {
+    const screens = [
+      { label: "S1 · Main list",         sub: "list nav · root",         comp: <window.ScreenMain/> },
+      { label: "S2 · Workout pre",       sub: "commit screen",           comp: <window.ScreenWorkoutPre/> },
+      { label: "S3 · Logging (HERO)",    sub: "set in progress",         comp: <window.ScreenWorkoutLogging/> },
+      { label: "S4 · Rest timer",        sub: "ring + tabular",          comp: <window.ScreenRest/> },
+      { label: "S5 · Quick meal",        sub: "3 suggestions",           comp: <window.ScreenQuickMeal/> },
+      { label: "S6 · Weigh-in",          sub: "crown-driven",            comp: <window.ScreenWeighIn/> },
+      { label: "S7 · Today glance",      sub: "page-based · 1 of 3",     comp: <window.ScreenToday/> },
+      { label: "S8 · Notification",      sub: "long-look",               comp: <window.ScreenNotification/> },
+      { label: "S9 · Complete",          sub: "earned, not celebratory", comp: <window.ScreenComplete/> },
+    ];
+    const root = document.getElementById('watches');
+    screens.forEach(s => {
+      const host = document.createElement('div');
+      root.appendChild(host);
+      ReactDOM.createRoot(host).render(
+        <window.WatchFrame label={s.label} sub={s.sub}>{s.comp}</window.WatchFrame>
+      );
+    });
+  }
+
+  function mountFaces() {
+    const root = document.getElementById('faces');
+
+    // Face 1 — Infograph
+    const f1Wrap = document.createElement('div');
+    f1Wrap.className = 'face-card';
+    f1Wrap.innerHTML = `
+      <div class="id">face · infograph</div>
+      <h3>infograph face.</h3>
+      <div class="face-grid">
+        <div id="face-infograph-host"></div>
+        <div class="face-meta">
+          <h4>complications used</h4>
+          <ul>
+            <li><strong>Top-left corner:</strong> NEXT · workout name</li>
+            <li><strong>Top-right corner:</strong> FUEL ring · 42%</li>
+            <li><strong>Bottom-left corner:</strong> WEEK ring · 2/4</li>
+            <li><strong>Bottom-right corner:</strong> Body weight · 82.4 kg</li>
+          </ul>
+          <h4>refresh</h4>
+          <p>NEXT/WEEK refresh on workout state change. FUEL refreshes on meal log + every 15 min. Weight refreshes on weigh-in only.</p>
+          <h4>tap targets</h4>
+          <p>Each corner deep-links to its corresponding screen (S2 / S7 page-1 / S7 page-2 / S6).</p>
+        </div>
+      </div>
+    `;
+    root.appendChild(f1Wrap);
+    ReactDOM.createRoot(document.getElementById('face-infograph-host')).render(
+      <window.WatchFrame><window.FaceInfograph/></window.WatchFrame>
+    );
+
+    // Face 2 — Modular
+    const f2Wrap = document.createElement('div');
+    f2Wrap.className = 'face-card';
+    f2Wrap.innerHTML = `
+      <div class="id">face · modular</div>
+      <h3>modular face.</h3>
+      <div class="face-grid">
+        <div id="face-modular-host"></div>
+        <div class="face-meta">
+          <h4>complications used</h4>
+          <ul>
+            <li><strong>Large rectangular (mid):</strong> NEXT 6:30 · Push A · 5 ex · 48 min</li>
+            <li><strong>Bottom row (3 small circular):</strong> FUEL · WEEK · weight</li>
+          </ul>
+          <h4>why this face</h4>
+          <p>For users who want time + the next workout legible at arm's length. The rectangular slot is doing the work; circulars are quick reference.</p>
+        </div>
+      </div>
+    `;
+    root.appendChild(f2Wrap);
+    ReactDOM.createRoot(document.getElementById('face-modular-host')).render(
+      <window.WatchFrame><window.FaceModular/></window.WatchFrame>
+    );
+
+    // Standalone complications gallery
+    const galleryWrap = document.createElement('div');
+    galleryWrap.className = 'face-card';
+    galleryWrap.innerHTML = `
+      <div class="id">complications · gallery</div>
+      <h3>complications, isolated.</h3>
+      <p style="font-size:13px; line-height:1.55; color: var(--dim); margin-top: 8px; max-width: 640px;">
+        How each renders in isolation — picker preview, smart stack, third-party faces.
+        watchOS draws these monochrome by default; we ship multi-color tinted variants where allowed.
+      </p>
+      <div class="complications">
+        <div>
+          <div class="comp-cell"><div id="comp-fuel"></div></div>
+          <div class="comp-label"><div class="name">circular small</div><div class="what">FUEL · ring + percentage</div></div>
+        </div>
+        <div>
+          <div class="comp-cell"><div id="comp-week"></div></div>
+          <div class="comp-label"><div class="name">circular small (alt)</div><div class="what">WEEK · 2 of 4 done</div></div>
+        </div>
+        <div>
+          <div class="comp-cell"><div id="comp-weight"></div></div>
+          <div class="comp-label"><div class="name">circular small (alt)</div><div class="what">WEIGHT · last weigh-in</div></div>
+        </div>
+        <div>
+          <div class="comp-cell wide"><div id="comp-rect"></div></div>
+          <div class="comp-label"><div class="name">rectangular</div><div class="what">NEXT 6:30 · Push A · 5 ex · 48 min</div></div>
+        </div>
+      </div>
+    `;
+    root.appendChild(galleryWrap);
+    ReactDOM.createRoot(document.getElementById('comp-fuel')).render(<window.ComplicationCircularStandalone kind="fuel" label="FUEL"/>);
+    ReactDOM.createRoot(document.getElementById('comp-week')).render(<window.ComplicationCircularStandalone kind="week" label="WEEK"/>);
+    ReactDOM.createRoot(document.getElementById('comp-weight')).render(<window.ComplicationCircularStandalone kind="weight" label="KG"/>);
+    ReactDOM.createRoot(document.getElementById('comp-rect')).render(<window.ComplicationRectangular/>);
+  }
+
+  // wait for components to be on window
+  setTimeout(() => { mountWatches(); mountFaces(); }, 50);
+</script>
+
+</body>
+</html>

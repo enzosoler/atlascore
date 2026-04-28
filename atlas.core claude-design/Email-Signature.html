@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>atlas.core — email signature</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --bg:  #efe9da;
+    --accent: #e8b500;
+    --dim: rgba(10,10,10,0.55);
+    --line: rgba(10,10,10,0.12);
+    --soft: rgba(10,10,10,0.04);
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 64px 48px 120px; }
+  .backlink { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); text-decoration: none; }
+  .backlink:hover { color: var(--ink); }
+
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+  h1.display { margin: 10px 0 20px; font-family: var(--display); font-size: 84px; letter-spacing: -3px; line-height: 0.9; text-transform: lowercase; }
+  h1.display .accent { color: var(--accent); }
+  h1.display .stamp { background: var(--ink); color: var(--bg); padding: 0 14px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 720px; color: rgba(10,10,10,0.82); }
+
+  h2.section { font-family: var(--display); font-size: 38px; letter-spacing: -1.2px; line-height: 1; text-transform: lowercase; margin: 72px 0 6px; }
+  .section-sub { font-size: 14px; color: var(--dim); margin-bottom: 24px; max-width: 620px; line-height: 1.5; }
+
+  .sig-wrap { background: #fff; border: 1px solid var(--line); }
+  .sig-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--soft); }
+  .sig-head-l { display: flex; align-items: baseline; gap: 10px; }
+  .sig-id { font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); }
+  .sig-title { font-size: 14px; font-weight: 600; }
+  .sig-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink); padding: 2px 6px; background: rgba(10,10,10,0.08); }
+  .sig-tag.accent { background: var(--accent); }
+  .sig-body {
+    padding: 32px 28px;
+    background:
+      repeating-linear-gradient(135deg, rgba(0,0,0,0.02) 0 10px, transparent 10px 20px),
+      #fff;
+  }
+  .sig-meta {
+    padding: 10px 16px;
+    border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 120px 1fr auto; gap: 8px 16px;
+    align-items: center;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+  }
+  .sig-meta-k { color: var(--dim); }
+  .sig-meta-v { color: var(--ink); }
+  .copy-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; padding: 5px 10px; background: var(--ink); color: var(--bg); border: 0; cursor: pointer; }
+  .copy-btn:hover { background: var(--accent); color: var(--ink); }
+  .copy-btn.copied { background: var(--accent); color: var(--ink); }
+
+  .email-ctx { font-family: var(--body); font-size: 14px; line-height: 1.6; color: rgba(10,10,10,0.85); margin-bottom: 26px; max-width: 520px; }
+  .email-ctx .quote { color: var(--dim); font-size: 12px; border-left: 2px solid var(--line); padding-left: 10px; margin-top: 14px; }
+
+  .atlas-sig, .atlas-sig table { font-family: "Inter", -apple-system, "Segoe UI", Arial, sans-serif !important; color: #0a0a0a !important; }
+  .atlas-sig a { color: #0a0a0a !important; text-decoration: none !important; }
+
+  .rules { margin-top: 64px; padding: 24px 28px; background: var(--ink); color: var(--bg); }
+  .rules .eyebrow { color: rgba(239,233,218,0.6); }
+  .rules h3 { font-family: var(--display); font-size: 28px; letter-spacing: -0.8px; margin: 4px 0 14px; text-transform: lowercase; }
+  .rules ul { padding-left: 18px; font-size: 13px; line-height: 1.7; margin: 0; column-count: 2; column-gap: 40px; }
+  .rules li::marker { color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+
+const SIG_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "name": "Enzo Soler",
+  "role": "Founder",
+  "company": "atlas.core",
+  "email": "enzo@useatlascore.com",
+  "website": "https:\/\/useatlascore.com",
+  "websiteLabel": "useatlascore.com",
+  "tagline": "the system · on a phone",
+  "accent": "#e8b500",
+  "monogram": "e.",
+  "showTagline": true,
+  "showECGDivider": true
+}/*EDITMODE-END*/;
+
+function Sig01Classic({ t }) {
+  return (
+    <table id="sig-01" className="atlas-sig" cellPadding="0" cellSpacing="0" border="0" style={{ borderCollapse: 'collapse' }}>
+      <tbody><tr>
+        <td style={{ padding: '0 18px 0 0', verticalAlign: 'top' }}>
+          <div style={{ width: 56, height: 56, background: '#0a0a0a', color: t.accent, fontFamily: "'Archivo Black','Helvetica Neue',Arial,sans-serif", fontSize: 28, lineHeight: '56px', textAlign: 'center', letterSpacing: -1 }}>{t.monogram}</div>
+        </td>
+        <td style={{ verticalAlign: 'top', borderLeft: '1px solid rgba(10,10,10,0.12)', padding: '0 0 0 18px' }}>
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 15, fontWeight: 700, color: '#0a0a0a', letterSpacing: -0.2, lineHeight: 1.2 }}>{t.name}</div>
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 12, color: 'rgba(10,10,10,0.6)', lineHeight: 1.5, marginTop: 2 }}>{t.role} · {t.company}</div>
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 12, lineHeight: 1.7, marginTop: 10 }}>
+            <a href={t.website} style={{ color: '#0a0a0a', textDecoration: 'none', borderBottom: `1px solid ${t.accent}` }}>{t.websiteLabel}</a>
+            <span style={{ color: 'rgba(10,10,10,0.3)', padding: '0 6px' }}>·</span>
+            <a href={`mailto:${t.email}`} style={{ color: '#0a0a0a', textDecoration: 'none' }}>{t.email}</a>
+          </div>
+        </td>
+      </tr></tbody>
+    </table>
+  );
+}
+
+function Sig02Minimal({ t }) {
+  return (
+    <table id="sig-02" className="atlas-sig" cellPadding="0" cellSpacing="0" border="0" style={{ borderCollapse: 'collapse' }}>
+      <tbody><tr>
+        <td style={{ verticalAlign: 'top' }}>
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 13, color: '#0a0a0a', lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 700 }}>{t.name}</span>
+            <span style={{ color: 'rgba(10,10,10,0.4)', padding: '0 6px' }}>·</span>
+            <span style={{ color: 'rgba(10,10,10,0.6)' }}>{t.role.toLowerCase()}</span>
+            <span style={{ color: 'rgba(10,10,10,0.4)', padding: '0 6px' }}>·</span>
+            <a href={t.website} style={{ color: '#0a0a0a', textDecoration: 'none', borderBottom: `1px solid ${t.accent}` }}>{t.websiteLabel}</a>
+          </div>
+        </td>
+      </tr></tbody>
+    </table>
+  );
+}
+
+function Sig03ECG({ t }) {
+  const ecgSvg = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 14" width="200" height="14"><path d="M0 7 L40 7 L46 2 L52 12 L58 7 L96 7 L102 2 L108 12 L114 7 L200 7" fill="none" stroke="#0a0a0a" stroke-width="1.4"/></svg>`);
+  return (
+    <table id="sig-03" className="atlas-sig" cellPadding="0" cellSpacing="0" border="0" style={{ borderCollapse: 'collapse' }}>
+      <tbody><tr>
+        <td style={{ padding: '0 20px 0 0', verticalAlign: 'top' }}>
+          <div style={{ width: 64, height: 64, background: '#0a0a0a', color: t.accent, fontFamily: "'Archivo Black','Helvetica Neue',Arial,sans-serif", fontSize: 32, lineHeight: '64px', textAlign: 'center', letterSpacing: -1 }}>{t.monogram}</div>
+        </td>
+        <td style={{ verticalAlign: 'top', padding: '2px 0 0' }}>
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 15, fontWeight: 700, color: '#0a0a0a', letterSpacing: -0.2, lineHeight: 1.2 }}>{t.name}</div>
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 12, color: 'rgba(10,10,10,0.6)', lineHeight: 1.5, marginTop: 2 }}>{t.role} · {t.company}</div>
+          {t.showECGDivider && (
+            <div style={{ margin: '12px 0 10px' }}>
+              <img alt="" width="200" height="14" style={{ display: 'block' }} src={`data:image/svg+xml;utf8,${ecgSvg}`} />
+            </div>
+          )}
+          <div style={{ fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif", fontSize: 12, lineHeight: 1.7, marginTop: t.showECGDivider ? 0 : 10 }}>
+            <a href={t.website} style={{ color: '#0a0a0a', textDecoration: 'none', borderBottom: `1px solid ${t.accent}` }}>{t.websiteLabel}</a>
+            <span style={{ color: 'rgba(10,10,10,0.3)', padding: '0 6px' }}>·</span>
+            <a href={`mailto:${t.email}`} style={{ color: '#0a0a0a', textDecoration: 'none' }}>{t.email}</a>
+          </div>
+          {t.showTagline && (
+            <div style={{ fontFamily: "'JetBrains Mono','SF Mono',Menlo,Consolas,monospace", fontSize: 9, color: 'rgba(10,10,10,0.45)', letterSpacing: 1.4, textTransform: 'uppercase', marginTop: 8 }}>
+              {t.tagline}
+            </div>
+          )}
+        </td>
+      </tr></tbody>
+    </table>
+  );
+}
+
+function CopyBtn({ targetId }) {
+  const [label, setLabel] = React.useState('copy html');
+  const onClick = async () => {
+    const node = document.getElementById(targetId);
+    if (!node) return;
+    const html = node.outerHTML;
+    try {
+      if (navigator.clipboard && window.ClipboardItem) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([html], { type: 'text/plain' }),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(html);
+      }
+    } catch(e) {
+      const ta = document.createElement('textarea');
+      ta.value = html; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    setLabel('✓ copied');
+    setTimeout(() => setLabel('copy html'), 1400);
+  };
+  return <button className="copy-btn" onClick={onClick}>{label}</button>;
+}
+
+function SigCard({ id, title, tag, tagAccent, sub, width, lines, fallbacks, targetId, children }) {
+  return (
+    <div className="sig-wrap">
+      <div className="sig-head">
+        <div className="sig-head-l">
+          <span className="sig-id">SIG·{id}</span>
+          <span className="sig-title">{title}</span>
+        </div>
+        <span className={`sig-tag ${tagAccent ? 'accent' : ''}`}>{tag}</span>
+      </div>
+      <div className="sig-body">
+        {sub}
+        {children}
+      </div>
+      <div className="sig-meta">
+        <div className="sig-meta-k">rendered width</div>
+        <div className="sig-meta-v">~ {width} px</div>
+        <CopyBtn targetId={targetId} />
+        <div className="sig-meta-k">line count</div>
+        <div className="sig-meta-v">{lines}</div>
+        <div></div>
+        <div className="sig-meta-k">fallbacks</div>
+        <div className="sig-meta-v">{fallbacks}</div>
+        <div></div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [t, setTweak] = window.useTweaks(SIG_DEFAULTS);
+  const {
+    TweaksPanel, TweakSection, TweakText, TweakColor, TweakToggle,
+  } = window;
+
+  return (
+    <div className="page">
+      <a href="index.html" className="backlink">← atlas.core · back to canvas</a>
+
+      <div style={{ marginTop: 32 }}>
+        <div className="eyebrow">/// atlas.core · brand · email signature</div>
+        <h1 className="display">
+          sign off<br/>
+          <span className="stamp">with weight.</span>
+        </h1>
+        <p className="lede">
+          Three signature variants for <strong>{t.name}</strong> — same person, three dosages.
+          Edit the name, role, and contact fields in the Tweaks panel — all three previews update live.
+          Copy-paste the HTML into Gmail / Superhuman / Apple Mail signature settings.
+        </p>
+      </div>
+
+      <h2 className="section">01 · classic.</h2>
+      <p className="section-sub">Logo-left, three lines of info, one accent underline on the action link. The default — works everywhere.</p>
+      <SigCard id="01" title="classic · founder" tag="DEFAULT" tagAccent width="280" lines="3" fallbacks="helvetica neue · arial" targetId="sig-01"
+        sub={
+          <div className="email-ctx">
+            Thanks for the thoughtful note — I'll loop in the coach team and come back Thursday with the full protocol write-up. Short version: yes to the labs cadence, no to the weekly check-ins, and let's talk macros on the call.
+            <div className="quote">
+              On Tue, Mar 4, Marcus wrote: &gt; Wanted to flag two things from the onboarding flow before we ship …
+            </div>
+          </div>
+        }>
+        <Sig01Classic t={t} />
+      </SigCard>
+
+      <h2 className="section">02 · minimal.</h2>
+      <p className="section-sub">Text-only, one line. For quick replies and threads — where a 56px logo block would feel loud.</p>
+      <SigCard id="02" title="minimal · reply-thread" tag="QUIET" width="300" lines="1" fallbacks="helvetica neue · arial" targetId="sig-02"
+        sub={<div className="email-ctx">Yes — go.</div>}>
+        <Sig02Minimal t={t} />
+      </SigCard>
+
+      <h2 className="section">03 · ecg.</h2>
+      <p className="section-sub">Full brand moment — logo, role block, and an inline ECG divider. For investor / partner / press outbound, where the brand carries weight.</p>
+      <SigCard id="03" title="ecg · external / press" tag="BRANDED" tagAccent width="320" lines="5" fallbacks="helvetica neue · arial · sf mono" targetId="sig-03"
+        sub={<div className="email-ctx">Appreciate you taking the time. Attaching the latest deck — Series A narrative, twelve slides, audio version linked on slide 1. Happy to walk through it live anytime next week.</div>}>
+        <Sig03ECG t={t} />
+      </SigCard>
+
+      <div className="rules">
+        <div className="eyebrow">/// rules &amp; notes</div>
+        <h3>how to install.</h3>
+        <ul>
+          <li><strong>Tap "copy html"</strong> on the signature you want — it copies the raw markup.</li>
+          <li><strong>Gmail:</strong> Settings → General → Signature → create new → paste as rich text.</li>
+          <li><strong>Apple Mail:</strong> paste into Signatures pane, then re-open — it auto-converts.</li>
+          <li><strong>Superhuman:</strong> Settings → Signature → source view → paste HTML.</li>
+          <li><strong>Don't edit inside Gmail's WYSIWYG</strong> — it rewrites the HTML. Edit source, repaste.</li>
+          <li><strong>Classic is default</strong> — reach for ECG only when the brand needs to do work.</li>
+          <li><strong>Fonts gracefully degrade</strong> to Helvetica Neue / Arial / system mono.</li>
+          <li><strong>Colors are inline</strong> — no client-side CSS dependency.</li>
+        </ul>
+      </div>
+
+      <TweaksPanel title="Signature">
+        <TweakSection label="Person" />
+        <TweakText label="Name"         value={t.name}         onChange={(v) => setTweak('name', v)} />
+        <TweakText label="Role"         value={t.role}         onChange={(v) => setTweak('role', v)} />
+        <TweakText label="Monogram"     value={t.monogram}     onChange={(v) => setTweak('monogram', v)} />
+        <TweakSection label="Contact" />
+        <TweakText label="Email"        value={t.email}        onChange={(v) => setTweak('email', v)} />
+        <TweakText label="Website URL"  value={t.website}      onChange={(v) => setTweak('website', v)} />
+        <TweakText label="Website label" value={t.websiteLabel} onChange={(v) => setTweak('websiteLabel', v)} />
+        <TweakText label="Company"      value={t.company}      onChange={(v) => setTweak('company', v)} />
+        <TweakSection label="ECG variant" />
+        <TweakText   label="Tagline"        value={t.tagline}       onChange={(v) => setTweak('tagline', v)} />
+        <TweakToggle label="Show tagline"   value={t.showTagline}   onChange={(v) => setTweak('showTagline', v)} />
+        <TweakToggle label="Show ECG line"  value={t.showECGDivider} onChange={(v) => setTweak('showECGDivider', v)} />
+        <TweakSection label="Brand" />
+        <TweakColor label="Accent"       value={t.accent}       onChange={(v) => setTweak('accent', v)} />
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Sparkles, Loader2, AlertCircle, X, Dumbbell, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
+import { useT } from '@/lib/i18nContext';
 import { toast } from 'sonner';
 
 /** Capitalize each word: "supino reto" → "Supino Reto" */
@@ -35,6 +36,7 @@ function titleCase(str) {
  *     { name, sets, reps, weight, weight_unit, muscle_group, rest_seconds, confidence }
  */
 export default function AIWorkoutInput({ onExercisesDetected }) {
+  const t = useT();
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null); // The full AI response
@@ -84,14 +86,14 @@ export default function AIWorkoutInput({ onExercisesDetected }) {
       console.error('AI workout text error:', err);
       const msg = err?.message || '';
       if (msg.includes('429') || msg.includes('rate')) {
-        setError('Too many requests. Please wait a moment and try again.');
+        setError(t('errors.aiWorkoutTooManyRequests'));
       } else {
         setError('Failed to analyze. Please try again or add exercises manually.');
       }
     } finally {
       setIsAnalyzing(false);
     }
-  }, [text]);
+  }, [text, t]);
 
   const handleConfirm = useCallback(() => {
     if (!result?.exercises?.length) return;

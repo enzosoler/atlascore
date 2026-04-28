@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>atlas.core — chart library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --bg:  #efe9da;
+    --accent: #e8b500;
+    --good: #2a7a47;
+    --warn: #c14d2f;
+    --dim: rgba(10,10,10,0.55);
+    --line: rgba(10,10,10,0.12);
+    --soft: rgba(10,10,10,0.04);
+    --card: rgba(10,10,10,0.03);
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 64px 48px 120px; }
+  .mono { font-family: var(--mono); letter-spacing: 1.6px; text-transform: uppercase; font-size: 11px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+  h1.display { margin: 10px 0 20px; font-family: var(--display); font-size: 96px; letter-spacing: -4px; line-height: 0.9; text-transform: lowercase; }
+  h1.display .accent { color: var(--accent); }
+  h1.display .stamp { background: var(--ink); color: var(--bg); padding: 0 14px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 720px; color: rgba(10,10,10,0.82); }
+  h2.section { font-family: var(--display); font-size: 44px; letter-spacing: -1.6px; line-height: 1; text-transform: lowercase; margin: 96px 0 8px; }
+  .section-sub { font-size: 14px; color: var(--dim); margin-bottom: 28px; max-width: 620px; line-height: 1.5; }
+
+  .backlink { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--dim); text-decoration: none; }
+  .backlink:hover { color: var(--ink); }
+
+  .index-grid {
+    margin-top: 30px;
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    border: 1px solid var(--line);
+  }
+  .index-cell {
+    padding: 18px 14px; border-left: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 10px; min-height: 120px;
+    text-decoration: none; color: inherit;
+    background: var(--bg);
+  }
+  .index-cell:first-child { border-left: 0; }
+  .index-cell:hover { background: var(--soft); }
+  .index-cell .idx-id { font-family: var(--mono); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); }
+  .index-cell .idx-name { font-size: 13px; font-weight: 600; letter-spacing: -0.2px; }
+  .index-cell .idx-svg { flex: 1; display: flex; align-items: center; }
+
+  .chart-block {
+    margin-top: 48px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .chart-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 20px 24px; border-bottom: 1px solid var(--line);
+  }
+  .chart-head-l .chart-id { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+  .chart-head-l h3 { margin: 6px 0 4px; font-family: var(--display); font-size: 32px; letter-spacing: -1px; line-height: 1; text-transform: lowercase; }
+  .chart-head-l .chart-role { font-size: 13px; color: var(--dim); max-width: 520px; line-height: 1.5; }
+  .chart-tags { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .chart-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 3px 7px; background: rgba(10,10,10,0.08); }
+  .chart-tag.accent { background: var(--accent); color: var(--ink); }
+
+  .specimens {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  }
+  .specimen {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 22px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+    min-height: 200px;
+  }
+  .specimen:last-child { border-right: 0; }
+  .specimen-caption {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim);
+    display: flex; justify-content: space-between;
+  }
+  .specimen-stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 140px; }
+  .specimen-label { font-size: 13px; font-weight: 600; letter-spacing: -0.2px; }
+
+  .props {
+    padding: 18px 24px;
+    display: grid; grid-template-columns: 160px 1fr 220px 1fr; gap: 10px 20px;
+    font-size: 13px;
+  }
+  .prop-k { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim); }
+  .prop-v { font-family: var(--mono); font-size: 11px; }
+  .prop-v code { background: var(--soft); padding: 1px 5px; }
+
+  .do-dont {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--line);
+  }
+  .do, .dont { padding: 18px 24px; }
+  .do { background: rgba(42,122,71,0.05); border-right: 1px solid var(--line); }
+  .dont { background: rgba(193,77,47,0.04); }
+  .do .label, .dont .label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .do .label { color: var(--good); }
+  .dont .label { color: var(--warn); }
+  .do ul, .dont ul { margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.6; }
+
+  .rules {
+    margin-top: 80px;
+    padding: 28px 32px;
+    background: var(--ink); color: var(--bg);
+  }
+  .rules .eyebrow { color: rgba(239,233,218,0.6); }
+  .rules h3 { font-family: var(--display); font-size: 36px; letter-spacing: -1.2px; margin: 4px 0 18px; text-transform: lowercase; }
+  .rules ul { padding-left: 18px; font-size: 14px; line-height: 1.7; margin: 0; column-count: 2; column-gap: 48px; }
+  .rules li::marker { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="backlink">← atlas.core · back to canvas</a>
+
+  <div style="margin-top: 32px;">
+    <div class="eyebrow">/// atlas.core · data viz · phase 14</div>
+    <h1 class="display">
+      charts that <span class="accent">tell</span><br/>
+      <span class="stamp">the body's story.</span>
+    </h1>
+    <p class="lede">
+      Six chart primitives, every dashboard in atlas.core is built from. Each primitive is tuned
+      to one thing and does only that. No dual-axis, no pie, no 3D. The rule: a chart earns its
+      place by changing a decision — if it doesn't change what the user does next, it's furniture.
+    </p>
+  </div>
+
+  <!-- ══════════════════ INDEX ══════════════════ -->
+  <div class="index-grid">
+    <a href="#c01" class="index-cell">
+      <span class="idx-id">C · 01</span>
+      <span class="idx-name">ecg trace</span>
+      <div class="idx-svg">
+        <svg viewBox="0 0 120 32" width="100%"><path d="M0 16 L24 16 L32 6 L40 26 L48 16 L72 16 L80 6 L88 26 L96 16 L120 16" stroke="#0a0a0a" stroke-width="1.5" fill="none"/></svg>
+      </div>
+    </a>
+    <a href="#c02" class="index-cell">
+      <span class="idx-id">C · 02</span>
+      <span class="idx-name">readiness ring</span>
+      <div class="idx-svg">
+        <svg viewBox="0 0 48 48" width="52"><circle cx="24" cy="24" r="18" stroke="rgba(10,10,10,0.15)" stroke-width="4" fill="none"/><circle cx="24" cy="24" r="18" stroke="#e8b500" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="85 200" transform="rotate(-90 24 24)"/></svg>
+      </div>
+    </a>
+    <a href="#c03" class="index-cell">
+      <span class="idx-id">C · 03</span>
+      <span class="idx-name">bar stack</span>
+      <div class="idx-svg">
+        <svg viewBox="0 0 120 40" width="100%"><rect x="4" y="10" width="14" height="28" fill="#0a0a0a"/><rect x="22" y="16" width="14" height="22" fill="#0a0a0a"/><rect x="40" y="6" width="14" height="32" fill="#e8b500"/><rect x="58" y="14" width="14" height="24" fill="#0a0a0a"/><rect x="76" y="20" width="14" height="18" fill="#0a0a0a"/><rect x="94" y="12" width="14" height="26" fill="#0a0a0a"/></svg>
+      </div>
+    </a>
+    <a href="#c04" class="index-cell">
+      <span class="idx-id">C · 04</span>
+      <span class="idx-name">streak grid</span>
+      <div class="idx-svg">
+        <svg viewBox="0 0 120 32" width="100%"><g>
+          <rect x="0" y="0" width="14" height="14" fill="#0a0a0a"/><rect x="16" y="0" width="14" height="14" fill="#0a0a0a"/><rect x="32" y="0" width="14" height="14" fill="rgba(10,10,10,0.2)"/><rect x="48" y="0" width="14" height="14" fill="#0a0a0a"/><rect x="64" y="0" width="14" height="14" fill="#0a0a0a"/><rect x="80" y="0" width="14" height="14" fill="#e8b500"/><rect x="96" y="0" width="14" height="14" fill="rgba(10,10,10,0.2)"/>
+          <rect x="0" y="18" width="14" height="14" fill="#0a0a0a"/><rect x="16" y="18" width="14" height="14" fill="rgba(10,10,10,0.2)"/><rect x="32" y="18" width="14" height="14" fill="#0a0a0a"/><rect x="48" y="18" width="14" height="14" fill="#0a0a0a"/><rect x="64" y="18" width="14" height="14" fill="#0a0a0a"/><rect x="80" y="18" width="14" height="14" fill="rgba(10,10,10,0.2)"/><rect x="96" y="18" width="14" height="14" fill="#0a0a0a"/>
+        </g></svg>
+      </div>
+    </a>
+    <a href="#c05" class="index-cell">
+      <span class="idx-id">C · 05</span>
+      <span class="idx-name">pr ladder</span>
+      <div class="idx-svg">
+        <svg viewBox="0 0 120 40" width="100%"><path d="M0 32 L20 32 L20 24 L44 24 L44 18 L72 18 L72 10 L100 10 L100 6 L120 6" stroke="#0a0a0a" stroke-width="1.6" fill="none"/></svg>
+      </div>
+    </a>
+    <a href="#c06" class="index-cell">
+      <span class="idx-id">C · 06</span>
+      <span class="idx-name">sparkline</span>
+      <div class="idx-svg">
+        <svg viewBox="0 0 120 32" width="100%"><path d="M0 22 L12 20 L24 24 L36 18 L48 20 L60 14 L72 16 L84 10 L96 12 L108 6 L120 8" stroke="#0a0a0a" stroke-width="1.4" fill="none"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- ══════════════════ CHARTS ══════════════════ -->
+  <div id="charts"></div>
+
+  <!-- ══════════════════ RULES ══════════════════ -->
+  <div class="rules">
+    <div class="eyebrow">/// rules &amp; anti-patterns</div>
+    <h3>the short list.</h3>
+    <ul>
+      <li><strong>One chart, one question.</strong> If a chart answers two questions, split it.</li>
+      <li><strong>Accent is a noun.</strong> Yellow = "this is the point." Never decorative.</li>
+      <li><strong>Ink = truth. Dim = context.</strong> Never color-code categories with the accent.</li>
+      <li><strong>Axes are a last resort.</strong> Annotate the thing that matters inline; ditch the grid.</li>
+      <li><strong>No tooltips on phones.</strong> If the data needs hover, it doesn't belong on mobile.</li>
+      <li><strong>No pies. No donuts.</strong> Bar stacks express ratios more honestly.</li>
+      <li><strong>Time flows right.</strong> Always. "Now" is always on the right edge.</li>
+      <li><strong>Reduced motion</strong> kills the draw-in; data appears instant.</li>
+    </ul>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="chart-library.jsx"></script>
+
+</body>
+</html>

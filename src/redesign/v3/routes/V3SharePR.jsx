@@ -66,9 +66,6 @@ export default function V3SharePR() {
           
           toast.success(t('sharePR.imageSaved'));
         }, 'image/png');
-      } else if (format === 'pdf') {
-        // PDF export would require additional library like jsPDF
-        toast.info(t('sharePR.pdfComingSoon'));
       }
     } catch (error) {
       console.error('Export failed:', error);

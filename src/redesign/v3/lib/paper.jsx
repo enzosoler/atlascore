@@ -99,6 +99,7 @@ export function ACDot({ size = 8, color, style }) {
   );
 }
 
+/** @param {{ children: React.ReactNode, size?: number, track?: number, color: any, style?: object }} props */
 export function ACLabel({ children, size = 11, track = 0.3, color, style }) {
   return (
     <span
@@ -116,6 +117,7 @@ export function ACLabel({ children, size = 11, track = 0.3, color, style }) {
   );
 }
 
+/** @param {{ children: React.ReactNode, size?: number, track?: number, color: any, style?: object }} props */
 export function ACMono({ children, size = 11, track = 0.4, color, style }) {
   return (
     <span
@@ -156,7 +158,7 @@ export function ACNum({ children, size = 48, color, weight = 700, style }) {
 
 /** Standard button — primary fills with amber, default is a flat panel. */
 export function ACBtn({
-  children, primary, dark, block, style, size = 'md', pill, onClick, type = 'button', disabled = false,
+  children, primary, dark, block, style, size = 'md', pill, onClick, type = /** @type {'button'|'submit'|'reset'} */ ('button'), disabled = false,
 }) {
   const c = useACT(dark);
   const pads = { sm: '10px 16px', md: '14px 20px', lg: '18px 24px' };

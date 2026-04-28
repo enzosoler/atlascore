@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1400">
+<title>atlas.core — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #efe9da;
+    --accent: #e8b500;
+    --mono: "JetBrains Mono", monospace;
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ink); color: var(--paper); font-family: var(--body); }
+
+  /* Header */
+  .header {
+    padding: 48px 64px 40px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-bottom: 1px solid rgba(239,233,218,0.08);
+  }
+  .header h1 {
+    font-family: var(--display); font-size: 42px; letter-spacing: -1.8px;
+    text-transform: lowercase; line-height: 1;
+  }
+  .header .meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2.5px;
+    text-transform: uppercase; color: rgba(239,233,218,0.45); text-align: right;
+    line-height: 1.8;
+  }
+
+  /* Showcase grid */
+  .showcase {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    padding: 2px;
+  }
+  .showcase .full { grid-column: 1 / -1; }
+
+  /* Each card wraps an appstore image */
+  [data-export-id] {
+    position: relative;
+    background: var(--ink);
+    overflow: hidden;
+  }
+  [data-export-id] img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  /* Constrain tall App Store artboards to fit the viewport */
+  .showcase [data-export-id] img {
+    max-height: 680px;
+    object-fit: contain;
+  }
+
+  /* Phone screen grid */
+  .screen-grid {
+    padding: 48px 64px 64px;
+    border-top: 1px solid rgba(239,233,218,0.08);
+  }
+  .screen-grid h2 {
+    font-family: var(--display); font-size: 32px; letter-spacing: -1.2px;
+    text-transform: lowercase; margin-bottom: 8px;
+  }
+  .screen-grid .sub {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2.5px;
+    text-transform: uppercase; color: rgba(239,233,218,0.45);
+    margin-bottom: 32px;
+  }
+  .phones {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+  }
+  .phone-card {
+    background: rgba(239,233,218,0.04);
+    border: 1px solid rgba(239,233,218,0.06);
+    border-radius: 20px;
+    padding: 10px;
+    transition: transform 0.2s;
+  }
+  .phone-card:hover { transform: translateY(-4px); }
+  .phone-card img {
+    width: 100%; border-radius: 12px; display: block;
+  }
+  .phone-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.8px;
+    text-transform: uppercase; color: rgba(239,233,218,0.4);
+    text-align: center; padding: 10px 4px 4px;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 32px 64px 48px;
+    border-top: 1px solid rgba(239,233,218,0.08);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer .brand {
+    font-family: var(--display); font-size: 14px; letter-spacing: -0.3px;
+    text-transform: lowercase; color: rgba(239,233,218,0.4);
+  }
+  .footer .stack {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(239,233,218,0.3);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>atlas.<span style="color:var(--accent)">core</span></h1>
+    <div style="font-size: 15px; color: rgba(239,233,218,0.6); margin-top: 8px; max-width: 440px; line-height: 1.5;">
+      Self-optimization operating system. Training, nutrition, recovery, labs, and hormones — one system for everything you're optimizing.
+    </div>
+  </div>
+  <div class="meta">
+    enzo soler · 2026<br>
+    react · capacitor · supabase · swiftui<br>
+    ios · app store · testflight
+  </div>
+</div>
+
+<!-- ═══ APP STORE COMPOSITIONS ═══ -->
+<div class="showcase">
+  <div class="full" data-export-id="01-hero">
+    <img src="exports/appstore-01.png" alt="Hero — your body, one system">
+  </div>
+
+  <div data-export-id="02-training">
+    <img src="exports/appstore-02.png" alt="Training — every rep, logged">
+  </div>
+
+  <div data-export-id="03-labs">
+    <img src="exports/appstore-03.png" alt="Labs — 84 markers, one dashboard">
+  </div>
+
+  <div data-export-id="04-nutrition">
+    <img src="exports/appstore-04.png" alt="Nutrition — fuel precision">
+  </div>
+
+  <div data-export-id="05-coach">
+    <img src="exports/appstore-05.png" alt="Coach — AI that knows you">
+  </div>
+
+  <div class="full" data-export-id="06-weekly">
+    <img src="exports/appstore-06.png" alt="Weekly — the bigger picture">
+  </div>
+
+  <div class="full" data-export-id="07-system">
+    <img src="exports/appstore-07.png" alt="System — measure everything">
+  </div>
+</div>
+
+<!-- ═══ INDIVIDUAL SCREENS ═══ -->
+<div class="screen-grid">
+  <h2>every <span style="color:var(--accent)">screen.</span></h2>
+  <div class="sub">50 screens · iphone 14 pro · design canvas · 2x resolution</div>
+  <div class="phones">
+    <div class="phone-card"><img src="exports/01-screen.png" alt="Welcome"><div class="phone-label">welcome</div></div>
+    <div class="phone-card"><img src="exports/02-screen.png" alt="Today"><div class="phone-label">today</div></div>
+    <div class="phone-card"><img src="exports/05-screen.png" alt="Paywall"><div class="phone-label">paywall</div></div>
+    <div class="phone-card"><img src="exports/06-screen.png" alt="Onboarding"><div class="phone-label">onboarding</div></div>
+    <div class="phone-card"><img src="exports/08-screen.png" alt="Goal"><div class="phone-label">goal</div></div>
+    <div class="phone-card"><img src="exports/12-screen.png" alt="Coach"><div class="phone-label">coach</div></div>
+    <div class="phone-card"><img src="exports/13-screen.png" alt="Nutrition"><div class="phone-label">nutrition</div></div>
+    <div class="phone-card"><img src="exports/15-screen.png" alt="Labs"><div class="phone-label">labs</div></div>
+    <div class="phone-card"><img src="exports/17-screen.png" alt="Body"><div class="phone-label">body</div></div>
+    <div class="phone-card"><img src="exports/20-screen.png" alt="Workouts"><div class="phone-label">workouts</div></div>
+    <div class="phone-card"><img src="exports/25-screen.png" alt="Program"><div class="phone-label">5/3/1 bbb</div></div>
+    <div class="phone-card"><img src="exports/30-screen.png" alt="PR Wall"><div class="phone-label">pr wall</div></div>
+    <div class="phone-card"><img src="exports/35-screen.png" alt="Weekly"><div class="phone-label">weekly recap</div></div>
+    <div class="phone-card"><img src="exports/40-screen.png" alt="Search"><div class="phone-label">search</div></div>
+    <div class="phone-card"><img src="exports/45-screen.png" alt="Protocol"><div class="phone-label">protocol</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="brand">atlas·core · enzo soler · 2026</div>
+  <div class="stack">react · capacitor · supabase · swiftui · revenuecat · resend · playwright · fastlane</div>
+</div>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn,
@@ -15,19 +16,31 @@ import { useT } from '@/lib/i18nContext';
  * Props:
  *   dark          — light/dark variant
  *   onClose       — X button top-left (defaults to onSkip)
- *   onStartTrial  — CTA ({planId}) → start trial flow
+ *   onStartTrial  — CTA ({planId}) → purchase flow
  *   onRestore     — restore purchases link
  *   onSkip        — "Not now" / dismiss
  *   platform      — 'native' | 'web' (changes disclaimer copy)
  */
-function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, platform = 'native' }) {
+function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, platform = 'native', packageDisplays = {} }) {
   const c = useACT(dark);
   const t = useT();
   const [plan, setPlan] = React.useState('yearly');
   const handleClose = onClose || onSkip;
   const plans = [
-    { k: 'yearly', t: t('paywall.plans.yearly'), p: '$79', pm: t('paywall.pricing.yearlyEffective'), save: t('paywall.plans.save') },
-    { k: 'monthly', t: t('paywall.plans.monthly'), p: '$9.99', pm: t('paywall.pricing.monthly'), save: null },
+    {
+      k: 'yearly',
+      t: t('paywall.plans.yearly'),
+      p: packageDisplays.yearly?.price || t('paywall.pricing.confirmedInStore'),
+      pm: t('paywall.pricing.yearly'),
+      save: t('paywall.plans.save'),
+    },
+    {
+      k: 'monthly',
+      t: t('paywall.plans.monthly'),
+      p: packageDisplays.monthly?.price || t('paywall.pricing.confirmedInStore'),
+      pm: t('paywall.pricing.monthly'),
+      save: null,
+    },
   ];
   const features = [
     t('paywall.features.coach'),
@@ -104,18 +117,28 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onStartTrial?.({ planId: plan })}>{t('paywall.mobile.startTrial')}</ACBtn>
+        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onStartTrial?.({ planId: plan })}>{t('paywall.mobile.continue')}</ACBtn>
         <div style={{ textAlign: 'center', marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <ACLabel size={11} color={c.dim}>
             {platform === 'web'
               ? t('paywall.mobile.webDisclaimer')
               : t('paywall.mobile.nativeDisclaimer')}
           </ACLabel>
-          {onRestore && (
-            <button type="button" onClick={onRestore} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-              <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline' }}>{t('paywall.links.restore')}</ACLabel>
-            </button>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+            {onRestore && (
+              <button type="button" onClick={onRestore} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline' }}>{t('paywall.links.restore')}</ACLabel>
+              </button>
+            )}
+            {onRestore && <span style={{ color: c.dim, fontSize: 11 }}>&middot;</span>}
+            <Link to="/terms" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.3, color: c.dim, textDecoration: 'underline' }}>
+              {t('paywall.links.terms')}
+            </Link>
+            <span style={{ color: c.dim, fontSize: 11 }}>&middot;</span>
+            <Link to="/privacy" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.3, color: c.dim, textDecoration: 'underline' }}>
+              {t('paywall.links.privacy')}
+            </Link>
+          </div>
         </div>
       </div>
     </div>
