@@ -6,6 +6,8 @@
   "buildCommand": "npm run build:dual",
   "installCommand": "npm install --legacy-peer-deps",
   "rewrites": [
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/br/:path*", "destination": "/br/index.html" },
     { "source": "/pt/:path*", "destination": "/index.html" },
     { "source": "/en/:path*", "destination": "/index.html" },

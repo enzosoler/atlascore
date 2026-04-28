@@ -8,6 +8,7 @@ import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen
 import { saveCompletedWorkout } from '@/services/workoutService';
 import { fetchRecentWorkoutHistory, computePersonalRecords } from '@/services/workoutHistoryService';
 import { loadSession } from '@/lib/workoutSession';
+import { saveDraft, clearDraft } from '@/lib/workoutDraft';
 import { DEMO_EXERCISES } from '@/redesign/v3/lib/exerciseCatalog.js';
 import { listRoutines, markRoutineUsed, saveWorkoutSession } from '@/lib/workoutsService';
 import V3LoadingSplash from '@/redesign/v3/routes/V3LoadingSplash.jsx';
@@ -192,6 +193,9 @@ export default function V3ActiveWorkout() {
           return;
         }
 
+        // Persist draft before attempting save — survives crashes and network failures
+        saveDraft({ payload, workout });
+
         try {
           await saveCompletedWorkout(user.id, payload, workout);
 
@@ -228,11 +232,29 @@ export default function V3ActiveWorkout() {
             }
           }
 
+          clearDraft();
           invalidateAfterAction('workout');
           navigate('/app/workouts/history', { replace: true });
         } catch (error) {
           console.error('[V3ActiveWorkout] save failed', error);
-          toast.error(error?.message || t('workoutExecution.saveFailed'));
+          toast.error(error?.message || t('workoutExecution.saveFailed'), {
+            action: {
+              label: t('common.tryAgain'),
+              onClick: () => {
+                saveCompletedWorkout(user.id, payload, workout)
+                  .then(() => {
+                    clearDraft();
+                    invalidateAfterAction('workout');
+                    toast.success(t('workoutExecution.saveRetrySuccess'));
+                    navigate('/app/workouts/history', { replace: true });
+                  })
+                  .catch((retryErr) => {
+                    console.error('[V3ActiveWorkout] retry save failed', retryErr);
+                    toast.error(t('workoutExecution.saveFailed'));
+                  });
+              },
+            },
+          });
         }
       }}
     />

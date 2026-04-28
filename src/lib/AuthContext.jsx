@@ -288,8 +288,8 @@ export const AuthProvider = ({ children }) => {
     let profileSource = 'unknown';
 
     try {
-      // Hard 3 s timeout — on slow mobile networks this query can hang indefinitely,
-      // keeping authState at 'loading' forever and preventing the splash from hiding.
+      // 8 s timeout — Supabase cold starts can take 3-5 s on first request.
+      // The previous 3 s timeout caused false failures on slow mobile networks.
       const [role, profileRow] = await Promise.race([
         Promise.all([
           fetchProfileRole(authUser?.id, profileRole),
@@ -304,7 +304,7 @@ export const AuthProvider = ({ children }) => {
             }),
         ]),
         new Promise((_, reject) =>
-          window.setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
+          window.setTimeout(() => reject(new Error('Profile fetch timeout')), 8000)
         ),
       ]);
 
@@ -321,10 +321,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (e) {
       console.error('[AuthContext] Profile fetch failed:', e.message);
-      
-      if (retryCount < 2) {
-        console.log(`[AuthContext] Retrying profile fetch (${retryCount + 1}/2)...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const maxRetries = 3;
+      if (retryCount < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 4000); // 1s, 2s, 4s
+        console.log(`[AuthContext] Retrying profile fetch (${retryCount + 1}/${maxRetries}) in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
         return applyAuthenticatedUser(authUser, retryCount + 1);
       }
 

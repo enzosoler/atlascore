@@ -25,11 +25,13 @@ function getEnvOrigins(): string[] {
 function isAllowedVercelPreviewOrigin(origin: string): boolean {
   try {
     const parsed = new URL(origin);
-    // Scope to atlas project slugs only — bare *.vercel.app is too broad
+    // Match atlas-core project previews only.
+    // Previous pattern `startsWith('atlas')` was too broad and would match
+    // any atlas-*.vercel.app domain including hostile ones.
     return (
       parsed.protocol === 'https:' &&
       parsed.hostname.endsWith('.vercel.app') &&
-      parsed.hostname.startsWith('atlas')
+      /^atlas-core(-[a-z0-9]+)?(-[a-z0-9]+)*\.vercel\.app$/.test(parsed.hostname)
     );
   } catch {
     return false;

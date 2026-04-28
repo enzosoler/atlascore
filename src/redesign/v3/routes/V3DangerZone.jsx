@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -7,12 +7,15 @@ import { toast } from 'sonner';
 import { WEBAPP_BILLING, WEBAPP_EXPORT } from '@/lib/platformRoutes';
 import { useT } from '@/lib/i18nContext';
 import { WebAccountRow, WebAccountScaffold, WebAccountSection } from './WebAccountScaffold.jsx';
+import PromptDialog from '@/components/ui/PromptDialog';
 
 export default function V3DangerZone() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { subscription, showCustomerCenter } = useSubscription();
   const t = useT();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const hasManagedBilling = Boolean(
     subscription?.status &&
@@ -36,23 +39,25 @@ export default function V3DangerZone() {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (!user?.email) {
       toast.error(t('dangerZone.toasts.noAccount'));
       return;
     }
+    setDeleteDialogOpen(true);
+  };
 
-    const confirmEmail = window.prompt(t('dangerZone.prompts.typeEmail', { email: user.email }), '');
-    if (confirmEmail !== user.email) {
+  async function onEmailConfirmed(typedEmail) {
+    if (typedEmail !== user.email) {
       toast(t('dangerZone.toasts.deleteCancelled'), {
         description: t('dangerZone.toasts.emailMismatch'),
       });
       return;
     }
+    setConfirmDialogOpen(true);
+  }
 
-    const confirmed = window.confirm(t('dangerZone.prompts.finalConfirm'));
-    if (!confirmed) return;
-
+  async function executeAccountDeletion() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error(t('dangerZone.toasts.notSignedIn'));
@@ -86,9 +91,9 @@ export default function V3DangerZone() {
         });
       }
     }
-  };
+  }
 
-  return (
+  return (<>
     <WebAccountScaffold
       eyebrow={t('dangerZone.header')}
       title={t('dangerZone.title')}
@@ -141,5 +146,30 @@ export default function V3DangerZone() {
         </div>
       </WebAccountSection>
     </WebAccountScaffold>
+
+    <PromptDialog
+      open={deleteDialogOpen}
+      onOpenChange={setDeleteDialogOpen}
+      title={t('dangerZone.prompts.typeEmailTitle')}
+      description={t('dangerZone.prompts.typeEmail', { email: user?.email || '' })}
+      inputLabel={t('dangerZone.prompts.emailLabel')}
+      inputPlaceholder={user?.email || ''}
+      confirmLabel={t('dangerZone.prompts.deleteButton')}
+      cancelLabel={t('common.cancel')}
+      onConfirm={onEmailConfirmed}
+      destructive
+    />
+
+    <PromptDialog
+      open={confirmDialogOpen}
+      onOpenChange={setConfirmDialogOpen}
+      title={t('dangerZone.prompts.finalConfirmTitle')}
+      description={t('dangerZone.prompts.finalConfirm')}
+      confirmLabel={t('dangerZone.prompts.deleteForever')}
+      cancelLabel={t('common.cancel')}
+      onConfirm={executeAccountDeletion}
+      destructive
+    />
+  </>
   );
 }

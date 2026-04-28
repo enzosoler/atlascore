@@ -13,7 +13,7 @@
  * planId values match PLAN_TO_PACKAGE keys: 'weekly' | 'monthly' | 'yearly'
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useT } from '@/lib/i18nContext';
@@ -62,15 +62,24 @@ export function useRevenueCat({ userId, source = 'paywall', onSuccess } = {}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [packageDisplays, setPackageDisplays] = useState({});
+  const [offeringsError, setOfferingsError] = useState(false);
+  const [offeringsLoading, setOfferingsLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadOfferingMetadata() {
-      if (!isRevenueCatAvailable()) return;
+  const loadOfferingMetadata = useCallback(async () => {
+    setOfferingsError(false);
+    setOfferingsLoading(true);
+    try {
+      if (!isRevenueCatAvailable()) {
+        setOfferingsLoading(false);
+        return;
+      }
       await initRevenueCat(userId);
       const offering = await getOfferings({ currentOnly: true });
-      if (cancelled || !offering?.availablePackages) return;
+      if (!offering?.availablePackages) {
+        setOfferingsError(true);
+        setOfferingsLoading(false);
+        return;
+      }
 
       const next = {};
       for (const pkg of offering.availablePackages) {
@@ -78,16 +87,22 @@ export function useRevenueCat({ userId, source = 'paywall', onSuccess } = {}) {
         if (plan) next[plan] = normalizePackageDisplay(pkg);
       }
       setPackageDisplays(next);
-    }
-
-    loadOfferingMetadata().catch((err) => {
+      setOfferingsError(false);
+    } catch (err) {
       console.warn('[useRevenueCat] offering metadata load failed:', err);
-    });
-
-    return () => {
-      cancelled = true;
-    };
+      setOfferingsError(true);
+    } finally {
+      setOfferingsLoading(false);
+    }
   }, [userId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadOfferingMetadata().then(() => {
+      if (cancelled) return;
+    });
+    return () => { cancelled = true; };
+  }, [loadOfferingMetadata]);
 
   async function purchase({ planId } = {}) {
     if (loading) return;
@@ -161,5 +176,5 @@ export function useRevenueCat({ userId, source = 'paywall', onSuccess } = {}) {
     }
   }
 
-  return { purchase, restore, loading, packageDisplays };
+  return { purchase, restore, loading, packageDisplays, offeringsError, offeringsLoading, retryLoadOfferings: loadOfferingMetadata };
 }

@@ -58,6 +58,41 @@ serve(async (req) => {
     });
   }
 
+  // ── Per-user rate limiting ────────────────────────────────────────────────
+  const DAILY_LIMIT = 50; // searches per day per user
+  const today = new Date().toISOString().split('T')[0];
+
+  const adminSupabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  );
+
+  let { data: quota } = await adminSupabase
+    .from('ai_usage_quotas')
+    .select('exercise_search_today, quota_date')
+    .eq('user_id', user.id)
+    .single();
+
+  if (quota && quota.quota_date !== today) {
+    await adminSupabase
+      .from('ai_usage_quotas')
+      .update({ exercise_search_today: 0, quota_date: today })
+      .eq('user_id', user.id);
+    quota = { ...quota, exercise_search_today: 0, quota_date: today };
+  }
+
+  const usedToday = quota?.exercise_search_today ?? 0;
+  if (usedToday >= DAILY_LIMIT) {
+    return new Response(JSON.stringify({
+      error: `Daily exercise search limit reached (${DAILY_LIMIT}). Try again tomorrow.`,
+      code: 'USER_DAILY_LIMIT',
+      limit: DAILY_LIMIT,
+      used: usedToday,
+    }), {
+      status: 429, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
+  }
+
   // ── Parse request ──────────────────────────────────────────────────────────
   let body: { path?: string; params?: Record<string, string | number> };
   try {
@@ -123,6 +158,17 @@ serve(async (req) => {
     }
 
     const data = await upstreamRes.json();
+
+    // Increment daily counter (best-effort, don't fail the request)
+    adminSupabase
+      .from('ai_usage_quotas')
+      .upsert(
+        { user_id: user.id, exercise_search_today: usedToday + 1, quota_date: today },
+        { onConflict: 'user_id' },
+      )
+      .then(() => {})
+      .catch((e: unknown) => console.warn('[exercise-search] quota increment failed:', e));
+
     return new Response(JSON.stringify(data), {
       status: 200, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });

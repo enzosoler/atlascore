@@ -1,11 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { useT } from '@/lib/i18nContext';
+
+const TERMS_URL = 'https://useatlascore.com/terms';
+const PRIVACY_URL = 'https://useatlascore.com/privacy';
+
+const openExternal = async (url) => {
+  try {
+    if (window.Capacitor?.isNativePlatform?.()) {
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url });
+      return;
+    }
+  } catch { /* fall through */ }
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
 
 /**
  * S5_Paywall_A — onboarding trial gate (mobile).
@@ -21,7 +34,7 @@ import { useT } from '@/lib/i18nContext';
  *   onSkip        — "Not now" / dismiss
  *   platform      — 'native' | 'web' (changes disclaimer copy)
  */
-function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, platform = 'native', packageDisplays = {} }) {
+function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, platform = 'native', packageDisplays = {}, offeringsError = false, onRetryOfferings }) {
   const c = useACT(dark);
   const t = useT();
   const [plan, setPlan] = React.useState('yearly');
@@ -117,7 +130,18 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onStartTrial?.({ planId: plan })}>{t('paywall.mobile.continue')}</ACBtn>
+        {offeringsError ? (
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <ACLabel size={13} color={c.dim} style={{ marginBottom: 10, display: 'block' }}>
+              {t('paywall.toasts.billingUnavailable')}
+            </ACLabel>
+            <ACBtn primary block dark={dark} size="lg" pill onClick={onRetryOfferings}>
+              {t('paywall.mobile.retry')}
+            </ACBtn>
+          </div>
+        ) : (
+          <ACBtn primary block dark={dark} size="lg" pill onClick={() => onStartTrial?.({ planId: plan })}>{t('paywall.mobile.continue')}</ACBtn>
+        )}
         <div style={{ textAlign: 'center', marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <ACLabel size={11} color={c.dim}>
             {platform === 'web'
@@ -131,13 +155,13 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
               </button>
             )}
             {onRestore && <span style={{ color: c.dim, fontSize: 11 }}>&middot;</span>}
-            <Link to="/terms" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.3, color: c.dim, textDecoration: 'underline' }}>
-              {t('paywall.links.terms')}
-            </Link>
+            <button type="button" onClick={() => openExternal(TERMS_URL)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+              <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline', fontFamily: ACFonts.mono, letterSpacing: 0.3 }}>{t('paywall.links.terms')}</ACLabel>
+            </button>
             <span style={{ color: c.dim, fontSize: 11 }}>&middot;</span>
-            <Link to="/privacy" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.3, color: c.dim, textDecoration: 'underline' }}>
-              {t('paywall.links.privacy')}
-            </Link>
+            <button type="button" onClick={() => openExternal(PRIVACY_URL)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+              <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline', fontFamily: ACFonts.mono, letterSpacing: 0.3 }}>{t('paywall.links.privacy')}</ACLabel>
+            </button>
           </div>
         </div>
       </div>

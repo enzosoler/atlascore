@@ -6,22 +6,11 @@ import { useT } from '@/lib/i18nContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
+import { useAIConsent } from '../lib/useAIConsent.js';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S12_Coach_Chat from '../screens/S12_Coach_Chat.jsx';
 
 const COACH_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach-chat`;
-const AI_CONSENT_KEY = 'atlas.ai_consent_given';
-
-function useAIConsent() {
-  const [consented, setConsented] = useState(() => {
-    try { return localStorage.getItem(AI_CONSENT_KEY) === '1'; } catch { return false; }
-  });
-  const grant = useCallback(() => {
-    try { localStorage.setItem(AI_CONSENT_KEY, '1'); } catch { /* noop */ }
-    setConsented(true);
-  }, []);
-  return { consented, grant };
-}
 
 export default function V3CoachChat() {
   const navigate = useNavigate();
@@ -30,7 +19,7 @@ export default function V3CoachChat() {
   const { user } = useAuth();
   const [params] = useSearchParams();
   const ask = params.get('ask');
-  const { consented, grant: grantConsent } = useAIConsent();
+  const { consented, grant: grantConsent } = useAIConsent({ userId: user?.id, kind: 'coach_chat', provider: 'OpenAI' });
 
   // Daily state for context
   const { workoutDone, nutrition, checkin } = useDailyStateV2();

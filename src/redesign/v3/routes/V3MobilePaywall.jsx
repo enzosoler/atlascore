@@ -29,7 +29,7 @@ export default function V3MobilePaywall() {
   // as well as contextual paywall triggers with location state.
   // location.state?.trigger and location.state?.from are available for telemetry if needed.
 
-  const { purchase, restore, packageDisplays } = useRevenueCat({
+  const { purchase, restore, packageDisplays, offeringsError, retryLoadOfferings } = useRevenueCat({
     userId: user?.id,
     source: 'mobile_paywall',
   });
@@ -40,6 +40,8 @@ export default function V3MobilePaywall() {
       onStartTrial={purchase}
       onRestore={restore}
       packageDisplays={packageDisplays}
+      offeringsError={offeringsError}
+      onRetryOfferings={retryLoadOfferings}
       onClose={() => navigate(-1)}
       showTabBar={false}
     />

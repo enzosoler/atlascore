@@ -205,15 +205,8 @@ export default function V3AccountHub() {
 
         {/* Actions grid */}
         <div className="hub-grid" style={{
-          marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16,
+          marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16,
         }}>
-          <ActionCard
-            title={t('webapp.accountHub.billingHistoryTitle')}
-            description={t('webapp.accountHub.billingHistoryDesc')}
-            cta={t('webapp.accountHub.billingHistoryCta')}
-            onClick={() => navigate('/webapp/billing/invoices')}
-            style={{ opacity: 0, animation: 'acHubFade 0.6s ease-out forwards', animationDelay: '0.2s' }}
-          />
           <ActionCard
             title={t('webapp.accountHub.exportTitle')}
             description={t('webapp.accountHub.exportDesc')}

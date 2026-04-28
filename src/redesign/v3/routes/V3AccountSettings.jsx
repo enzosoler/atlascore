@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { email as emailService } from '@/lib/emailService';
 import { useT } from '@/lib/i18nContext';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
+import PromptDialog from '@/components/ui/PromptDialog';
 import {
   connectProvider,
   disconnectProvider,
@@ -23,6 +24,9 @@ export default function V3AccountSettings() {
     { id: 'google', name: t('accountSettings.providers.google'), connected: false },
   ]);
   const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [mfaDialogOpen, setMfaDialogOpen] = useState(false);
+  const [pendingMfaFactor, setPendingMfaFactor] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,10 +85,12 @@ export default function V3AccountSettings() {
     ]);
   }
 
-  async function handleChangeEmail() {
-    const nextEmail = window.prompt(t('accountSettings.prompts.changeEmail'), email);
-    if (!nextEmail || nextEmail === email) return;
+  function handleChangeEmail() {
+    setEmailDialogOpen(true);
+  }
 
+  async function submitEmailChange(nextEmail) {
+    if (!nextEmail || nextEmail.trim() === email) return;
     try {
       const { error } = await supabase.auth.updateUser({ email: nextEmail.trim() });
       if (error) throw error;
@@ -128,18 +134,9 @@ export default function V3AccountSettings() {
         if (aalError) throw aalError;
 
         if (aalData?.currentLevel !== 'aal2') {
-          const disableCode = window.prompt(t('accountSettings.prompts.disable2fa'), '');
-          if (!disableCode) return;
-          const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
-            factorId: verifiedFactor.id,
-          });
-          if (challengeError) throw challengeError;
-          const { error: verifyError } = await supabase.auth.mfa.verify({
-            factorId: verifiedFactor.id,
-            challengeId: challengeData.id,
-            code: disableCode.trim(),
-          });
-          if (verifyError) throw verifyError;
+          setPendingMfaFactor(verifiedFactor);
+          setMfaDialogOpen(true);
+          return;
         }
 
         const { error: disableError } = await supabase.auth.mfa.unenroll({ factorId: verifiedFactor.id });
@@ -238,7 +235,32 @@ export default function V3AccountSettings() {
     }
   }
 
-  return (
+  async function submitMfaDisable(code) {
+    if (!code || !pendingMfaFactor) return;
+    try {
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: pendingMfaFactor.id,
+      });
+      if (challengeError) throw challengeError;
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: pendingMfaFactor.id,
+        challengeId: challengeData.id,
+        code: code.trim(),
+      });
+      if (verifyError) throw verifyError;
+      const { error: disableError } = await supabase.auth.mfa.unenroll({ factorId: pendingMfaFactor.id });
+      if (disableError) throw disableError;
+      setMfaEnabled(false);
+      setPendingMfaFactor(null);
+      toast.success(t('accountSettings.toasts.twoFactorDisabled'));
+    } catch (err) {
+      toast.error(t('accountSettings.toasts.twoFactorToggleFailed'), {
+        description: err?.message || t('common.tryAgain'),
+      });
+    }
+  }
+
+  return (<>
     <WebAccountScaffold
       eyebrow={t('accountSettingsPage.eyebrow')}
       title={t('accountSettingsPage.heading')}
@@ -297,5 +319,31 @@ export default function V3AccountSettings() {
         />
       </WebAccountSection>
     </WebAccountScaffold>
+
+    <PromptDialog
+      open={emailDialogOpen}
+      onOpenChange={setEmailDialogOpen}
+      title={t('accountSettings.prompts.changeEmailTitle')}
+      description={t('accountSettings.prompts.changeEmail')}
+      inputLabel={t('accountSettings.prompts.emailLabel')}
+      inputPlaceholder={email}
+      defaultValue={email}
+      confirmLabel={t('accountSettings.prompts.updateButton')}
+      cancelLabel={t('common.cancel')}
+      onConfirm={submitEmailChange}
+    />
+
+    <PromptDialog
+      open={mfaDialogOpen}
+      onOpenChange={setMfaDialogOpen}
+      title={t('accountSettings.prompts.disable2faTitle')}
+      description={t('accountSettings.prompts.disable2fa')}
+      inputLabel={t('accountSettings.prompts.codeLabel')}
+      inputPlaceholder="000000"
+      confirmLabel={t('accountSettings.prompts.disableButton')}
+      cancelLabel={t('common.cancel')}
+      onConfirm={submitMfaDisable}
+    />
+  </>
   );
 }

@@ -4440,7 +4440,8 @@
     "volume": "Volume",
     "personalRecord": "PR",
     "mustBeSignedIn": "You must be signed in to save a workout.",
-    "saveFailed": "Failed to save workout. Please try again."
+    "saveFailed": "Failed to save workout. Please try again.",
+    "saveRetrySuccess": "Workout saved successfully."
   },
   "sharePR": {
     "cardNotReady": "Card not ready for export",
@@ -4879,6 +4880,7 @@
       "subtitle": "Confirm price, renewal terms, and any trial eligibility in the App Store sheet before you approve.",
       "startTrial": "Continue →",
       "continue": "Continue →",
+      "retry": "Retry",
       "nativeDisclaimer": "Apple confirms price, trial eligibility, and renewal before purchase.",
       "webDisclaimer": "Secure checkout confirms price and renewal before payment.",
       "features": {
@@ -5101,7 +5103,12 @@
     },
     "prompts": {
       "typeEmail": "Type {email} to permanently delete this account.",
-      "finalConfirm": "This permanently deletes your account and tracking data. This cannot be undone."
+      "typeEmailTitle": "Delete account",
+      "emailLabel": "Your email",
+      "deleteButton": "Continue",
+      "finalConfirm": "This permanently deletes your account and tracking data. This cannot be undone.",
+      "finalConfirmTitle": "Are you sure?",
+      "deleteForever": "Delete forever"
     },
     "toasts": {
       "notSignedIn": "Not signed in",
@@ -5322,7 +5329,13 @@
     },
     "prompts": {
       "changeEmail": "Enter your new email address.",
+      "changeEmailTitle": "Change email",
+      "emailLabel": "New email",
+      "updateButton": "Update",
       "disable2fa": "Enter the 6-digit code from your authenticator app to disable two-factor authentication.",
+      "disable2faTitle": "Disable 2FA",
+      "codeLabel": "Verification code",
+      "disableButton": "Disable",
       "enable2fa": "Scan the QR code in your authenticator app, or use this secret: {secret}\n\nEnter the 6-digit code to verify."
     },
     "toasts": {
