@@ -12,7 +12,7 @@ export default function V3Manifesto() {
     <V3StandaloneLayout>
       <S1_Splash_B
         dark={theme === 'dark'}
-        onCreateAccount={() => navigate('/auth/signup')}
+        onCreateAccount={() => navigate('/onboarding')}
         onSignIn={() => navigate('/auth/login?mode=password')}
       />
     </V3StandaloneLayout>

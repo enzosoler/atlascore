@@ -182,10 +182,10 @@ function S61_Onboard_Summary({
                   { l: tr('onboardSummary.runtime.macros.fat'),     v: String(targetData.fat),      u: tr('onboardSummary.runtime.grams') },
                 ].map((m, i) => (
                   <div key={i}>
-                    <ACLabel size={11} color="rgba(239,233,218,0.55)">{m.l}</ACLabel>
+                    <ACLabel size={11} color="rgba(239,233,218,0.8)">{m.l}</ACLabel>
                     <div style={{ marginTop: 6 }}>
                       <ACNum size={26} color={c.bg} weight={700}>{m.v}</ACNum>
-                      <span style={{ fontSize: 11, color: 'rgba(239,233,218,0.55)', marginLeft: 3 }}>{m.u}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(239,233,218,0.8)', marginLeft: 3 }}>{m.u}</span>
                     </div>
                   </div>
                 ))}

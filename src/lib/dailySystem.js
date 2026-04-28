@@ -164,7 +164,11 @@ export function nextDayModifier(adherence) {
 export function getSystemIntegrity(adherence, trend, anchorsComplete) {
   if (anchorsComplete && adherence.adherence >= 80) return { state: 'stable', label: 'System stable' };
   if (adherence.adherence >= 40 || adherence.done > 0) return { state: 'degrading', label: 'System degrading — restore consistency' };
-  return { state: 'broken', label: 'System broken — reset required' };
+  // No actions completed yet — brand-new user or start of day, not actually broken
+  if (adherence.done === 0 && (!trend?.values || trend.values.length === 0)) {
+    return { state: 'ready', label: 'System initializing' };
+  }
+  return { state: 'broken', label: 'System offline — start your anchors' };
 }
 
 // ─── 7-DAY TREND ────────────────────────────────────────────

@@ -28,7 +28,7 @@ function formatCountdown(totalSeconds) {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
-export default function V3AuthSignup() {
+export default function V3AuthSignup({ onboardingMode = false }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { theme } = useTheme();
@@ -50,11 +50,16 @@ export default function V3AuthSignup() {
 
   useEffect(() => {
     if (authState !== 'authenticated' || !user) return;
+    if (onboardingMode) {
+      // Coming from onboarding flow — go to tour/finalize
+      navigate('/onboarding/tour', { replace: true });
+      return;
+    }
     if (!user.onboarding_completed) {
       seedOnboardingDraftFromIntent(intentDraft);
     }
     navigate(user.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
-  }, [authState, user, navigate, intentDraft]);
+  }, [authState, user, navigate, intentDraft, onboardingMode]);
 
   useEffect(() => {
     if (rateLimitRemaining <= 0) return undefined;

@@ -87,7 +87,7 @@ function S10_Onboard_Plan({
             <ACNum size={72} color={c.bg} weight={700}>{plan.calories.toLocaleString()}</ACNum>
             <ACLabel size={13} color="rgba(239,233,218,0.6)">{t('onboardPlan.runtime.kcal')}</ACLabel>
           </div>
-          <ACLabel size={11} color="rgba(239,233,218,0.55)" style={{ marginTop: 2 }}>
+          <ACLabel size={11} color="rgba(239,233,218,0.8)" style={{ marginTop: 2 }}>
             {plan.deficitLabel}
           </ACLabel>
 
@@ -100,10 +100,10 @@ function S10_Onboard_Plan({
               { l: t('onboardPlan.runtime.macros.fat'),     v: String(plan.fatG),      u: t('onboardPlan.runtime.grams'), pct: `${plan.fatPct}%` },
             ].map((m, i) => (
               <div key={i}>
-                <ACLabel size={11} color="rgba(239,233,218,0.55)">{m.l}</ACLabel>
+                <ACLabel size={11} color="rgba(239,233,218,0.8)">{m.l}</ACLabel>
                 <div style={{ marginTop: 6 }}>
                   <ACNum size={26} color={c.bg} weight={700}>{m.v}</ACNum>
-                  <span style={{ fontSize: 11, color: 'rgba(239,233,218,0.55)', marginLeft: 3 }}>{m.u}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(239,233,218,0.8)', marginLeft: 3 }}>{m.u}</span>
                 </div>
                 <ACLabel size={10} color={c.accent} style={{ fontWeight: 600, marginTop: 2 }}>{m.pct}</ACLabel>
               </div>

@@ -491,20 +491,23 @@ function AppRoutes() {
         <Route path="/auth/magic"    element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3MagicLinkSent />} />
         <Route path="/auth/callback" element={<V3AuthCallback />} />
 
-        {/* ── Onboarding ─────────────────────────────────────────── */}
-        <Route path="/onboarding" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingIdentity />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/nutrition" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingDietPreferences />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/goal" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingGoal />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/activity" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingActivity />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/stats" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPlan />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/diet" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPermissions />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/workout" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingWorkout />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/habits" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingHabits />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/constraints" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingConstraints />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/summary" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingSummary />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/coach-match" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingCoachMatch />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/paywall" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <Navigate to="/onboarding/tour" replace />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/tour" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingTour />) : <Navigate to="/auth/signup" replace />} />
+        {/* ── Onboarding (pre-auth: questions collected into localStorage) ── */}
+        <Route path="/onboarding" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingIdentity />} />
+        <Route path="/onboarding/nutrition" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingDietPreferences />} />
+        <Route path="/onboarding/goal" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingGoal />} />
+        <Route path="/onboarding/activity" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingActivity />} />
+        <Route path="/onboarding/stats" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPlan />} />
+        <Route path="/onboarding/diet" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPermissions />} />
+        <Route path="/onboarding/workout" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingWorkout />} />
+        <Route path="/onboarding/habits" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingHabits />} />
+        <Route path="/onboarding/constraints" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingConstraints />} />
+        <Route path="/onboarding/summary" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingSummary />} />
+        <Route path="/onboarding/coach-match" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingCoachMatch />} />
+        <Route path="/onboarding/paywall" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <Navigate to="/onboarding/signup" replace />} />
+        {/* Signup step — inserted after coach-match, before tour */}
+        <Route path="/onboarding/signup" element={isAuthed ? <Navigate to="/onboarding/tour" replace /> : <V3AuthSignup onboardingMode />} />
+        {/* Tour + finalize — requires auth */}
+        <Route path="/onboarding/tour" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingTour />) : <Navigate to="/onboarding/signup" replace />} />
 
         {/* Public profile lives outside the shell (no auth guard on view) */}
         <Route path="/app/u/:username" element={<V3PublicProfile />} />

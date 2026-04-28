@@ -1469,8 +1469,9 @@
       },
       "integrity": {
         "stable": "Sistema estável",
+        "ready": "Sistema inicializando — complete suas primeiras ações",
         "degrading": "Sistema degradando — restaure a consistência",
-        "broken": "Sistema quebrado — reset necessário"
+        "broken": "Sistema offline — inicie suas âncoras"
       }
     }
   },

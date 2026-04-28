@@ -389,10 +389,12 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
           const anchorsComplete = trainingDone && proteinDone;
           const integrity = getSystemIntegrity(adherence, trend, anchorsComplete);
           const integrityColor = integrity.state === 'stable' ? c.accent
+            : integrity.state === 'ready' ? c.dim
             : integrity.state === 'degrading' ? c.fg
             : (ACBrand.error || '#c65b4b');
 
           const integrityLabel = integrity.state === 'stable' ? t('today.system.integrity.stable')
+            : integrity.state === 'ready' ? t('today.system.integrity.ready')
             : integrity.state === 'degrading' ? t('today.system.integrity.degrading')
             : t('today.system.integrity.broken');
 
@@ -806,7 +808,17 @@ export default function V3Today() {
 
   const proteinTarget = daily.nutrition?.proteinTarget || user?.user_metadata?.daily_protein_target || 0;
   const proteinConsumed = daily.nutrition?.proteinConsumed || 0;
-  const mandatoryCheckin = daily.dailyCheckinRequired !== false;
+  // Skip mandatory check-in on the day onboarding was completed
+  const onboardingJustCompleted = (() => {
+    try {
+      const ts = user?.user_metadata?.onboarding_completed_at || user?.profile_data?.onboarding_completed_at;
+      if (!ts) return false;
+      const completedDate = new Date(ts);
+      const now = new Date();
+      return completedDate.toDateString() === now.toDateString();
+    } catch { return false; }
+  })();
+  const mandatoryCheckin = !onboardingJustCompleted && daily.dailyCheckinRequired !== false;
 
   const system = useDailySystem({ proteinTarget });
   const bootstrappedCheckin = useRef(false);

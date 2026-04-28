@@ -12,7 +12,7 @@ export default function V3Welcome() {
     <V3StandaloneLayout>
       <S1_Splash_A
         dark={theme === 'dark'}
-        onGetStarted={() => navigate('/welcome/manifesto')}
+        onGetStarted={() => navigate('/onboarding')}
         onSignIn={() => navigate('/auth/login?mode=password')}
       />
     </V3StandaloneLayout>

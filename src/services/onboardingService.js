@@ -301,7 +301,11 @@ export async function finalizeOnboarding(userId, onboardingData = null) {
     throw profileError;
   }
 
-  const authMetadata = buildAuthMetadataFromOnboarding(source, profileData);
+  const completedAt = new Date().toISOString();
+  const authMetadata = {
+    ...buildAuthMetadataFromOnboarding(source, profileData),
+    onboarding_completed_at: completedAt,
+  };
   const { error: authError } = await supabase.auth.updateUser({ data: authMetadata });
   if (authError) {
     console.error('[onboarding] auth metadata update failed', {

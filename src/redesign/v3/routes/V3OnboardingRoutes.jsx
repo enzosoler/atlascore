@@ -230,7 +230,7 @@ export function V3OnboardingCoachMatch() {
             pill
             onClick={() => {
               update({ coachTone, coachFocus });
-              navigate('/onboarding/tour');
+              navigate('/onboarding/signup');
             }}
           >
             {t('onboarding.coachMatch.continue')}
@@ -479,7 +479,7 @@ export function V3OnboardingTour() {
   async function completeOnboarding() {
     if (finishing) return;
     if (!user?.id) {
-      navigate('/auth/signup', { replace: true });
+      navigate('/onboarding/signup', { replace: true });
       return;
     }
 

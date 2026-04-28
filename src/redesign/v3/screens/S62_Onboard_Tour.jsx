@@ -181,7 +181,6 @@ export default function S62_Onboard_Tour({
         flexDirection: 'column',
         background: c.bg,
         color: c.fg,
-        minHeight: '100svh',
         position: 'relative',
         overflow: 'hidden',
         userSelect: 'none',
@@ -190,7 +189,7 @@ export default function S62_Onboard_Tour({
     >
       {/* ── skip tour (top-right) ── */}
       <div style={{
-        padding: 'calc(env(safe-area-inset-top, 0px) + 16px) 22px 0',
+        padding: '10px 22px 0',
         display: 'flex',
         justifyContent: 'flex-end',
         position: 'relative',
@@ -260,7 +259,7 @@ export default function S62_Onboard_Tour({
 
       {/* ── bottom area: dots + CTA ── */}
       <div style={{
-        padding: '0 28px calc(env(safe-area-inset-bottom, 0px) + 28px)',
+        padding: '0 28px 28px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

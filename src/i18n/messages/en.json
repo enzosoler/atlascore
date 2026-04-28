@@ -1482,8 +1482,9 @@
       },
       "integrity": {
         "stable": "System stable",
+        "ready": "System initializing — complete your first actions",
         "degrading": "System degrading — restore consistency",
-        "broken": "System broken — reset required"
+        "broken": "System offline — start your anchors"
       }
     }
   },
