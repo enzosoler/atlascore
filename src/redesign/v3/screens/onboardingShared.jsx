@@ -1,7 +1,7 @@
 import React from 'react';
 import { ACFonts, ACRadii, useACT, ACLabel, ACBtn } from '../lib/paper.jsx';
 
-export function OnboardingHeader({ step, total, dark, onBack = true, eyebrow = 'Onboarding' }) {
+export function OnboardingHeader({ step, total, dark, onBack = true, onExit, eyebrow = 'Onboarding' }) {
   const c = useACT(dark);
 
   return (
@@ -63,12 +63,36 @@ export function OnboardingHeader({ step, total, dark, onBack = true, eyebrow = '
             ))}
           </div>
         </div>
+
+        {onExit && (
+          <button
+            type="button"
+            onClick={onExit}
+            aria-label="Exit onboarding"
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 999,
+              background: dark ? 'rgba(239,233,218,0.06)' : 'rgba(10,10,10,0.05)',
+              border: `1px solid ${c.hair}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10">
+              <path d="M1 1l8 8M9 1l-8 8" stroke={c.fg} strokeWidth="1.6" fill="none" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-export function OnboardingShell({ dark = false, step, total = 10, onBack, eyebrow, children, footer }) {
+export function OnboardingShell({ dark = false, step, total = 10, onBack, onExit, eyebrow, children, footer }) {
   const c = useACT(dark);
   const topGlow = dark
     ? 'radial-gradient(120% 70% at 50% 0%, rgba(232,181,0,0.12), rgba(232,181,0,0) 58%)'
@@ -94,8 +118,8 @@ export function OnboardingShell({ dark = false, step, total = 10, onBack, eyebro
       />
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-        <OnboardingHeader step={step} total={total} dark={dark} onBack={onBack} eyebrow={eyebrow} />
-        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '26px 28px 16px' }}>{children}</div>
+        <OnboardingHeader step={step} total={total} dark={dark} onBack={onBack} onExit={onExit} eyebrow={eyebrow} />
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '26px 28px 16px', display: 'flex', flexDirection: 'column' }}>{children}</div>
         <div
           style={{
             padding: '14px 28px 26px',

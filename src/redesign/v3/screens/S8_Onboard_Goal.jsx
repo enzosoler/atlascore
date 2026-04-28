@@ -20,7 +20,7 @@ function TrendIcon({ k, color, size = 28 }) {
   </svg>;
 }
 
-function S8_Onboard_Goal({ dark = false, onBack, onContinue, onChange, value }) {
+function S8_Onboard_Goal({ dark = false, onBack, onExit, onContinue, onChange, value }) {
   const c = useACT(dark);
   const [goal, setGoal] = React.useState(value?.goal || 'recomp');
   const goals = [
@@ -35,6 +35,7 @@ function S8_Onboard_Goal({ dark = false, onBack, onContinue, onChange, value }) 
       step={2}
       total={10}
       onBack={onBack}
+      onExit={onExit}
       eyebrow="Direction"
       footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>Continue →</OnboardingPrimaryAction>}
     >

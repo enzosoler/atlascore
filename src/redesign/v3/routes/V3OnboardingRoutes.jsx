@@ -58,7 +58,7 @@ function SplitOnboardingCard({ dark = false, stepLabel, title, body, children, f
           {body}
         </div>
       </div>
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 28px 16px' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '24px 28px 16px', display: 'flex', flexDirection: 'column' }}>
         {children}
       </div>
       <div style={{ padding: '14px 28px 26px', background: c.bg, flexShrink: 0 }}>
@@ -309,6 +309,7 @@ export function V3OnboardingIdentity() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onContinue={() => navigate('/onboarding/nutrition')}
       />
     </Wrap>
@@ -325,6 +326,7 @@ export function V3OnboardingGoal() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/nutrition')}
         onContinue={() => navigate('/onboarding/activity')}
       />
@@ -342,6 +344,7 @@ export function V3OnboardingActivity() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/goal')}
         onContinue={() => navigate('/onboarding/stats')}
       />
@@ -359,6 +362,7 @@ export function V3OnboardingPlan() {
         dark={theme === 'dark'}
         onboardingData={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/activity')}
         onContinue={(nextData) => {
           update(nextData || {});
@@ -379,6 +383,7 @@ export function V3OnboardingPermissions() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/stats')}
         onContinue={() => navigate('/onboarding/workout')}
         onSkip={() => navigate('/onboarding/workout')}
@@ -397,6 +402,7 @@ export function V3OnboardingWorkout() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/diet')}
         onContinue={() => navigate('/onboarding/habits')}
       />
@@ -414,6 +420,7 @@ export function V3OnboardingHabits() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/workout')}
         onContinue={() => navigate('/onboarding/constraints')}
       />
@@ -431,6 +438,7 @@ export function V3OnboardingConstraints() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/habits')}
         onContinue={() => navigate('/onboarding/summary')}
         onSkip={() => navigate('/onboarding/summary')}
@@ -462,6 +470,7 @@ export function V3OnboardingSummary() {
         dark={theme === 'dark'}
         targets={summaryTargets}
         constraints={summaryConstraints}
+        onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/constraints')}
         onContinue={() => navigate('/onboarding/coach-match')}
       />

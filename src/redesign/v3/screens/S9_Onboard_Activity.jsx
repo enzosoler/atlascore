@@ -5,7 +5,7 @@ import {
 } from '../lib/paper.jsx';
 import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
-function S9_Onboard_Activity({ dark = false, onBack, onContinue, onChange, value }) {
+function S9_Onboard_Activity({ dark = false, onBack, onExit, onContinue, onChange, value }) {
   const c = useACT(dark);
   const [lvl, setLvl] = React.useState(value?.activity || 3);
   const levels = [
@@ -21,6 +21,7 @@ function S9_Onboard_Activity({ dark = false, onBack, onContinue, onChange, value
       step={3}
       total={10}
       onBack={onBack}
+      onExit={onExit}
       eyebrow="Load"
       footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>Continue →</OnboardingPrimaryAction>}
     >

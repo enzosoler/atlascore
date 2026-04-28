@@ -5,7 +5,7 @@ import {
 } from '../lib/paper.jsx';
 import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
-function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value }) {
+function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChange, value }) {
   const c = useACT(dark);
   const [sex, setSex] = React.useState(value?.sex || 'male');
   const [ageRaw, setAgeRaw] = React.useState(value?.age ? String(value.age) : '');
@@ -27,6 +27,7 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value
       step={1}
       total={10}
       onBack={onBack || false}
+      onExit={onExit}
       eyebrow="Foundation"
       footer={(
         <OnboardingPrimaryAction

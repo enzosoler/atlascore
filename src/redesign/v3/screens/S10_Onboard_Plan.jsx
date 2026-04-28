@@ -10,6 +10,7 @@ import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShel
 function S10_Onboard_Plan({
   dark = false,
   onBack,
+  onExit,
   onContinue,
   onboardingData,
   value,
@@ -62,6 +63,7 @@ function S10_Onboard_Plan({
       step={4}
       total={10}
       onBack={onBack}
+      onExit={onExit}
       eyebrow={t('onboardPlan.runtime.eyebrow')}
       footer={<OnboardingPrimaryAction dark={dark} onClick={() => onContinue?.(localData)}>{t('onboardPlan.runtime.cta')}</OnboardingPrimaryAction>}
     >

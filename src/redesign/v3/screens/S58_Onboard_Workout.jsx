@@ -20,16 +20,16 @@ import {
 } from '../lib/paper.jsx';
 
 /* ── OBHeader (inline, matches S7–S11 exactly) ─────────────── */
-function OBHeader({ step, total, dark, onBack = true }) {
+function OBHeader({ step, total, dark, onBack = true, onExit }) {
   const c = useACT(dark);
   return (
-    <div style={{ padding: '14px 22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ padding: '14px 22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
       {onBack ? (
         <button type="button" onClick={typeof onBack === 'function' ? onBack : undefined} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
           <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
       ) : <div style={{ width: 28 }} />}
-      <div style={{ flex: 1, margin: '0 14px', display: 'flex', gap: 4 }}>
+      <div style={{ flex: 1, margin: '0 10px', display: 'flex', gap: 4 }}>
         {Array.from({ length: total }).map((_, i) => (
           <div key={i} style={{
             flex: 1, height: 3, borderRadius: 2,
@@ -38,6 +38,11 @@ function OBHeader({ step, total, dark, onBack = true }) {
         ))}
       </div>
       <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600 }}>{step}/{total}</ACLabel>
+      {onExit && (
+        <button type="button" onClick={onExit} aria-label="Exit" style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+          <svg width="9" height="9" viewBox="0 0 10 10"><path d="M1 1l8 8M9 1l-8 8" stroke={c.fg} strokeWidth="1.6" fill="none" strokeLinecap="round"/></svg>
+        </button>
+      )}
     </div>
   );
 }
@@ -73,6 +78,7 @@ function S58_Onboard_Workout({
   value,
   onChange,
   onBack,
+  onExit,
   onContinue,
 }) {
   const c = useACT(dark);
@@ -96,10 +102,10 @@ function S58_Onboard_Workout({
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
-      <OBHeader step={step} total={total} dark={dark} onBack={onBack} />
+      <OBHeader step={step} total={total} dark={dark} onBack={onBack} onExit={onExit} />
 
       {/* scrollable content */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 28px 16px' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '24px 28px 16px', display: 'flex', flexDirection: 'column' }}>
 
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Training</ACLabel>
         <div style={{
