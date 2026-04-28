@@ -10,7 +10,12 @@ import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/i18nContext';
 
 function friendlyOAuthError(provider, err, t) {
-  return err?.message || t(provider === 'apple' ? 'auth.login.appleStartFailed' : 'auth.login.googleStartFailed');
+  const raw = String(err?.message || '');
+  if (/not implemented|not available|plugin/i.test(raw)) {
+    return t('auth.login.oauthNotAvailable');
+  }
+  if (/cancel/i.test(raw)) return null;
+  return t(provider === 'apple' ? 'auth.login.appleStartFailed' : 'auth.login.googleStartFailed');
 }
 
 function formatCountdown(totalSeconds) {
@@ -129,7 +134,8 @@ export default function V3AuthLogin() {
     try {
       await signInWithOAuth(provider);
     } catch (err) {
-      setError(friendlyOAuthError(provider, err, t));
+      const msg = friendlyOAuthError(provider, err, t);
+      if (msg) setError(msg);
     }
   };
 

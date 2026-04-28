@@ -62,6 +62,7 @@
       "magicLinkFailed": "Could not send magic link.",
       "appleStartFailed": "Could not start Apple sign in.",
       "googleStartFailed": "Could not start Google sign in.",
+      "oauthNotAvailable": "Social sign-in is not available right now. Use email and password instead.",
       "rateLimitedCountdown": "Too many attempts. Try again in {time}"
     },
     "signup": {
@@ -77,6 +78,7 @@
       "createFailed": "Could not create your account.",
       "appleStartFailed": "Could not start Apple sign up.",
       "googleStartFailed": "Could not start Google sign up.",
+      "oauthNotAvailable": "Social sign-up is not available right now. Use email and password instead.",
       "headlineLine1": "create your",
       "headlineAccent": "account.",
       "description": "Start with email and password. The rest of setup happens inside atlas.core.",

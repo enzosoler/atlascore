@@ -62,6 +62,7 @@
       "magicLinkFailed": "Não foi possível enviar o magic link.",
       "appleStartFailed": "Não foi possível iniciar o login com Apple.",
       "googleStartFailed": "Não foi possível iniciar o login com Google.",
+      "oauthNotAvailable": "Login social indisponível no momento. Use e-mail e senha.",
       "rateLimitedCountdown": "Muitas tentativas. Tente novamente em {time}"
     },
     "signup": {
@@ -77,6 +78,7 @@
       "createFailed": "Não foi possível criar sua conta.",
       "appleStartFailed": "Não foi possível iniciar o cadastro com Apple.",
       "googleStartFailed": "Não foi possível iniciar o cadastro com Google.",
+      "oauthNotAvailable": "Cadastro social indisponível no momento. Use e-mail e senha.",
       "headlineLine1": "crie sua",
       "headlineAccent": "conta.",
       "description": "Comece com e-mail e senha. O restante da configuração acontece dentro do atlas.core.",

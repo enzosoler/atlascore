@@ -13,7 +13,12 @@ import {
 } from '@/services/onboardingService';
 
 function friendlyOAuthError(provider, err, t) {
-  return err?.message || t(provider === 'apple' ? 'auth.signup.appleStartFailed' : 'auth.signup.googleStartFailed');
+  const raw = String(err?.message || '');
+  if (/not implemented|not available|plugin/i.test(raw)) {
+    return t('auth.signup.oauthNotAvailable');
+  }
+  if (/cancel/i.test(raw)) return null;
+  return t(provider === 'apple' ? 'auth.signup.appleStartFailed' : 'auth.signup.googleStartFailed');
 }
 
 function formatCountdown(totalSeconds) {
@@ -131,7 +136,8 @@ export default function V3AuthSignup() {
     try {
       await signInWithOAuth(provider);
     } catch (err) {
-      setError(friendlyOAuthError(provider, err, t));
+      const msg = friendlyOAuthError(provider, err, t);
+      if (msg) setError(msg);
     }
   };
 

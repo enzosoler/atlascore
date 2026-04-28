@@ -6,25 +6,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    private func registerLocalPluginsIfNeeded() {
-        guard let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge else {
-            return
-        }
-
-        if bridge.plugin(withName: "WidgetDataBridge") == nil {
-            bridge.registerPluginInstance(WidgetDataBridge())
-        }
-
-        if bridge.plugin(withName: "NativeAuthSession") == nil {
-            bridge.registerPluginInstance(NativeAuthSession())
-        }
-    }
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Wait until the Capacitor bridge exists, then register app-local plugins and configure watch sync.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.registerLocalPluginsIfNeeded()
-
+        // Plugins are now registered synchronously in AtlasBridgeViewController.capacitorDidLoad().
+        // WatchConnectivity still needs a brief delay for the bridge to fully initialize.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
                 WatchConnectivityHandler.shared.configure(bridge: bridge)
             }
