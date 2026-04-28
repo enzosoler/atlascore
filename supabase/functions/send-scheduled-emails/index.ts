@@ -359,13 +359,9 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization') || '';
   const token = authHeader.replace('Bearer ', '');
   if (!SERVICE_ROLE_KEY || token !== SERVICE_ROLE_KEY) {
-    // Also accept anon key for debugging (remove in production)
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-    if (token !== anonKey) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
