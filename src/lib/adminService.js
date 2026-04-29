@@ -387,109 +387,34 @@ export async function extendTrial(userId, additionalDays = 7) {
   return data;
 }
 
-export async function grantAccess(userId, tier = 'pro', reason = '', durationDays = null, locale = 'en') {
-  const actorId = await getCurrentAdminId();
-
-  const grantData = {
-    status: 'granted',
-    tier,
-    granted_by_admin: actorId,
-    grant_reason: reason,
-  };
-
-  // Set expiry if duration is specified (null = unlimited)
-  if (durationDays) {
-    const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
-    grantData.current_period_ends_at = expiresAt;
-    grantData.current_period_starts_at = new Date().toISOString();
-  }
-
-  // Upsert: update existing subscription or create one if absent
-  const { data: existing } = await supabase
-    .from('subscriptions')
-    .select('id')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  let data, error;
-
-  if (existing?.id) {
-    ({ data, error } = await supabase
-      .from('subscriptions')
-      .update({ ...grantData, user_id: userId })
-      .eq('id', existing.id)
-      .select()
-      .single());
-  } else {
-    ({ data, error } = await supabase
-      .from('subscriptions')
-      .insert({ user_id: userId, ...grantData })
-      .select()
-      .single());
-  }
-
+/**
+ * Grant access via RevenueCat promotional entitlement.
+ * RevenueCat becomes the single source of truth — its webhook syncs the
+ * subscription row to our database automatically.
+ *
+ * @param {string} userId - Supabase user ID (= RevenueCat app_user_id)
+ * @param {string} duration - RevenueCat duration: weekly, monthly, three_month, six_month, yearly, lifetime
+ */
+export async function grantAccess(userId, duration = 'monthly') {
+  const { data, error } = await supabase.functions.invoke('admin-grant-entitlement', {
+    body: { userId, action: 'grant', duration },
+  });
   if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
 
-  // Send notification email to the user
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', userId)
-      .single();
-
-    if (profile?.email) {
-      const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
-      const durationText = durationDays
-        ? (locale === 'pt-BR' ? `${durationDays} dias` : `${durationDays} days`)
-        : (locale === 'pt-BR' ? 'ilimitado' : 'unlimited');
-      const firstName = profile.full_name?.split(' ')[0] || '';
-      const appUrl = 'https://useatlascore.com';
-
-      const subject = locale === 'pt-BR'
-        ? `atlas.core — acesso ${tierName} concedido`
-        : `atlas.core — ${tierName} access granted`;
-
-      const html = locale === 'pt-BR'
-        ? `<div style="background:#05070A;color:rgba(255,255,255,0.92);font-family:Inter,-apple-system,sans-serif;padding:28px;max-width:560px;margin:0 auto;border:1px solid rgba(255,255,255,0.1);">
-            <div style="font-size:20px;font-weight:700;letter-spacing:-0.03em;color:#fff;margin-bottom:20px;">atlas.core</div>
-            <h1 style="font-size:28px;font-weight:700;color:#fff;margin:0 0 16px;">Acesso ${tierName} concedido</h1>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">Olá${firstName ? ' ' + firstName : ''},</p>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">Você recebeu acesso <strong>${tierName}</strong> ao atlas.core.</p>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">Duração: <strong>${durationText}</strong></p>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">Todas as funcionalidades estão desbloqueadas. Use direito.</p>
-            <a href="${appUrl}/app" style="display:inline-block;background:#00FFFF;color:#05070A;text-decoration:none;font-size:15px;font-weight:700;padding:14px 18px;border-radius:6px;margin-top:8px;">Entrar no atlas.core</a>
-            <div style="margin-top:28px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
-              <p style="margin:0;color:rgba(255,255,255,0.64);font-size:12px;">atlas.core · <a href="${appUrl}" style="color:rgba(255,255,255,0.64);text-decoration:none;">useatlascore.com</a></p>
-            </div>
-          </div>`
-        : `<div style="background:#05070A;color:rgba(255,255,255,0.92);font-family:Inter,-apple-system,sans-serif;padding:28px;max-width:560px;margin:0 auto;border:1px solid rgba(255,255,255,0.1);">
-            <div style="font-size:20px;font-weight:700;letter-spacing:-0.03em;color:#fff;margin-bottom:20px;">atlas.core</div>
-            <h1 style="font-size:28px;font-weight:700;color:#fff;margin:0 0 16px;">${tierName} access granted</h1>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">Hi${firstName ? ' ' + firstName : ''},</p>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">You have been granted <strong>${tierName}</strong> access to atlas.core.</p>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">Duration: <strong>${durationText}</strong></p>
-            <p style="margin:0 0 12px;font-size:16px;line-height:1.55;">All features are unlocked. Use them well.</p>
-            <a href="${appUrl}/app" style="display:inline-block;background:#00FFFF;color:#05070A;text-decoration:none;font-size:15px;font-weight:700;padding:14px 18px;border-radius:6px;margin-top:8px;">Enter atlas.core</a>
-            <div style="margin-top:28px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
-              <p style="margin:0;color:rgba(255,255,255,0.64);font-size:12px;">atlas.core · <a href="${appUrl}" style="color:rgba(255,255,255,0.64);text-decoration:none;">useatlascore.com</a></p>
-            </div>
-          </div>`;
-
-      await supabase.functions.invoke('send-email', {
-        body: { to: profile.email, subject, html },
-      }).catch(() => {
-        // Fallback: try direct if send-email function doesn't exist
-        console.warn('[AdminService] Email notification skipped — send-email function may not exist');
-      });
-    }
-  } catch (emailErr) {
-    console.warn('[AdminService] Failed to send grant notification email:', emailErr);
-  }
-
-  await logAdminAction('subscription.grant', userId, { tier, reason, durationDays });
+/**
+ * Revoke promotional entitlement via RevenueCat.
+ * Only revokes admin-granted promotional access — paid subscriptions
+ * through App Store / Stripe are not affected.
+ */
+export async function revokeEntitlement(userId) {
+  const { data, error } = await supabase.functions.invoke('admin-grant-entitlement', {
+    body: { userId, action: 'revoke' },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
   return data;
 }
 

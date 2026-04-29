@@ -17,6 +17,7 @@ import {
   unsuspendUser,
   updateUserRole,
   grantAccess,
+  revokeEntitlement,
   revokeAccess,
   resetOnboarding,
 } from '@/lib/adminService';
@@ -141,8 +142,7 @@ export default function AdminUserDetail() {
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [roleSelect, setRoleSelect] = useState('');
-  const [grantTier, setGrantTier] = useState('pro');
-  const [grantDays, setGrantDays] = useState('');
+  const [grantDuration, setGrantDuration] = useState('monthly');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-user-detail', id],
@@ -182,12 +182,12 @@ export default function AdminUserDetail() {
   });
 
   const grantMut = useMutation({
-    mutationFn: () => grantAccess(id, grantTier, 'Admin grant', grantDays ? Number(grantDays) : null),
+    mutationFn: () => grantAccess(id, grantDuration),
     onSuccess: invalidateUser,
   });
 
   const revokeMut = useMutation({
-    mutationFn: () => revokeAccess(id),
+    mutationFn: () => revokeEntitlement(id),
     onSuccess: invalidateUser,
   });
 
@@ -335,38 +335,30 @@ export default function AdminUserDetail() {
                 )}
               </div>
 
-              {/* Grant access */}
+              {/* Grant access via RevenueCat */}
               <div>
-                <div style={{ fontSize: 11, color: c.dim, marginBottom: 6 }}>Grant access</div>
+                <div style={{ fontSize: 11, color: c.dim, marginBottom: 6 }}>Grant Pro access (via RevenueCat)</div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <select
-                    value={grantTier}
-                    onChange={(e) => setGrantTier(e.target.value)}
-                    style={{
-                      minHeight: 36, borderRadius: 8,
-                      border: `1px solid ${c.hair}`, background: 'rgba(239,233,218,0.03)',
-                      color: c.fg, fontFamily: ACFonts.body, fontSize: 12,
-                      padding: '0 10px', outline: 'none',
-                    }}
-                  >
-                    {['pro', 'premium', 'performance', 'coach'].map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                  <input
-                    value={grantDays}
-                    onChange={(e) => setGrantDays(e.target.value)}
-                    placeholder="Days (empty = unlimited)"
-                    type="number"
+                    value={grantDuration}
+                    onChange={(e) => setGrantDuration(e.target.value)}
                     style={{
                       flex: 1, minHeight: 36, borderRadius: 8,
                       border: `1px solid ${c.hair}`, background: 'rgba(239,233,218,0.03)',
                       color: c.fg, fontFamily: ACFonts.body, fontSize: 12,
                       padding: '0 10px', outline: 'none',
                     }}
-                  />
+                  >
+                    <option value="weekly">1 week</option>
+                    <option value="monthly">1 month</option>
+                    <option value="two_month">2 months</option>
+                    <option value="three_month">3 months</option>
+                    <option value="six_month">6 months</option>
+                    <option value="yearly">1 year</option>
+                    <option value="lifetime">Lifetime</option>
+                  </select>
                   <ActionButton
-                    label={grantMut.isPending ? '...' : 'Grant'}
+                    label={grantMut.isPending ? 'Granting...' : 'Grant'}
                     onClick={() => grantMut.mutate()}
                     variant="success"
                     disabled={grantMut.isPending}
@@ -376,17 +368,21 @@ export default function AdminUserDetail() {
                 {grantMut.isError && (
                   <div style={{ marginTop: 4, color: '#ef4444', fontSize: 11 }}>{grantMut.error?.message}</div>
                 )}
+                {grantMut.isSuccess && (
+                  <div style={{ marginTop: 4, color: '#22c55e', fontSize: 11 }}>Entitlement granted via RevenueCat. Webhook will sync shortly.</div>
+                )}
               </div>
 
-              {/* Revoke access */}
-              {subscription && ['active', 'trialing', 'granted'].includes(subscription.status) && (
-                <ActionButton
-                  label={revokeMut.isPending ? 'Revoking...' : 'Revoke access'}
-                  onClick={() => revokeMut.mutate()}
-                  variant="danger"
-                  disabled={revokeMut.isPending}
-                  c={c}
-                />
+              {/* Revoke promotional entitlement */}
+              <ActionButton
+                label={revokeMut.isPending ? 'Revoking...' : 'Revoke promotional access'}
+                onClick={() => revokeMut.mutate()}
+                variant="danger"
+                disabled={revokeMut.isPending}
+                c={c}
+              />
+              {revokeMut.isError && (
+                <div style={{ marginTop: 4, color: '#ef4444', fontSize: 11 }}>{revokeMut.error?.message}</div>
               )}
 
               {/* Reset onboarding */}
