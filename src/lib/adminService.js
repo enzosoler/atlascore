@@ -471,7 +471,7 @@ export async function fetchUserMeasurements(userId) {
 export async function fetchUserPhotos(userId) {
   const { data, error } = await supabase
     .from('progress_photos')
-    .select('id, photo_url, date, category, created_at, notes, weight')
+    .select('id, photo_url, date, category, created_at, notes')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) throw error;
@@ -563,7 +563,7 @@ export async function fetchUserTimeline(userId) {
   });
 
   photos.forEach((p) => {
-    events.push({ type: 'photo', date: p.created_at, label: 'Progress photo uploaded', detail: p.weight ? `${p.weight} kg` : '', raw: p });
+    events.push({ type: 'photo', date: p.created_at, label: 'Progress photo uploaded', detail: p.category || '', raw: p });
   });
 
   aiMessages.forEach((msg) => {
