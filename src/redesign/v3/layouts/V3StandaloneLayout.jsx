@@ -185,9 +185,18 @@ function WebFrameInner({ children }) {
   );
 }
 
+function isAdminSubdomain() {
+  return typeof window !== 'undefined' && window.location.hostname.startsWith('admin.');
+}
+
 function V3StandaloneInner({ children }) {
   const isNative = Capacitor.isNativePlatform();
   const isDev = useDevMode();
+
+  // Admin subdomain uses web frame — it's a desktop admin surface, not a phone preview.
+  if (isAdminSubdomain()) {
+    return <WebFrameInner>{children}</WebFrameInner>;
+  }
 
   // Dev mode (localhost / ?dev=1) keeps the phone-frame preview so internal
   // QA can test mobile surfaces inside a regular desktop browser.

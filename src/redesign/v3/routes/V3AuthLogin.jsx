@@ -45,10 +45,13 @@ export default function V3AuthLogin() {
     (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
   // Hooks must always run in the same order — declare them before any early return.
+  const isAdmin = typeof window !== 'undefined' && window.location.hostname.startsWith('admin.');
+
   useEffect(() => {
     if (authState !== 'authenticated' || !user) return;
-    navigate(user.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
-  }, [authState, user, navigate]);
+    const dest = isAdmin ? '/admin' : (user.onboarding_completed ? '/app/today' : '/onboarding');
+    navigate(dest, { replace: true });
+  }, [authState, user, navigate, isAdmin]);
 
   useEffect(() => {
     if (rateLimitRemaining <= 0) return undefined;
@@ -100,7 +103,8 @@ export default function V3AuthLogin() {
     try {
       if (mode === 'password') {
         const user = await signIn(em, password);
-        navigate(user?.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
+        const dest = isAdmin ? '/admin' : (user?.onboarding_completed ? '/app/today' : '/onboarding');
+        navigate(dest, { replace: true });
       } else {
         const { error: otpError } = await supabase.auth.signInWithOtp({
           email: em,
@@ -156,6 +160,7 @@ export default function V3AuthLogin() {
           setMode(next);
           setError('');
         }}
+        onForgotPassword={() => navigate('/auth/forgot')}
         loading={loading}
         error={rateLimitRemaining > 0 ? t('auth.login.rateLimitedCountdown', { time: formatCountdown(rateLimitRemaining) }) : error}
         submitDisabled={loading || rateLimitRemaining > 0}
