@@ -15,13 +15,19 @@
   ],
   "redirects": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "admin.useatlascore.com" }],
+      "destination": "https://admin.useatlascore.com/admin",
+      "permanent": false
+    },
+    {
       "source": "/admin/:path*",
       "has": [{ "type": "host", "value": "(?!admin\\.).*useatlascore\\.com" }],
       "destination": "https://admin.useatlascore.com/admin/:path*",
       "permanent": false
     },
     {
-      "source": "/:path((?!admin|_next|api|assets|favicon|branding|sw|workbox).*)",
+      "source": "/:path((?!admin|auth|_next|api|assets|favicon|branding|sw|workbox).*)",
       "has": [{ "type": "host", "value": "admin.useatlascore.com" }],
       "destination": "https://useatlascore.com/:path",
       "permanent": false

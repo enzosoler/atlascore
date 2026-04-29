@@ -186,6 +186,8 @@ const MeasurementsRoute = lazy(() => import('@/routes/app/MeasurementsRoute.jsx'
 const AdminShell = lazy(() => import('@/pages/admin/AdminShell.jsx'));
 const AdminOverview = lazy(() => import('@/pages/admin/AdminOverview.jsx'));
 const AdminPlaceholder = lazy(() => import('@/pages/admin/AdminPlaceholder.jsx'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers.jsx'));
+const AdminUserDetail = lazy(() => import('@/pages/admin/AdminUserDetail.jsx'));
 const AdminGDPR = lazy(() => import('@/pages/admin/AdminGDPR.jsx'));
 const BodyCheckInRoute = lazy(() => import('@/routes/app/BodyCheckInRoute.jsx'));
 
@@ -320,8 +322,8 @@ function AppRoutes() {
           }
         >
           <Route index element={<AdminOverview />} />
-          <Route path="users" element={<AdminPlaceholder title="Users" description="User management — search, inspect, suspend, delete, grant roles." />} />
-          <Route path="users/:id" element={<AdminPlaceholder title="User Detail" description="Full user profile with data inspection tabs." />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="users/:id" element={<AdminUserDetail />} />
           <Route path="billing" element={<AdminPlaceholder title="Billing" description="Subscription management — comp, cancel, refund, force-sync." />} />
           <Route path="moderation" element={<AdminPlaceholder title="Moderation" description="Content moderation queue and case management." />} />
           <Route path="support" element={<AdminPlaceholder title="Support" description="Support inbox — tickets, replies, resolution." />} />
