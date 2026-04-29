@@ -18,7 +18,6 @@ import {
   updateUserRole,
   grantAccess,
   revokeEntitlement,
-  revokeAccess,
   resetOnboarding,
 } from '@/lib/adminService';
 

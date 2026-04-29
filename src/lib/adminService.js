@@ -292,9 +292,6 @@ export async function resetOnboarding(userId) {
 
 // ─── SUBSCRIPTION MANAGEMENT ────────────────────────────────────────────────
 
-const VALID_TIERS   = ['free', 'pro', 'premium', 'performance', 'coach', 'nutritionist', 'clinician', 'internal', 'custom'];
-const VALID_STATUSES = ['trialing', 'active', 'granted', 'past_due', 'canceled', 'expired', 'inactive'];
-
 export async function fetchAllSubscriptions(page = 1, pageSize = 50) {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -307,84 +304,6 @@ export async function fetchAllSubscriptions(page = 1, pageSize = 50) {
 
   if (error) throw error;
   return { subscriptions: data || [], total: count || 0, page, pageSize };
-}
-
-export async function updateSubscriptionTier(userId, newTier) {
-  if (!VALID_TIERS.includes(newTier)) throw new Error(`Invalid tier: ${newTier}`);
-
-  const { data: before } = await supabase
-    .from('subscriptions')
-    .select('tier, status')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .update({ tier: newTier })
-    .eq('user_id', userId)
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await logAdminAction('subscription.tier.update', userId, { newTier }, { tier: before?.tier }, { tier: newTier });
-  return data;
-}
-
-export async function updateSubscriptionStatus(userId, newStatus) {
-  if (!VALID_STATUSES.includes(newStatus)) throw new Error(`Invalid status: ${newStatus}`);
-
-  const { data: before } = await supabase
-    .from('subscriptions')
-    .select('status')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .update({ status: newStatus })
-    .eq('user_id', userId)
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await logAdminAction('subscription.status.update', userId, { newStatus }, { status: before?.status }, { status: newStatus });
-  return data;
-}
-
-export async function extendTrial(userId, additionalDays = 7) {
-  const { data: subscription, error: fetchError } = await supabase
-    .from('subscriptions')
-    .select('trial_ends_at, status')
-    .eq('user_id', userId)
-    .eq('status', 'trialing')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (fetchError) throw fetchError;
-  if (!subscription) throw new Error('No active trial found for this user.');
-
-  const currentEnd = new Date(subscription.trial_ends_at || Date.now());
-  const newEnd = new Date(currentEnd.getTime() + additionalDays * 24 * 60 * 60 * 1000);
-
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .update({ trial_ends_at: newEnd.toISOString() })
-    .eq('user_id', userId)
-    .eq('status', 'trialing')
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await logAdminAction('subscription.trial.extend', userId, { additionalDays }, { trial_ends_at: subscription.trial_ends_at }, { trial_ends_at: newEnd.toISOString() });
-  return data;
 }
 
 /**
@@ -427,25 +346,6 @@ export async function deleteUser(userId) {
   return data;
 }
 
-export async function revokeAccess(userId) {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .update({ status: 'inactive' })
-    .eq('user_id', userId)
-    .in('status', ['active', 'trialing', 'granted'])
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await logAdminAction('subscription.revoke', userId);
-  return data;
-}
-
-export async function resyncBillingStatus(userId) {
-  await logAdminAction('subscription.resync_requested', userId, { note: 'Manual resync requested from admin console' });
-  throw new Error('Billing resync requires a Supabase Edge Function. This action has been logged.');
-}
 
 // ─── BETA INVITES ─────────────────────────────────────────────────────────────
 
