@@ -4947,6 +4947,147 @@
       "export": "Exportação completa de dados (CSV + JSON)"
     }
   },
+  "onboardIdentity": {
+    "eyebrow": "Base",
+    "cta": "Continuar →",
+    "label": "Sobre você",
+    "title": "Acerte a base.",
+    "body": "Essas informações definem o primeiro rascunho de energia, recuperação e macros. Tudo permanece privado.",
+    "asideLabel": "Uso",
+    "asideBody": "Apenas para metas. Nunca compartilhado.",
+    "sexLabel": "Sexo biológico",
+    "male": "masculino",
+    "female": "feminino",
+    "ageLabel": "Idade",
+    "years": "anos",
+    "heightLabel": "Altura",
+    "cm": "cm"
+  },
+  "onboardGoal": {
+    "eyebrow": "Direção",
+    "cta": "Continuar →",
+    "label": "Seu objetivo",
+    "title": "Escolha o resultado principal.",
+    "body": "O Atlas só faz escolhas claras se uma direção vence. Isso define o viés de calorias, recuperação e progressão.",
+    "asideLabel": "Foco",
+    "asideBody": "Um alvo. Menos dispersão.",
+    "goals": {
+      "lose": "Perder gordura",
+      "loseDesc": "Reduzir gordura, manter força",
+      "recomp": "Recomposição",
+      "recompDesc": "Substituir gordura por músculo",
+      "maintain": "Manter",
+      "maintainDesc": "Manter peso, otimizar prontidão",
+      "gain": "Ganhar músculo",
+      "gainDesc": "Bulk limpo, acompanhar PRs"
+    }
+  },
+  "onboardActivity": {
+    "eyebrow": "Carga",
+    "cta": "Continuar →",
+    "label": "Atividade",
+    "title": "Defina a carga.",
+    "body": "Esta é a primeira estimativa de gasto energético. O Atlas vai ajustar com treinos reais e tendência de peso.",
+    "asideLabel": "Estimativa",
+    "asideBody": "Ajustado depois com os registros.",
+    "levels": {
+      "sedentary": "Sedentário",
+      "sedentaryDesc": "Trabalho sentado, pouco movimento",
+      "light": "Leve",
+      "lightDesc": "1–2 dias de treino / semana",
+      "moderate": "Moderado",
+      "moderateDesc": "3–4 dias de treino / semana",
+      "active": "Ativo",
+      "activeDesc": "5–6 dias de treino / semana",
+      "athletic": "Atlético",
+      "athleticDesc": "Diário + trabalho físico"
+    }
+  },
+  "onboardWorkout": {
+    "eyebrow": "Treino",
+    "cta": "Continuar →",
+    "title": "Seu contexto\nde treino.",
+    "experienceLabel": "Nível de experiência",
+    "experience": {
+      "beginner": "Iniciante",
+      "beginnerDesc": "< 6 meses treinando consistentemente",
+      "intermediate": "Intermediário",
+      "intermediateDesc": "6 meses – 2 anos de treino",
+      "advanced": "Avançado",
+      "advancedDesc": "2+ anos, boa forma, perto de platôs"
+    },
+    "frequencyLabel": "Frequência semanal",
+    "equipmentLabel": "Equipamento disponível",
+    "equipment": {
+      "fullGym": "Academia completa",
+      "dumbbellsOnly": "Apenas halteres",
+      "bodyweight": "Peso corporal",
+      "resistanceBands": "Elásticos",
+      "homeGym": "Academia em casa"
+    }
+  },
+  "onboardHabits": {
+    "eyebrow": "Hábitos",
+    "cta": "Continuar →",
+    "title": "Alguns hábitos\ndiários.",
+    "sleepLabel": "Sono típico",
+    "sleep": {
+      "lt6": "< 6h",
+      "6_7": "6–7h",
+      "7_8": "7–8h",
+      "gt8": "8h+"
+    },
+    "stepsLabel": "Meta diária de passos",
+    "steps": {
+      "5k": "5k",
+      "8k": "8k",
+      "10k": "10k",
+      "12k": "12k+"
+    },
+    "waterLabel": "Ingestão diária de água"
+  },
+  "onboardConstraints": {
+    "eyebrow": "Restrições",
+    "cta": "Continuar →",
+    "title": "Algo a sinalizar?",
+    "subtitle": "Tudo opcional — privado, usado apenas para filtrar prescrições inseguras.",
+    "injuriesLabel": "Lesões",
+    "injuries": {
+      "knee": "Joelho",
+      "lowerBack": "Lombar",
+      "shoulder": "Ombro",
+      "wrist": "Punho",
+      "hip": "Quadril",
+      "ankle": "Tornozelo",
+      "neck": "Pescoço"
+    },
+    "medicalLabel": "Condições médicas",
+    "medical": {
+      "hypertension": "Hipertensão",
+      "diabetes": "Diabetes",
+      "heartCondition": "Condição cardíaca",
+      "asthma": "Asma",
+      "thyroid": "Tireoide",
+      "pregnancy": "Gravidez"
+    },
+    "notesLabel": "Notas adicionais",
+    "notesPlaceholder": "Medicamentos, cirurgia recente, necessidades alimentares...",
+    "skip": "Pular por agora"
+  },
+  "onboardPermissions": {
+    "eyebrow": "Conectar",
+    "cta": "Continuar →",
+    "title": "Conecte suas fontes.",
+    "health": "Apple Health",
+    "healthDesc": "Recuperação, sono, passos e frequência cardíaca permitem que o coach ajuste o dia em vez de adivinhar.",
+    "camera": "Câmera",
+    "cameraDesc": "Fotos de progresso, leitura de códigos e captura de refeições funcionam mais rápido com acesso à câmera.",
+    "notif": "Notificações",
+    "notifDesc": "Lembretes de trial, nudges do coach e check-ins de treino chegam na hora certa.",
+    "whoop": "Whoop / Oura",
+    "whoopDesc": "Importe sinais de prontidão do seu rastreador de recuperação.",
+    "skip": "Pular por agora"
+  },
   "onboardPlan": {
     "runtime": {
       "eyebrow": "Resultado",

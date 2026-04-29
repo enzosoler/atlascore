@@ -3,10 +3,12 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
 function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChange, value }) {
   const c = useACT(dark);
+  const t = useT();
   const [sex, setSex] = React.useState(value?.sex || 'male');
   const [ageRaw, setAgeRaw] = React.useState(value?.age ? String(value.age) : '');
   const [heightCmRaw, setHeightCmRaw] = React.useState(value?.heightCm ? String(value.heightCm) : '');
@@ -28,32 +30,32 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChang
       total={10}
       onBack={onBack || false}
       onExit={onExit}
-      eyebrow="Foundation"
+      eyebrow={t('onboardIdentity.eyebrow')}
       footer={(
         <OnboardingPrimaryAction
           dark={dark}
           onClick={canContinue ? onContinue : undefined}
           style={{ opacity: canContinue ? 1 : 0.42, pointerEvents: canContinue ? 'auto' : 'none' }}
         >
-          Continue →
+          {t('onboardIdentity.cta')}
         </OnboardingPrimaryAction>
       )}
     >
       <OnboardingHero
         dark={dark}
-        label="About you"
-        title={<>Get the baseline right.</>}
-        body="These inputs set the first draft of energy, recovery, and macro assumptions. They stay private."
+        label={t('onboardIdentity.label')}
+        title={<>{t('onboardIdentity.title')}</>}
+        body={t('onboardIdentity.body')}
         aside={(
           <>
-            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Use</ACLabel>
-            <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.45, color: c.dim }}>Targets only. Never shared.</div>
+            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardIdentity.asideLabel')}</ACLabel>
+            <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.45, color: c.dim }}>{t('onboardIdentity.asideBody')}</div>
           </>
         )}
       />
 
       <OnboardingCard dark={dark} accent>
-        <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>Sex at birth</ACLabel>
+        <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>{t('onboardIdentity.sexLabel')}</ACLabel>
         <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
           {['male', 'female'].map((k) => {
             const on = sex === k;
@@ -77,7 +79,7 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChang
                   border: `1px solid ${on ? 'transparent' : c.hair}`,
                 }}
               >
-                {k}
+                {t(`onboardIdentity.${k}`)}
               </button>
             );
           })}
@@ -86,7 +88,7 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChang
 
       <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
         <OnboardingCard dark={dark}>
-          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>Age</ACLabel>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>{t('onboardIdentity.ageLabel')}</ACLabel>
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
             <input
               type="text"
@@ -112,12 +114,12 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChang
                 fontVariantNumeric: 'tabular-nums',
               }}
             />
-            <ACLabel size={12} color={c.dim} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>years</ACLabel>
+            <ACLabel size={12} color={c.dim} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardIdentity.years')}</ACLabel>
           </div>
         </OnboardingCard>
 
         <OnboardingCard dark={dark}>
-          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>Height</ACLabel>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>{t('onboardIdentity.heightLabel')}</ACLabel>
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <input
@@ -144,7 +146,7 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onExit, onChang
                   fontVariantNumeric: 'tabular-nums',
                 }}
               />
-              <span style={{ fontSize: 12, color: c.dim, fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>cm</span>
+              <span style={{ fontSize: 12, color: c.dim, fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardIdentity.cm')}</span>
             </div>
             {heightCm >= 100 ? (
               <ACLabel size={12} color={c.accent} style={{ fontFamily: ACFonts.mono }}>

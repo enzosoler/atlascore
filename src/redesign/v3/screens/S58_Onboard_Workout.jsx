@@ -18,6 +18,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 
 /* ── OBHeader (inline, matches S7–S11 exactly) ─────────────── */
 function OBHeader({ step, total, dark, onBack = true, onExit }) {
@@ -48,12 +49,6 @@ function OBHeader({ step, total, dark, onBack = true, onExit }) {
 }
 
 /* ── data ──────────────────────────────────────────────────── */
-const EXPERIENCE = [
-  { id: 'beginner',     label: 'Beginner',     desc: '< 6 months lifting consistently' },
-  { id: 'intermediate', label: 'Intermediate',  desc: '6 months \u2013 2 years of training' },
-  { id: 'advanced',     label: 'Advanced',      desc: '2+ years, solid form, near plateaus' },
-];
-
 const FREQUENCY = [
   { id: '2x', label: '2\u00d7' },
   { id: '3x', label: '3\u00d7' },
@@ -62,13 +57,7 @@ const FREQUENCY = [
   { id: '6x', label: '6\u00d7' },
 ];
 
-const EQUIPMENT = [
-  'Full gym',
-  'Dumbbells only',
-  'Bodyweight',
-  'Resistance bands',
-  'Home gym',
-];
+const EQUIPMENT_KEYS = ['fullGym', 'dumbbellsOnly', 'bodyweight', 'resistanceBands', 'homeGym'];
 
 /* ── screen ────────────────────────────────────────────────── */
 function S58_Onboard_Workout({
@@ -82,6 +71,7 @@ function S58_Onboard_Workout({
   onContinue,
 }) {
   const c = useACT(dark);
+  const t = useT();
 
   const [experience, setExperience] = React.useState(value?.experience || null);
   const [frequency, setFrequency]   = React.useState(value?.frequency || null);
@@ -107,22 +97,22 @@ function S58_Onboard_Workout({
       {/* scrollable content */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 16px', display: 'flex', flexDirection: 'column' }}>
 
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Training</ACLabel>
+        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{t('onboardWorkout.eyebrow')}</ACLabel>
         <div style={{
           marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
-          letterSpacing: -1, lineHeight: 1.05, color: c.fg,
+          letterSpacing: -1, lineHeight: 1.05, color: c.fg, whiteSpace: 'pre-line',
         }}>
-          Your training<br/>context.
+          {t('onboardWorkout.title')}
         </div>
 
         {/* ── Experience level (single select) ───────────── */}
         <div style={{ marginTop: 22 }}>
-          <ACLabel size={12} color={c.dim}>Experience level</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardWorkout.experienceLabel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {EXPERIENCE.map(e => {
-              const on = experience === e.id;
+            {['beginner', 'intermediate', 'advanced'].map(id => {
+              const on = experience === id;
               return (
-                <button key={e.id} type="button" onClick={() => { setExperience(e.id); emit({ experience: e.id }); }} style={{
+                <button key={id} type="button" onClick={() => { setExperience(id); emit({ experience: id }); }} style={{
                   padding: '12px 18px', borderRadius: ACRadii.input,
                   background: on ? c.fg : 'transparent',
                   color: on ? c.bg : c.fg,
@@ -131,8 +121,8 @@ function S58_Onboard_Workout({
                   cursor: 'pointer', width: '100%', textAlign: 'left',
                 }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600 }}>{e.label}</div>
-                    <div style={{ fontSize: 12, opacity: 0.55, marginTop: 2 }}>{e.desc}</div>
+                    <div style={{ fontSize: 15, fontWeight: 600 }}>{t(`onboardWorkout.experience.${id}`)}</div>
+                    <div style={{ fontSize: 12, opacity: 0.55, marginTop: 2 }}>{t(`onboardWorkout.experience.${id}Desc`)}</div>
                   </div>
                   <div style={{
                     width: 20, height: 20, borderRadius: 999,
@@ -150,7 +140,7 @@ function S58_Onboard_Workout({
 
         {/* ── Weekly frequency (single select pill row) ──── */}
         <div style={{ marginTop: 20 }}>
-          <ACLabel size={12} color={c.dim}>Weekly frequency</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardWorkout.frequencyLabel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
             {FREQUENCY.map(f => {
               const on = frequency === f.id;
@@ -169,18 +159,18 @@ function S58_Onboard_Workout({
 
         {/* ── Equipment (multi-select chip toggles) ──────── */}
         <div style={{ marginTop: 20 }}>
-          <ACLabel size={12} color={c.dim}>Equipment available</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardWorkout.equipmentLabel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {EQUIPMENT.map(e => {
-              const on = equipment.has(e);
+            {EQUIPMENT_KEYS.map(k => {
+              const on = equipment.has(k);
               return (
-                <button key={e} type="button" onClick={() => toggleEquip(e)} style={{
+                <button key={k} type="button" onClick={() => toggleEquip(k)} style={{
                   padding: '10px 16px', borderRadius: 999,
                   background: on ? c.accent : c.card,
                   color: on ? c.ink : c.fg,
                   fontSize: 13, fontWeight: 600,
                   cursor: 'pointer', border: 'none',
-                }}>{e}</button>
+                }}>{t(`onboardWorkout.equipment.${k}`)}</button>
               );
             })}
           </div>
@@ -194,7 +184,7 @@ function S58_Onboard_Workout({
           onClick={canContinue ? onContinue : undefined}
           style={{ opacity: canContinue ? 1 : 0.4, pointerEvents: canContinue ? 'auto' : 'none' }}
         >
-          Continue →
+          {t('onboardWorkout.cta')}
         </ACBtn>
       </div>
     </div>

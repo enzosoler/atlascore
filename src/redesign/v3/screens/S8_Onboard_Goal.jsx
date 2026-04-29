@@ -3,6 +3,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACMono,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
 function TrendIcon({ k, color, size = 28 }) {
@@ -22,12 +23,13 @@ function TrendIcon({ k, color, size = 28 }) {
 
 function S8_Onboard_Goal({ dark = false, onBack, onExit, onContinue, onChange, value }) {
   const c = useACT(dark);
+  const t = useT();
   const [goal, setGoal] = React.useState(value?.goal || 'recomp');
   const goals = [
-    { k: 'lose',     t: 'Lose fat',        d: 'Cut body fat, hold strength',      trend: 'down' },
-    { k: 'recomp',   t: 'Recomp',          d: 'Replace fat with muscle',          trend: 'level' },
-    { k: 'maintain', t: 'Maintain',        d: 'Hold weight, optimize readiness',  trend: 'level' },
-    { k: 'gain',     t: 'Build muscle',    d: 'Lean bulk, track PRs',             trend: 'up' },
+    { k: 'lose',     t: t('onboardGoal.goals.lose'),     d: t('onboardGoal.goals.loseDesc'),     trend: 'down' },
+    { k: 'recomp',   t: t('onboardGoal.goals.recomp'),   d: t('onboardGoal.goals.recompDesc'),   trend: 'level' },
+    { k: 'maintain', t: t('onboardGoal.goals.maintain'), d: t('onboardGoal.goals.maintainDesc'), trend: 'level' },
+    { k: 'gain',     t: t('onboardGoal.goals.gain'),     d: t('onboardGoal.goals.gainDesc'),     trend: 'up' },
   ];
   return (
     <OnboardingShell
@@ -36,18 +38,18 @@ function S8_Onboard_Goal({ dark = false, onBack, onExit, onContinue, onChange, v
       total={10}
       onBack={onBack}
       onExit={onExit}
-      eyebrow="Direction"
-      footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>Continue →</OnboardingPrimaryAction>}
+      eyebrow={t('onboardGoal.eyebrow')}
+      footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>{t('onboardGoal.cta')}</OnboardingPrimaryAction>}
     >
       <OnboardingHero
         dark={dark}
-        label="Your goal"
-        title={<>Choose the dominant outcome.</>}
-        body="Atlas can only make clean tradeoffs if one direction wins. This sets the bias for calories, recovery, and progression."
+        label={t('onboardGoal.label')}
+        title={<>{t('onboardGoal.title')}</>}
+        body={t('onboardGoal.body')}
         aside={(
           <>
-            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Focus</ACLabel>
-            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>One target. Less drift.</div>
+            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardGoal.asideLabel')}</ACLabel>
+            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>{t('onboardGoal.asideBody')}</div>
           </>
         )}
       />

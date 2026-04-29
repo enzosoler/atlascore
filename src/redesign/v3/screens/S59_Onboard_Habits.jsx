@@ -18,6 +18,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 
 /* ── OBHeader (inline, matches S7–S11 exactly) ─────────────── */
 function OBHeader({ step, total, dark, onBack = true, onExit }) {
@@ -48,19 +49,8 @@ function OBHeader({ step, total, dark, onBack = true, onExit }) {
 }
 
 /* ── data ──────────────────────────────────────────────────── */
-const SLEEP = [
-  { id: 'lt6', label: '< 6h',  desc: 'Often sleep-deprived' },
-  { id: '6_7', label: '6\u20137h', desc: 'Usually enough, not always' },
-  { id: '7_8', label: '7\u20138h', desc: 'Pretty consistent' },
-  { id: 'gt8', label: '8h+',   desc: 'Sleep priority on lock' },
-];
-
-const STEPS = [
-  { id: '5k',  label: '5k',   desc: 'Mostly seated day' },
-  { id: '8k',  label: '8k',   desc: 'Light walking' },
-  { id: '10k', label: '10k',  desc: 'Active day' },
-  { id: '12k', label: '12k+', desc: 'Very active job or commute' },
-];
+const SLEEP_IDS = ['lt6', '6_7', '7_8', 'gt8'];
+const STEPS_IDS = ['5k', '8k', '10k', '12k'];
 
 const WATER = [
   { id: 1,   label: '1L' },
@@ -82,6 +72,7 @@ function S59_Onboard_Habits({
   onContinue,
 }) {
   const c = useACT(dark);
+  const t = useT();
 
   const [sleep, setSleep]   = React.useState(value?.sleep || null);
   const [steps, setSteps]   = React.useState(value?.steps || null);
@@ -100,29 +91,29 @@ function S59_Onboard_Habits({
       {/* scrollable content */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 16px', display: 'flex', flexDirection: 'column' }}>
 
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Habits</ACLabel>
+        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{t('onboardHabits.eyebrow')}</ACLabel>
         <div style={{
           marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
-          letterSpacing: -1, lineHeight: 1.05, color: c.fg,
+          letterSpacing: -1, lineHeight: 1.05, color: c.fg, whiteSpace: 'pre-line',
         }}>
-          A few daily<br/>habits.
+          {t('onboardHabits.title')}
         </div>
 
         {/* ── Sleep (horizontal pill row) ────────────────── */}
         <div style={{ marginTop: 22 }}>
-          <ACLabel size={12} color={c.dim}>Typical sleep</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardHabits.sleepLabel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-            {SLEEP.map(s => {
-              const on = sleep === s.id;
+            {SLEEP_IDS.map(id => {
+              const on = sleep === id;
               return (
-                <button key={s.id} type="button" onClick={() => { setSleep(s.id); emit({ sleep: s.id }); }} style={{
+                <button key={id} type="button" onClick={() => { setSleep(id); emit({ sleep: id }); }} style={{
                   flex: 1, padding: '12px 0', borderRadius: ACRadii.input,
                   background: on ? c.fg : c.card,
                   color: on ? c.bg : c.fg,
                   border: 'none',
                   fontSize: 13, fontWeight: 700,
                   cursor: 'pointer', textAlign: 'center',
-                }}>{s.label}</button>
+                }}>{t(`onboardHabits.sleep.${id}`)}</button>
               );
             })}
           </div>
@@ -130,19 +121,19 @@ function S59_Onboard_Habits({
 
         {/* ── Daily steps target (horizontal pill row) ───── */}
         <div style={{ marginTop: 20 }}>
-          <ACLabel size={12} color={c.dim}>Daily steps target</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardHabits.stepsLabel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-            {STEPS.map(s => {
-              const on = steps === s.id;
+            {STEPS_IDS.map(id => {
+              const on = steps === id;
               return (
-                <button key={s.id} type="button" onClick={() => { setSteps(s.id); emit({ steps: s.id }); }} style={{
+                <button key={id} type="button" onClick={() => { setSteps(id); emit({ steps: id }); }} style={{
                   flex: 1, padding: '12px 0', borderRadius: ACRadii.input,
                   background: on ? c.fg : c.card,
                   color: on ? c.bg : c.fg,
                   border: 'none',
                   fontSize: 13, fontWeight: 700,
                   cursor: 'pointer', textAlign: 'center',
-                }}>{s.label}</button>
+                }}>{t(`onboardHabits.steps.${id}`)}</button>
               );
             })}
           </div>
@@ -150,7 +141,7 @@ function S59_Onboard_Habits({
 
         {/* ── Water intake (pill row, no large number display) */}
         <div style={{ marginTop: 20 }}>
-          <ACLabel size={12} color={c.dim}>Daily water intake</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardHabits.waterLabel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
             {WATER.map(w => {
               const on = waterL === w.id;
@@ -176,7 +167,7 @@ function S59_Onboard_Habits({
           onClick={canContinue ? onContinue : undefined}
           style={{ opacity: canContinue ? 1 : 0.4, pointerEvents: canContinue ? 'auto' : 'none' }}
         >
-          Continue →
+          {t('onboardHabits.cta')}
         </ACBtn>
       </div>
     </div>

@@ -4958,6 +4958,147 @@
       "export": "Full data export (CSV + JSON)"
     }
   },
+  "onboardIdentity": {
+    "eyebrow": "Foundation",
+    "cta": "Continue →",
+    "label": "About you",
+    "title": "Get the baseline right.",
+    "body": "These inputs set the first draft of energy, recovery, and macro assumptions. They stay private.",
+    "asideLabel": "Use",
+    "asideBody": "Targets only. Never shared.",
+    "sexLabel": "Sex at birth",
+    "male": "male",
+    "female": "female",
+    "ageLabel": "Age",
+    "years": "years",
+    "heightLabel": "Height",
+    "cm": "cm"
+  },
+  "onboardGoal": {
+    "eyebrow": "Direction",
+    "cta": "Continue →",
+    "label": "Your goal",
+    "title": "Choose the dominant outcome.",
+    "body": "Atlas can only make clean tradeoffs if one direction wins. This sets the bias for calories, recovery, and progression.",
+    "asideLabel": "Focus",
+    "asideBody": "One target. Less drift.",
+    "goals": {
+      "lose": "Lose fat",
+      "loseDesc": "Cut body fat, hold strength",
+      "recomp": "Recomp",
+      "recompDesc": "Replace fat with muscle",
+      "maintain": "Maintain",
+      "maintainDesc": "Hold weight, optimize readiness",
+      "gain": "Build muscle",
+      "gainDesc": "Lean bulk, track PRs"
+    }
+  },
+  "onboardActivity": {
+    "eyebrow": "Load",
+    "cta": "Continue →",
+    "label": "Activity",
+    "title": "Set the workload.",
+    "body": "This is the first pass on energy output. Atlas will tighten it against actual training and bodyweight trend.",
+    "asideLabel": "Estimator",
+    "asideBody": "Adjusted later from logs.",
+    "levels": {
+      "sedentary": "Sedentary",
+      "sedentaryDesc": "Desk-bound, little movement",
+      "light": "Light",
+      "lightDesc": "1–2 training days / week",
+      "moderate": "Moderate",
+      "moderateDesc": "3–4 training days / week",
+      "active": "Active",
+      "activeDesc": "5–6 training days / week",
+      "athletic": "Athletic",
+      "athleticDesc": "Daily + physical job"
+    }
+  },
+  "onboardWorkout": {
+    "eyebrow": "Training",
+    "cta": "Continue →",
+    "title": "Your training\ncontext.",
+    "experienceLabel": "Experience level",
+    "experience": {
+      "beginner": "Beginner",
+      "beginnerDesc": "< 6 months lifting consistently",
+      "intermediate": "Intermediate",
+      "intermediateDesc": "6 months – 2 years of training",
+      "advanced": "Advanced",
+      "advancedDesc": "2+ years, solid form, near plateaus"
+    },
+    "frequencyLabel": "Weekly frequency",
+    "equipmentLabel": "Equipment available",
+    "equipment": {
+      "fullGym": "Full gym",
+      "dumbbellsOnly": "Dumbbells only",
+      "bodyweight": "Bodyweight",
+      "resistanceBands": "Resistance bands",
+      "homeGym": "Home gym"
+    }
+  },
+  "onboardHabits": {
+    "eyebrow": "Habits",
+    "cta": "Continue →",
+    "title": "A few daily\nhabits.",
+    "sleepLabel": "Typical sleep",
+    "sleep": {
+      "lt6": "< 6h",
+      "6_7": "6–7h",
+      "7_8": "7–8h",
+      "gt8": "8h+"
+    },
+    "stepsLabel": "Daily steps target",
+    "steps": {
+      "5k": "5k",
+      "8k": "8k",
+      "10k": "10k",
+      "12k": "12k+"
+    },
+    "waterLabel": "Daily water intake"
+  },
+  "onboardConstraints": {
+    "eyebrow": "Constraints",
+    "cta": "Continue →",
+    "title": "Anything to flag?",
+    "subtitle": "Everything optional — private, used only to filter unsafe prescriptions.",
+    "injuriesLabel": "Injuries",
+    "injuries": {
+      "knee": "Knee",
+      "lowerBack": "Lower back",
+      "shoulder": "Shoulder",
+      "wrist": "Wrist",
+      "hip": "Hip",
+      "ankle": "Ankle",
+      "neck": "Neck"
+    },
+    "medicalLabel": "Medical",
+    "medical": {
+      "hypertension": "Hypertension",
+      "diabetes": "Diabetes",
+      "heartCondition": "Heart condition",
+      "asthma": "Asthma",
+      "thyroid": "Thyroid",
+      "pregnancy": "Pregnancy"
+    },
+    "notesLabel": "Additional notes",
+    "notesPlaceholder": "Medications, recent surgery, dietary needs...",
+    "skip": "Skip for now"
+  },
+  "onboardPermissions": {
+    "eyebrow": "Connect",
+    "cta": "Continue →",
+    "title": "Connect your sources.",
+    "health": "Apple Health",
+    "healthDesc": "Recovery, sleep, steps, and heart rate let coach adjust the day instead of guessing.",
+    "camera": "Camera",
+    "cameraDesc": "Progress photos, barcode scans, and meal capture work faster when camera access is ready.",
+    "notif": "Notifications",
+    "notifDesc": "Trial reminders, coach nudges, and workout check-ins land at the right moment.",
+    "whoop": "Whoop / Oura",
+    "whoopDesc": "Import readiness signals from your recovery tracker.",
+    "skip": "Skip for now"
+  },
   "onboardPlan": {
     "runtime": {
       "eyebrow": "Output",

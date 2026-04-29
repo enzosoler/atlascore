@@ -20,6 +20,7 @@
  * DEMO fallbacks: renders sensibly when no props are provided.
  */
 import React from 'react';
+import { useT } from '@/lib/i18nContext';
 import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn,
@@ -54,8 +55,8 @@ function OBHeader({ step, total, dark, onBack = true, onExit }) {
 }
 
 /* ── chip lists ─────────────────────────────────────────────── */
-const INJURIES = ['Knee', 'Lower back', 'Shoulder', 'Wrist', 'Hip', 'Ankle', 'Neck'];
-const MEDICAL  = ['Hypertension', 'Diabetes', 'Heart condition', 'Asthma', 'Thyroid', 'Pregnancy'];
+const INJURY_KEYS = ['knee', 'lowerBack', 'shoulder', 'wrist', 'hip', 'ankle', 'neck'];
+const MEDICAL_KEYS = ['hypertension', 'diabetes', 'heartCondition', 'asthma', 'thyroid', 'pregnancy'];
 
 /* tint-aware backgrounds — amber for injuries, rose for medical */
 const TINTS = {
@@ -71,9 +72,9 @@ const TINTS = {
   },
 };
 
-function ChipGroup({ items, selected, onToggle, tint, dark }) {
+function ChipGroup({ items, selected, onToggle, tint, dark, labelFn }) {
   const c = useACT(dark);
-  const t = TINTS[tint] || TINTS.amber;
+  const ti = TINTS[tint] || TINTS.amber;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {items.map(item => {
@@ -91,14 +92,14 @@ function ChipGroup({ items, selected, onToggle, tint, dark }) {
               fontWeight: 600,
               fontFamily: ACFonts.body,
               letterSpacing: -0.1,
-              background: on ? t.bg : c.card,
-              border: on ? `1px solid ${t.border}` : `1px solid ${c.hair}`,
-              color: on ? t.fg : c.fg,
+              background: on ? ti.bg : c.card,
+              border: on ? `1px solid ${ti.border}` : `1px solid ${c.hair}`,
+              color: on ? ti.fg : c.fg,
               cursor: 'pointer',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {item}
+            {labelFn ? labelFn(item) : item}
           </button>
         );
       })}
@@ -119,6 +120,7 @@ function S60_Onboard_Constraints({
   onSkip,
 }) {
   const c = useACT(dark);
+  const t = useT();
 
   const [injuries, setInjuries] = React.useState(
     new Set(value?.injuries || []),
@@ -157,34 +159,34 @@ function S60_Onboard_Constraints({
 
       {/* scrollable body */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 16px', display: 'flex', flexDirection: 'column' }}>
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Constraints</ACLabel>
+        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{t('onboardConstraints.eyebrow')}</ACLabel>
         <div style={{
           marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
           letterSpacing: -1, lineHeight: 1.05, color: c.fg,
         }}>
-          Anything to flag?
+          {t('onboardConstraints.title')}
         </div>
-        <ACLabel size={12} color={c.dim} style={{ marginTop: 6, display: 'block' }}>Everything optional — private, used only to filter unsafe prescriptions.</ACLabel>
+        <ACLabel size={12} color={c.dim} style={{ marginTop: 6, display: 'block' }}>{t('onboardConstraints.subtitle')}</ACLabel>
 
         {/* injuries */}
         <div style={{ marginTop: 20 }}>
-          <ACLabel size={12} color={c.dim}>Injuries</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardConstraints.injuriesLabel')}</ACLabel>
           <div style={{ marginTop: 10 }}>
-            <ChipGroup items={INJURIES} selected={injuries} onToggle={toggleInjury} tint="amber" dark={dark} />
+            <ChipGroup items={INJURY_KEYS} selected={injuries} onToggle={toggleInjury} tint="amber" dark={dark} labelFn={(k) => t(`onboardConstraints.injuries.${k}`)} />
           </div>
         </div>
 
         {/* medical */}
         <div style={{ marginTop: 18 }}>
-          <ACLabel size={12} color={c.dim}>Medical</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardConstraints.medicalLabel')}</ACLabel>
           <div style={{ marginTop: 10 }}>
-            <ChipGroup items={MEDICAL} selected={medical} onToggle={toggleMedical} tint="rose" dark={dark} />
+            <ChipGroup items={MEDICAL_KEYS} selected={medical} onToggle={toggleMedical} tint="rose" dark={dark} labelFn={(k) => t(`onboardConstraints.medical.${k}`)} />
           </div>
         </div>
 
         {/* free-text notes */}
         <div style={{ marginTop: 18 }}>
-          <ACLabel size={12} color={c.dim}>Additional notes</ACLabel>
+          <ACLabel size={12} color={c.dim}>{t('onboardConstraints.notesLabel')}</ACLabel>
           <div style={{
             marginTop: 10, padding: 4, background: c.card,
             borderRadius: ACRadii.input,
@@ -192,7 +194,7 @@ function S60_Onboard_Constraints({
             <textarea
               value={notes}
               onChange={(e) => { setNotes(e.target.value); emit({ notes: e.target.value }); }}
-              placeholder="Medications, recent surgery, dietary needs..."
+              placeholder={t('onboardConstraints.notesPlaceholder')}
               rows={2}
               style={{
                 width: '100%',
@@ -213,10 +215,10 @@ function S60_Onboard_Constraints({
 
       {/* bottom actions */}
       <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onContinue?.()}>Continue →</ACBtn>
+        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onContinue?.()}>{t('onboardConstraints.cta')}</ACBtn>
         <div style={{ textAlign: 'center', padding: 4 }}>
           <button type="button" onClick={() => onSkip?.()} style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}>
-            <ACLabel size={12} color={c.dim}>Skip for now</ACLabel>
+            <ACLabel size={12} color={c.dim}>{t('onboardConstraints.skip')}</ACLabel>
           </button>
         </div>
       </div>

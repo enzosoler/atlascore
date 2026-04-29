@@ -3,17 +3,19 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
 function S9_Onboard_Activity({ dark = false, onBack, onExit, onContinue, onChange, value }) {
   const c = useACT(dark);
+  const t = useT();
   const [lvl, setLvl] = React.useState(value?.activity || 3);
   const levels = [
-    { k: 1, t: 'Sedentary',   d: 'Desk-bound, little movement',          mult: '1.2×' },
-    { k: 2, t: 'Light',       d: '1–2 training days / week',             mult: '1.38×' },
-    { k: 3, t: 'Moderate',    d: '3–4 training days / week',             mult: '1.55×' },
-    { k: 4, t: 'Active',      d: '5–6 training days / week',             mult: '1.73×' },
-    { k: 5, t: 'Athletic',    d: 'Daily + physical job',                 mult: '1.9×' },
+    { k: 1, t: t('onboardActivity.levels.sedentary'),   d: t('onboardActivity.levels.sedentaryDesc'), mult: '1.2×' },
+    { k: 2, t: t('onboardActivity.levels.light'),       d: t('onboardActivity.levels.lightDesc'),     mult: '1.38×' },
+    { k: 3, t: t('onboardActivity.levels.moderate'),    d: t('onboardActivity.levels.moderateDesc'),  mult: '1.55×' },
+    { k: 4, t: t('onboardActivity.levels.active'),      d: t('onboardActivity.levels.activeDesc'),    mult: '1.73×' },
+    { k: 5, t: t('onboardActivity.levels.athletic'),    d: t('onboardActivity.levels.athleticDesc'),  mult: '1.9×' },
   ];
   return (
     <OnboardingShell
@@ -22,18 +24,18 @@ function S9_Onboard_Activity({ dark = false, onBack, onExit, onContinue, onChang
       total={10}
       onBack={onBack}
       onExit={onExit}
-      eyebrow="Load"
-      footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>Continue →</OnboardingPrimaryAction>}
+      eyebrow={t('onboardActivity.eyebrow')}
+      footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>{t('onboardActivity.cta')}</OnboardingPrimaryAction>}
     >
       <OnboardingHero
         dark={dark}
-        label="Activity"
-        title={<>Set the workload.</>}
-        body="This is the first pass on energy output. Atlas will tighten it against actual training and bodyweight trend."
+        label={t('onboardActivity.label')}
+        title={<>{t('onboardActivity.title')}</>}
+        body={t('onboardActivity.body')}
         aside={(
           <>
-            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Estimator</ACLabel>
-            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>Adjusted later from logs.</div>
+            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardActivity.asideLabel')}</ACLabel>
+            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>{t('onboardActivity.asideBody')}</div>
           </>
         )}
       />

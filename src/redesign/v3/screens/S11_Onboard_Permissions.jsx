@@ -7,6 +7,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn, ACChip,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 
 const IS_NATIVE = Capacitor.isNativePlatform();
 
@@ -120,6 +121,7 @@ function S11_Onboard_Permissions({
   onChange,
 }) {
   const c = useACT(dark);
+  const t = useT();
   const [perms, setPerms] = React.useState({
     health: value?.health || 'idle',
     camera: value?.camera || 'idle',
@@ -228,26 +230,10 @@ function S11_Onboard_Permissions({
   };
 
   const items = [
-    {
-      k: 'health',
-      t: 'Apple Health',
-      d: 'Recovery, sleep, steps, and heart rate let coach adjust the day instead of guessing.',
-    },
-    {
-      k: 'camera',
-      t: 'Camera',
-      d: 'Progress photos, barcode scans, and meal capture work faster when camera access is ready.',
-    },
-    {
-      k: 'notif',
-      t: 'Notifications',
-      d: 'Trial reminders, coach nudges, and workout check-ins land at the right moment.',
-    },
-    {
-      k: 'whoop',
-      t: 'Whoop / Oura',
-      d: 'Import readiness signals from your recovery tracker.',
-    },
+    { k: 'health', label: t('onboardPermissions.health'), d: t('onboardPermissions.healthDesc') },
+    { k: 'camera', label: t('onboardPermissions.camera'), d: t('onboardPermissions.cameraDesc') },
+    { k: 'notif',  label: t('onboardPermissions.notif'),  d: t('onboardPermissions.notifDesc') },
+    { k: 'whoop',  label: t('onboardPermissions.whoop'),  d: t('onboardPermissions.whoopDesc') },
   ];
 
   return (
@@ -255,12 +241,12 @@ function S11_Onboard_Permissions({
       <OBHeader step={5} total={10} dark={dark} onBack={onBack} onExit={onExit} />
 
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 8px', display: 'flex', flexDirection: 'column' }}>
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Connect</ACLabel>
+        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{t('onboardPermissions.eyebrow')}</ACLabel>
         <div style={{
           marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
           letterSpacing: -1, lineHeight: 1.05, color: c.fg,
         }}>
-          Connect your sources.
+          {t('onboardPermissions.title')}
         </div>
 
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -285,7 +271,7 @@ function S11_Onboard_Permissions({
               >
                 <PermIcon k={p.k} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: c.fg }}>{p.t}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: c.fg }}>{p.label}</div>
                   <ACLabel size={12} color={c.dim}>{p.d}</ACLabel>
                 </div>
                 <ACChip accent={state === 'granted'} dark={dark}>
@@ -298,10 +284,10 @@ function S11_Onboard_Permissions({
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={onContinue}>Continue →</ACBtn>
+        <ACBtn primary block dark={dark} size="lg" pill onClick={onContinue}>{t('onboardPermissions.cta')}</ACBtn>
         <div style={{ textAlign: 'center', padding: 4 }}>
           <button type="button" onClick={onSkip} style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}>
-            <ACLabel size={12} color={c.dim}>Skip for now</ACLabel>
+            <ACLabel size={12} color={c.dim}>{t('onboardPermissions.skip')}</ACLabel>
           </button>
         </div>
       </div>
