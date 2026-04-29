@@ -427,7 +427,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {actions.map(action => {
               // Auto-complete protein actions when target is reached
-              const isProteinAction = action.anchor && action.category === 'eat' && action.text.includes('protein');
+              const isProteinAction = action.anchor && action.category === 'eat';
               const proteinMet = isProteinAction && proteinConsumed >= proteinTarget;
               const status = proteinMet ? 'done' : (completions[action.id] || 'pending');
               const isDone = status === 'done';

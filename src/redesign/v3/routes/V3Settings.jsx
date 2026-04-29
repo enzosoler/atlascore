@@ -156,7 +156,6 @@ export default function V3Settings() {
         },
         { k: 'theme',    t: t('settings.v3.rows.appearance'),    d: t('settings.v3.rows.appearanceDesc', { theme: currentThemeLabel }), chevron: true },
         { k: 'language', t: t('settings.v3.rows.language'),      d: t('settings.v3.rows.languageDesc', { language: currentLanguageLabel }), chevron: true },
-        { k: 'notifs',   t: t('settings.v3.rows.notifications'), d: t('settings.v3.rows.notificationsDesc'), chevron: false, muted: true },
         { k: 'goals',    t: t('settings.v3.rows.dailyTargets'),  d: t('settings.v3.rows.dailyTargetsDesc'), chevron: true },
       ],
     },

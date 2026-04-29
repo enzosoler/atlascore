@@ -197,6 +197,10 @@ export default function V3ForgotPassword() {
       setError(t('auth.forgot.enterEmail'));
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+      setError(t('auth.errors.invalidEmail'));
+      return;
+    }
 
     setLoading(true);
     try {

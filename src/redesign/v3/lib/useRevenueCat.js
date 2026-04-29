@@ -166,7 +166,7 @@ export function useRevenueCat({ userId, source = 'paywall', onSuccess } = {}) {
         }
       } else {
         track('restore_failed', { reason: 'no_active_subscription', source });
-        toast(t('paywall.toasts.noActiveSub'));
+        toast.info(t('paywall.toasts.noActiveSub'));
       }
     } catch (err) {
       track('restore_failed', { reason: err?.message || 'exception', source });

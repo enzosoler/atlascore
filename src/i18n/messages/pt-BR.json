@@ -21,7 +21,8 @@
   },
   "errors": {
     "aiWorkoutTooManyRequests": "Muitas solicitações. Espere um momento e tente novamente.",
-    "aiFoodTooManyRequests": "Muitas solicitações. A IA está ocupada. Use a busca abaixo ou espere um momento."
+    "aiFoodTooManyRequests": "Muitas solicitações. A IA está ocupada. Use a busca abaixo ou espere um momento.",
+    "loadFailed": "Algo deu errado ao carregar os dados. Tente novamente mais tarde."
   },
   "appShell": {
     "comingSoon": {
@@ -33,7 +34,8 @@
     "errors": {
       "rateLimited": "Muitas tentativas. Aguarde um momento e tente novamente.",
       "timeout": "O serviço de autenticação está demorando para responder. Tente novamente.",
-      "network": "Problema de rede ao contatar a autenticação. Verifique sua conexão e tente novamente."
+      "network": "Problema de rede ao contatar a autenticação. Verifique sua conexão e tente novamente.",
+      "invalidEmail": "Digite um endereço de e-mail válido."
     },
     "kicker": "Sistema de evolução pessoal",
     "title": {
@@ -5464,6 +5466,7 @@
     "saveBtn": "Salvar check-in"
   },
   "labs": {
+    "loadFailed": "Não foi possível carregar os exames. Tente novamente mais tarde.",
     "upload": {
       "consent": {
         "title": "Permitir leitura do exame por IA",

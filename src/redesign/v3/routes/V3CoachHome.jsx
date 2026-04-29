@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
-import { useT } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { captureException } from '@/lib/sentry';
 import S13_Coach_Brief from '../screens/S13_Coach_Brief.jsx';
@@ -228,7 +228,7 @@ export default function V3CoachHome() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useAuth();
-  const t = useT();
+  const { t, locale } = useI18n();
   const daily = useDailyStateV2();
   const firstName = (user?.full_name || user?.email?.split('@')[0] || 'Athlete').split(' ')[0];
   const mealCount = safeCount(daily.todayMeals?.length);
@@ -258,7 +258,7 @@ export default function V3CoachHome() {
     >
       <S13_Coach_Brief
         dark={theme === 'dark'}
-        timestampLabel={new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
+        timestampLabel={new Date().toLocaleDateString(locale || 'en-US', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
         briefLabel={t('coach.home.dailyBrief')}
         headlineLead={t('coach.home.youre', { name: firstName })}
         headlineAccent={hasPlan ? t('coach.home.onTrack') : t('coach.home.building')}

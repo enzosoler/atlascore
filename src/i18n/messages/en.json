@@ -21,7 +21,8 @@
   },
   "errors": {
     "aiWorkoutTooManyRequests": "Too many requests. Please wait a moment and try again.",
-    "aiFoodTooManyRequests": "Too many requests. AI is busy. Try search below or wait a moment."
+    "aiFoodTooManyRequests": "Too many requests. AI is busy. Try search below or wait a moment.",
+    "loadFailed": "Something went wrong loading data. Try again later."
   },
   "appShell": {
     "comingSoon": {
@@ -33,7 +34,8 @@
     "errors": {
       "rateLimited": "Too many attempts. Wait a moment and try again.",
       "timeout": "The auth service is taking too long to respond. Please try again.",
-      "network": "Network issue while contacting auth. Check your connection and retry."
+      "network": "Network issue while contacting auth. Check your connection and retry.",
+      "invalidEmail": "Enter a valid email address."
     },
     "kicker": "Personal evolution system",
     "title": {
@@ -5486,6 +5488,7 @@
     "saveBtn": "Save check-in"
   },
   "labs": {
+    "loadFailed": "Couldn't load labs. Try again later.",
     "upload": {
       "consent": {
         "title": "Allow AI lab parsing",

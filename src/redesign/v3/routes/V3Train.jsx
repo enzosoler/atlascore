@@ -18,8 +18,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { listRoutines } from '@/lib/workoutsService';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import S24_Library from '../screens/S24_Library.jsx';
@@ -75,6 +77,7 @@ export default function V3Train() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
 
   // Active assigned plan (workout_plans.active=true) — source for "NF Team 2".
   // useDailyStateV2 already fetches this; we reuse it so the Library and the
@@ -98,7 +101,9 @@ export default function V3Train() {
         const rows = await listRoutines();
         if (cancelled) return;
         setRoutines(Array.isArray(rows) ? rows : []);
-      } catch {
+      } catch (err) {
+        console.error('[V3Train] failed to load routines:', err);
+        toast.error(t('errors.loadFailed'));
         if (!cancelled) setRoutines([]);
       }
     })();

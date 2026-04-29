@@ -1,7 +1,9 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import S15_Labs_Inbox from '../screens/S15_Labs_Inbox.jsx';
 import {
   CONTEXTUAL_PAYWALL_ROUTE,
@@ -36,6 +38,7 @@ export default function V3Labs() {
   const location = useLocation();
   const { user } = useAuth();
   const { theme } = useTheme();
+  const t = useT();
   const [exams, setExams] = React.useState([]);
   const tier = user?.user_metadata?.tier;
   const isPremium = tier === 'Premium' || tier === 'Pro' || user?.atlas_role === 'admin';
@@ -55,6 +58,7 @@ export default function V3Labs() {
       })
       .catch((error) => {
         console.error('[V3Labs] failed to load labs:', error);
+        toast.error(t('labs.loadFailed'));
         if (!cancelled) setExams([]);
       });
 

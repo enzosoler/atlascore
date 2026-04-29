@@ -7,6 +7,23 @@ import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACBtn, ACFonts, ACLabel, ACBrand, useACT } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
+function EyeToggle({ show, onClick, color }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={show ? 'Hide password' : 'Show password'}
+      style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+    >
+      {show ? (
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" stroke={color} strokeWidth="1.6" /><circle cx="10" cy="10" r="2.5" stroke={color} strokeWidth="1.6" /></svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" stroke={color} strokeWidth="1.6" /><circle cx="10" cy="10" r="2.5" stroke={color} strokeWidth="1.6" /><path d="M3 17L17 3" stroke={color} strokeWidth="1.6" strokeLinecap="round" /></svg>
+      )}
+    </button>
+  );
+}
+
 function ResetPasswordCard({
   dark,
   password,
@@ -21,6 +38,8 @@ function ResetPasswordCard({
 }) {
   const c = useACT(dark);
   const mismatch = password && confirm && password !== confirm;
+  const [showPw, setShowPw] = React.useState(false);
+  const [showConfirm, setShowConfirm] = React.useState(false);
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -94,7 +113,7 @@ function ResetPasswordCard({
                 }}
               >
                 <input
-                  type="password"
+                  type={showPw ? 'text' : 'password'}
                   autoComplete="new-password"
                   autoFocus
                   value={password}
@@ -113,6 +132,7 @@ function ResetPasswordCard({
                     fontFamily: ACFonts.body,
                   }}
                 />
+                <EyeToggle show={showPw} onClick={() => setShowPw(v => !v)} color={c.dim} />
               </div>
             </div>
 
@@ -132,7 +152,7 @@ function ResetPasswordCard({
                 }}
               >
                 <input
-                  type="password"
+                  type={showConfirm ? 'text' : 'password'}
                   autoComplete="new-password"
                   value={confirm}
                   onChange={(e) => onConfirmChange(e.target.value)}
@@ -150,6 +170,7 @@ function ResetPasswordCard({
                     fontFamily: ACFonts.body,
                   }}
                 />
+                <EyeToggle show={showConfirm} onClick={() => setShowConfirm(v => !v)} color={c.dim} />
               </div>
               <ACLabel
                 size={10}
