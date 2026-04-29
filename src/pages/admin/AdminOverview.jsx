@@ -204,7 +204,7 @@ export default function AdminOverview() {
         <RecentList
           title="Recent errors"
           items={recentErrors?.map(e => ({
-            label: (e.message || e.error_message || 'Error').slice(0, 60),
+            label: (e.message || 'Error').slice(0, 60),
             meta: e.created_at ? new Date(e.created_at).toLocaleTimeString() : '',
           }))}
           emptyText="No recent errors"

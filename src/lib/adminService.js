@@ -826,7 +826,7 @@ export async function fetchRecentSignups(limit = 5) {
 export async function fetchRecentErrors(limit = 5) {
   const { data, error } = await supabase
     .from('error_logs')
-    .select('id, message, error_message, component, route, user_id, created_at')
+    .select('id, message, component, route, user_id, created_at')
     .order('created_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
