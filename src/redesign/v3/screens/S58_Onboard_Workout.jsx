@@ -105,28 +105,25 @@ function S58_Onboard_Workout({
       <OBHeader step={step} total={total} dark={dark} onBack={onBack} onExit={onExit} />
 
       {/* scrollable content */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '24px 28px 16px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 16px', display: 'flex', flexDirection: 'column' }}>
 
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Training</ACLabel>
         <div style={{
-          marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
+          marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
           letterSpacing: -1, lineHeight: 1.05, color: c.fg,
         }}>
           Your training<br/>context.
         </div>
-        <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          Defines starting volume and which exercises get prescribed.
-        </div>
 
         {/* ── Experience level (single select) ───────────── */}
-        <div style={{ marginTop: 30 }}>
+        <div style={{ marginTop: 22 }}>
           <ACLabel size={12} color={c.dim}>Experience level</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {EXPERIENCE.map(e => {
               const on = experience === e.id;
               return (
                 <button key={e.id} type="button" onClick={() => { setExperience(e.id); emit({ experience: e.id }); }} style={{
-                  padding: '16px 18px', borderRadius: ACRadii.input,
+                  padding: '12px 18px', borderRadius: ACRadii.input,
                   background: on ? c.fg : 'transparent',
                   color: on ? c.bg : c.fg,
                   border: on ? 'none' : `1px solid ${c.hair}`,
@@ -152,7 +149,7 @@ function S58_Onboard_Workout({
         </div>
 
         {/* ── Weekly frequency (single select pill row) ──── */}
-        <div style={{ marginTop: 28 }}>
+        <div style={{ marginTop: 20 }}>
           <ACLabel size={12} color={c.dim}>Weekly frequency</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
             {FREQUENCY.map(f => {
@@ -171,7 +168,7 @@ function S58_Onboard_Workout({
         </div>
 
         {/* ── Equipment (multi-select chip toggles) ──────── */}
-        <div style={{ marginTop: 28 }}>
+        <div style={{ marginTop: 20 }}>
           <ACLabel size={12} color={c.dim}>Equipment available</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {EQUIPMENT.map(e => {

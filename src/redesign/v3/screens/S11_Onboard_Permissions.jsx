@@ -133,6 +133,35 @@ function S11_Onboard_Permissions({
     onChange?.(next);
   }
 
+  // Check actual device state on mount so already-granted permissions show correctly
+  React.useEffect(() => {
+    if (!IS_NATIVE) return;
+    (async () => {
+      try {
+        const [camResult, notifResult, healthAvail] = await Promise.all([
+          Camera.checkPermissions().catch(() => null),
+          notificationService.checkPermissions?.().catch(() => null),
+          healthKitService.isAvailable().catch(() => false),
+        ]);
+
+        setPerms(prev => {
+          const next = { ...prev };
+          if (camResult?.camera === 'granted') next.camera = 'granted';
+          else if (camResult?.camera === 'denied') next.camera = 'denied';
+
+          if (notifResult === 'granted') next.notif = 'granted';
+          else if (notifResult === 'denied') next.notif = 'denied';
+
+          if (!healthAvail) next.health = 'unavailable';
+          return next;
+        });
+      } catch {
+        // silent — don't block UI
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // --- Real permission request handlers ---
 
   async function connectHealth() {
@@ -148,8 +177,14 @@ function S11_Onboard_Permissions({
         update('health', 'unavailable');
         return;
       }
-      const granted = await healthKitService.requestAuthorization();
-      update('health', granted ? 'granted' : 'denied');
+      const result = await healthKitService.requestAuthorization();
+      if (result.granted) {
+        update('health', 'granted');
+      } else if (result.errorType === 'plugin_init') {
+        update('health', 'unavailable');
+      } else {
+        update('health', 'denied');
+      }
     } catch {
       update('health', 'denied');
     }
@@ -219,19 +254,16 @@ function S11_Onboard_Permissions({
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
       <OBHeader step={5} total={10} dark={dark} onBack={onBack} onExit={onExit} />
 
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '24px 28px 16px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 8px', display: 'flex', flexDirection: 'column' }}>
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Connect</ACLabel>
         <div style={{
-          marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
+          marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
           letterSpacing: -1, lineHeight: 1.05, color: c.fg,
         }}>
           Connect your sources.
         </div>
-        <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          We explain each permission before the OS prompt so the ask feels earned. atlas.core reads signal and never writes without asking.
-        </div>
 
-        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {items.map((p) => {
             const state = perms[p.k];
             const isFinal = state === 'granted' || state === 'denied' || state === 'unavailable' || state === 'coming_soon';
@@ -243,7 +275,7 @@ function S11_Onboard_Permissions({
                 onClick={() => handlers[p.k]()}
                 disabled={isFinal || isLoading}
                 style={{
-                  padding: 18, borderRadius: ACRadii.card,
+                  padding: 14, borderRadius: ACRadii.card,
                   background: c.card,
                   display: 'flex', alignItems: 'center', gap: 14,
                   border: 'none', cursor: isFinal || isLoading ? 'default' : 'pointer',
@@ -263,19 +295,6 @@ function S11_Onboard_Permissions({
             );
           })}
         </div>
-
-        <div style={{
-          marginTop: 22, padding: '14px 16px', borderRadius: ACRadii.card,
-          borderLeft: `3px solid ${c.accent}`, background: c.card,
-        }}>
-          <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }}>Privacy</ACLabel>
-          <div style={{ marginTop: 4, fontSize: 13, color: c.fg, lineHeight: 1.5 }}>
-            All data stays on-device by default. Cloud sync is opt-in, encrypted, and exportable.
-          </div>
-        </div>
-
-        {/* Bottom padding for safe area */}
-        <div style={{ height: 24 }} />
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg, display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>

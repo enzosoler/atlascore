@@ -84,7 +84,7 @@ function ChipGroup({ items, selected, onToggle, tint, dark }) {
             type="button"
             onClick={() => onToggle(item)}
             style={{
-              height: 40,
+              height: 34,
               paddingInline: 14,
               borderRadius: 999,
               fontSize: 14,
@@ -156,31 +156,18 @@ function S60_Onboard_Constraints({
       <OBHeader step={step} total={total} dark={dark} onBack={onBack} onExit={onExit} />
 
       {/* scrollable body */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '24px 28px 16px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 16px', display: 'flex', flexDirection: 'column' }}>
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Constraints</ACLabel>
         <div style={{
-          marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
+          marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
           letterSpacing: -1, lineHeight: 1.05, color: c.fg,
         }}>
           Anything to flag?
         </div>
-        <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          Everything optional. Tap what applies.
-        </div>
-
-        {/* privacy note */}
-        <div style={{
-          marginTop: 18, padding: '14px 16px', borderRadius: ACRadii.card,
-          borderLeft: `3px solid ${c.accent}`, background: c.card,
-        }}>
-          <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }}>Privacy</ACLabel>
-          <div style={{ marginTop: 4, fontSize: 13, color: c.fg, lineHeight: 1.5 }}>
-            This data is private and used only to filter unsafe exercise prescriptions.
-          </div>
-        </div>
+        <ACLabel size={12} color={c.dim} style={{ marginTop: 6, display: 'block' }}>Everything optional — private, used only to filter unsafe prescriptions.</ACLabel>
 
         {/* injuries */}
-        <div style={{ marginTop: 26 }}>
+        <div style={{ marginTop: 20 }}>
           <ACLabel size={12} color={c.dim}>Injuries</ACLabel>
           <div style={{ marginTop: 10 }}>
             <ChipGroup items={INJURIES} selected={injuries} onToggle={toggleInjury} tint="amber" dark={dark} />
@@ -188,7 +175,7 @@ function S60_Onboard_Constraints({
         </div>
 
         {/* medical */}
-        <div style={{ marginTop: 24 }}>
+        <div style={{ marginTop: 18 }}>
           <ACLabel size={12} color={c.dim}>Medical</ACLabel>
           <div style={{ marginTop: 10 }}>
             <ChipGroup items={MEDICAL} selected={medical} onToggle={toggleMedical} tint="rose" dark={dark} />
@@ -196,7 +183,7 @@ function S60_Onboard_Constraints({
         </div>
 
         {/* free-text notes */}
-        <div style={{ marginTop: 24 }}>
+        <div style={{ marginTop: 18 }}>
           <ACLabel size={12} color={c.dim}>Additional notes</ACLabel>
           <div style={{
             marginTop: 10, padding: 4, background: c.card,
@@ -206,7 +193,7 @@ function S60_Onboard_Constraints({
               value={notes}
               onChange={(e) => { setNotes(e.target.value); emit({ notes: e.target.value }); }}
               placeholder="Medications, recent surgery, dietary needs..."
-              rows={3}
+              rows={2}
               style={{
                 width: '100%',
                 background: 'transparent',

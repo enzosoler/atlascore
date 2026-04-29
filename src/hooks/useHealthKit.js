@@ -36,7 +36,8 @@ export function useHealthKit() {
     if (!IS_IOS) return false;
     setLoading(true);
     try {
-      const granted = await hk.requestAuthorization();
+      const result = await hk.requestAuthorization();
+      const granted = result?.granted ?? result;
       if (granted) {
         setConnected(true);
         localStorage.setItem(STORAGE_KEY, 'true');

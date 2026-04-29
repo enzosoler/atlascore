@@ -98,118 +98,73 @@ function S59_Onboard_Habits({
       <OBHeader step={step} total={total} dark={dark} onBack={onBack} onExit={onExit} />
 
       {/* scrollable content */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '24px 28px 16px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '20px 28px 16px', display: 'flex', flexDirection: 'column' }}>
 
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Habits</ACLabel>
         <div style={{
-          marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
+          marginTop: 8, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
           letterSpacing: -1, lineHeight: 1.05, color: c.fg,
         }}>
           A few daily<br/>habits.
         </div>
-        <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          We anchor your recovery score and coach nudges on these.
-        </div>
 
-        {/* ── Sleep (single select) ──────────────────────── */}
-        <div style={{ marginTop: 30 }}>
+        {/* ── Sleep (horizontal pill row) ────────────────── */}
+        <div style={{ marginTop: 22 }}>
           <ACLabel size={12} color={c.dim}>Typical sleep</ACLabel>
-          <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
             {SLEEP.map(s => {
               const on = sleep === s.id;
               return (
                 <button key={s.id} type="button" onClick={() => { setSleep(s.id); emit({ sleep: s.id }); }} style={{
-                  padding: '16px 18px', borderRadius: ACRadii.input,
-                  background: on ? c.fg : 'transparent',
+                  flex: 1, padding: '12px 0', borderRadius: ACRadii.input,
+                  background: on ? c.fg : c.card,
                   color: on ? c.bg : c.fg,
-                  border: on ? 'none' : `1px solid ${c.hair}`,
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  cursor: 'pointer', width: '100%', textAlign: 'left',
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600 }}>{s.label}</div>
-                    <div style={{ fontSize: 12, opacity: 0.55, marginTop: 2 }}>{s.desc}</div>
-                  </div>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: 999,
-                    border: `1.8px solid ${on ? c.accent : c.faint}`,
-                    background: on ? c.accent : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {on && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke={c.ink} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                  </div>
-                </button>
+                  border: 'none',
+                  fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', textAlign: 'center',
+                }}>{s.label}</button>
               );
             })}
           </div>
         </div>
 
-        {/* ── Daily steps target (single select) ─────────── */}
-        <div style={{ marginTop: 28 }}>
+        {/* ── Daily steps target (horizontal pill row) ───── */}
+        <div style={{ marginTop: 20 }}>
           <ACLabel size={12} color={c.dim}>Daily steps target</ACLabel>
-          <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
             {STEPS.map(s => {
               const on = steps === s.id;
               return (
                 <button key={s.id} type="button" onClick={() => { setSteps(s.id); emit({ steps: s.id }); }} style={{
-                  padding: '16px 18px', borderRadius: ACRadii.input,
-                  background: on ? c.fg : 'transparent',
+                  flex: 1, padding: '12px 0', borderRadius: ACRadii.input,
+                  background: on ? c.fg : c.card,
                   color: on ? c.bg : c.fg,
-                  border: on ? 'none' : `1px solid ${c.hair}`,
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  cursor: 'pointer', width: '100%', textAlign: 'left',
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600 }}>{s.label}</div>
-                    <div style={{ fontSize: 12, opacity: 0.55, marginTop: 2 }}>{s.desc}</div>
-                  </div>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: 999,
-                    border: `1.8px solid ${on ? c.accent : c.faint}`,
-                    background: on ? c.accent : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {on && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke={c.ink} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                  </div>
-                </button>
+                  border: 'none',
+                  fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', textAlign: 'center',
+                }}>{s.label}</button>
               );
             })}
           </div>
         </div>
 
-        {/* ── Water intake (preset pill buttons) ─────────── */}
-        <div style={{ marginTop: 28 }}>
+        {/* ── Water intake (pill row, no large number display) */}
+        <div style={{ marginTop: 20 }}>
           <ACLabel size={12} color={c.dim}>Daily water intake</ACLabel>
-          <div style={{
-            marginTop: 10, padding: 18, background: c.card, borderRadius: ACRadii.card,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-              <ACLabel size={12} color={c.mute}>Target</ACLabel>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{
-                  fontFamily: ACFonts.display, fontSize: 30, fontWeight: 700,
-                  fontVariantNumeric: 'tabular-nums', color: c.fg,
-                }}>
-                  {waterL % 1 === 0 ? waterL : waterL.toFixed(1)}
-                </span>
-                <ACLabel size={13} color={c.dim}>L</ACLabel>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {WATER.map(w => {
-                const on = waterL === w.id;
-                return (
-                  <button key={w.id} type="button" onClick={() => { setWaterL(w.id); emit({ waterL: w.id }); }} style={{
-                    flex: 1, padding: '12px 0', borderRadius: ACRadii.input,
-                    background: on ? c.accent : 'transparent',
-                    color: on ? c.ink : c.fg,
-                    border: on ? 'none' : `1px solid ${c.hair}`,
-                    fontSize: 13, fontWeight: 700,
-                    cursor: 'pointer', textAlign: 'center',
-                  }}>{w.label}</button>
-                );
-              })}
-            </div>
+          <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+            {WATER.map(w => {
+              const on = waterL === w.id;
+              return (
+                <button key={w.id} type="button" onClick={() => { setWaterL(w.id); emit({ waterL: w.id }); }} style={{
+                  flex: 1, padding: '12px 0', borderRadius: ACRadii.input,
+                  background: on ? c.accent : c.card,
+                  color: on ? c.ink : c.fg,
+                  border: 'none',
+                  fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', textAlign: 'center',
+                }}>{w.label}</button>
+              );
+            })}
           </div>
         </div>
       </div>

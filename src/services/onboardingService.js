@@ -279,16 +279,35 @@ export async function finalizeOnboarding(userId, onboardingData = null) {
     targetCalories: profileData?.targets?.calories ?? null,
   });
 
-  const { data: profileRow, error: profileError } = await supabase
+  // Refresh session token before upsert to avoid 42501 race on first login
+  await supabase.auth.refreshSession().catch(() => {});
+
+  const upsertPayload = {
+    id: userId,
+    onboarding_completed: true,
+    profile_data: profileData,
+    updated_at: new Date().toISOString(),
+  };
+
+  let profileRow;
+  let profileError;
+
+  ({ data: profileRow, error: profileError } = await supabase
     .from('profiles')
-    .upsert({
-      id: userId,
-      onboarding_completed: true,
-      profile_data: profileData,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'id' })
+    .upsert(upsertPayload, { onConflict: 'id' })
     .select('id,onboarding_completed,updated_at')
-    .single();
+    .single());
+
+  // Retry once on insufficient_privilege (42501) — token may have just refreshed
+  if (profileError && (profileError.code === '42501' || profileError.message?.includes('permission denied'))) {
+    console.warn('[onboarding] profile upsert 42501, retrying after short delay', { userId });
+    await new Promise(r => setTimeout(r, 800));
+    ({ data: profileRow, error: profileError } = await supabase
+      .from('profiles')
+      .upsert(upsertPayload, { onConflict: 'id' })
+      .select('id,onboarding_completed,updated_at')
+      .single());
+  }
 
   if (profileError) {
     console.error('[onboarding] profile upsert failed', {

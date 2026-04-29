@@ -44,16 +44,19 @@ export async function isAvailable() {
  * Returns true if granted (at least partially), false otherwise.
  */
 export async function requestAuthorization() {
-  if (!IS_IOS) return false;
+  if (!IS_IOS) return { granted: false, errorType: 'unavailable' };
   try {
     await Health.requestAuthorization({
       read: READ_TYPES,
       write: WRITE_TYPES,
     });
-    return true;
+    return { granted: true, errorType: null };
   } catch (e) {
     console.warn('[HealthKit] Authorization failed:', e?.message);
-    return false;
+    // Distinguish plugin init failure (plugin not loaded / simulator) from user denial
+    const msg = String(e?.message || '');
+    const isPluginInit = msg.includes('not implement') || msg.includes('Plugin') || msg.includes('undefined') || msg.includes('capacitor');
+    return { granted: false, errorType: isPluginInit ? 'plugin_init' : 'user_denied' };
   }
 }
 

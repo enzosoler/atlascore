@@ -121,7 +121,7 @@ export function OnboardingShell({ dark = false, step, total = 10, onBack, onExit
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <OnboardingHeader step={step} total={total} dark={dark} onBack={onBack} onExit={onExit} eyebrow={eyebrow} />
-        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '26px 28px 16px', display: 'flex', flexDirection: 'column' }}>{children}</div>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '26px 28px 16px', display: 'flex', flexDirection: 'column' }}>{children}</div>
         <div
           style={{
             padding: '14px 28px 26px',
