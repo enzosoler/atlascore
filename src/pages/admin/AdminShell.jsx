@@ -34,6 +34,7 @@ function SidebarLink({ item, active, collapsed }) {
   return (
     <Link
       to={item.path}
+      data-testid={`admin-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
       style={{
         display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 12,
         justifyContent: collapsed ? 'center' : 'flex-start',
@@ -63,7 +64,7 @@ export default function AdminShell() {
   const sidebarWidth = collapsed ? 64 : 240;
 
   return (
-    <div style={{
+    <div data-testid="admin-shell" style={{
       display: 'flex', minHeight: '100vh',
       background: c.bg, color: c.fg,
       fontFamily: ACFonts.body,
@@ -103,7 +104,7 @@ export default function AdminShell() {
         </div>
 
         {/* Nav groups */}
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <nav data-testid="admin-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}>
           {NAV.map((group) => (
             <div key={group.group}>
               {!collapsed && (
@@ -203,7 +204,7 @@ export default function AdminShell() {
         </header>
 
         {/* Page content */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
+        <div data-testid="admin-content" style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
           <Outlet />
         </div>
 

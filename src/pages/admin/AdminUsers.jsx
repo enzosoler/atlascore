@@ -51,6 +51,7 @@ function UserRow({ user, c, onDelete, onToggleSuspend, deleting }) {
 
   return (
     <tr
+      data-testid={`admin-user-row-${user.id}`}
       style={{ borderBottom: `1px solid ${c.hair}`, cursor: 'pointer' }}
       onClick={() => navigate(`/admin/users/${user.id}`)}
     >
@@ -182,7 +183,7 @@ export default function AdminUsers() {
   };
 
   return (
-    <div>
+    <div data-testid="admin-users">
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{
@@ -199,6 +200,7 @@ export default function AdminUsers() {
       {/* Search bar */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
         <input
+          data-testid="admin-users-search"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="Search by email, name, or user ID..."
@@ -243,7 +245,7 @@ export default function AdminUsers() {
             {isSearching ? 'No users match your search.' : 'No users found.'}
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table data-testid="admin-users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
                 {['User', 'Role', 'Subscription', 'Status', 'Joined', 'Actions'].map(col => (

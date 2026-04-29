@@ -4,7 +4,7 @@ import { ACFonts, useACT, ACMono } from '@/redesign/v3/lib/paper.jsx';
 export default function AdminPlaceholder({ title = 'Coming soon', description = 'This section is planned for a future phase.' }) {
   const c = useACT(true);
   return (
-    <div style={{ padding: '40px 0' }}>
+    <div data-testid="admin-placeholder" style={{ padding: '40px 0' }}>
       <div style={{
         fontFamily: ACFonts.display, fontSize: 28, fontWeight: 700,
         letterSpacing: -1, color: c.fg,

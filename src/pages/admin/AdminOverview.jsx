@@ -108,7 +108,7 @@ export default function AdminOverview() {
   const maxFunnel = funnel?.[0]?.count || 1;
 
   return (
-    <div>
+    <div data-testid="admin-dashboard">
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{
@@ -123,7 +123,7 @@ export default function AdminOverview() {
       </div>
 
       {/* KPI Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div data-testid="admin-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
         <KPICard label="Total users" value={m.totalUsers ?? '—'} c={c} />
         <KPICard label="Active subs" value={m.activeSubscriptions ?? '—'} sub={`${m.trialingSubscriptions ?? 0} trialing`} accent c={c} />
         <KPICard label="Signups (7d)" value={m.signupsLast7Days ?? m.newUsersLast7Days ?? '—'} c={c} />

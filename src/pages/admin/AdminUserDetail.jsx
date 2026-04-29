@@ -229,7 +229,7 @@ export default function AdminUserDetail() {
         &larr; Back to users
       </button>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div data-testid="admin-user-detail" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
           <div style={{
             fontFamily: ACFonts.display, fontSize: 28, fontWeight: 700,

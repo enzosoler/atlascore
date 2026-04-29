@@ -286,7 +286,7 @@ export default function AdminGDPR() {
   };
 
   return (
-    <div>
+    <div data-testid="admin-compliance">
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{
