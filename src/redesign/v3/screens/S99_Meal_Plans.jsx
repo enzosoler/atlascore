@@ -9,7 +9,7 @@ export default function S99_Meal_Plans({ dark }) {
   return (
     <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
       <div style={{ padding:'14px 22px 0', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <ACLabel size={13} color={c.dim}>← Fuel</ACLabel>
+        <ACLabel size={13} color={c.dim}>← Nutrition</ACLabel>
         <ACLabel size={12} color={c.accent} style={{ fontWeight:600 }}>+ New</ACLabel>
       </div>
 

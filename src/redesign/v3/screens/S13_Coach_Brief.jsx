@@ -31,7 +31,7 @@ function S13_Coach_Brief({
   timestampLabel = 'SAT · 18 APR · 07:42',
   briefLabel = 'Morning brief · day 142',
   headlineLead = "You're",
-  headlineAccent = 'primed',
+  headlineAccent = 'Ready',
   metricLabel = 'Readiness',
   metricValue = '87',
   deltaLabel = 'vs 14d avg',
@@ -42,7 +42,7 @@ function S13_Coach_Brief({
   movesLabel = 'Today · three moves',
   movesProgressLabel,
   moves,
-  signalLabel = 'Signal trend · 14d',
+  signalLabel = 'Body trend · 14d',
   signalStatus = 'All green',
   signals,
   primaryActionLabel = 'Start today →',
@@ -57,7 +57,7 @@ function S13_Coach_Brief({
   
   const defaultMoves = [
     { id: 'm1', n: '01', t: 'Train', d: 'Heavy Lower · 58 min', meta: '4 PR attempts queued', lead: true },
-    { id: 'm2', n: '02', t: 'Fuel', d: 'Hit 186g protein', meta: '148g tracked · 38g to go' },
+    { id: 'm2', n: '02', t: 'Nutrition', d: 'Hit 186g protein', meta: '148g tracked · 38g to go' },
     { id: 'm3', n: '03', t: 'Sleep', d: 'In bed by 10:30', meta: 'Shifted 42 min later this week' },
   ];
 

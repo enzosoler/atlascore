@@ -301,7 +301,7 @@ export default function S51_Food_Diary({
 
       {/* ── State header ─────────────────────────────────────── */}
       <div style={{ padding: '16px 22px 8px' }}>
-        <ACLabel size={11} color={c.dim}>Fuel log</ACLabel>
+        <ACLabel size={11} color={c.dim}>Nutrition log</ACLabel>
         <div style={{
           fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700,
           letterSpacing: -0.8, color: c.fg, marginTop: 4,

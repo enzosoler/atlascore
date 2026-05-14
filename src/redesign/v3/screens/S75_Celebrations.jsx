@@ -130,7 +130,7 @@ const ACHIEVEMENT_MAP = {
   'nutrition-goal': {
     Icon: IconNutritionGoal,
     headline: 'Target hit.',
-    subtitle: 'Fuel dialed in. Recovery and training will follow.',
+    subtitle: 'Nutrition dialed in. Recovery and training will follow.',
   },
   'first-lab-upload': {
     Icon: IconLabUpload,

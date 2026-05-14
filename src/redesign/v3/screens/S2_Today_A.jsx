@@ -236,7 +236,7 @@ function S2_Today_A({
           <button type="button" onClick={onOpenNutrition} style={{ padding: 18, background: c.card, borderRadius: ACRadii.card, border: 'none', textAlign: 'left', cursor: 'pointer' }}>
             {f ? (
               <>
-                <ACLabel size={11} color={c.dim}>Fuel · today</ACLabel>
+                <ACLabel size={11} color={c.dim}>Nutrition · today</ACLabel>
                 <div style={{ marginTop: 10 }}><ACNum size={34} color={c.fg}>{formatNumber(f.current)}</ACNum></div>
                 <div style={{ marginTop: 4 }}><ACLabel size={11} color={c.dim}>of {formatNumber(f.target)} {f.unit}</ACLabel></div>
                 <div style={{ marginTop: 12, display: 'flex', height: 6, gap: 2, borderRadius: 3, overflow: 'hidden' }}>
@@ -246,7 +246,7 @@ function S2_Today_A({
               </>
             ) : (
               <>
-                <ACLabel size={11} color={c.dim}>Fuel</ACLabel>
+                <ACLabel size={11} color={c.dim}>Nutrition</ACLabel>
                 <div style={{ marginTop: 12, fontSize: 14, fontWeight: 600, color: c.fg }}>Log a meal</div>
                 <div style={{ marginTop: 4, fontSize: 12, color: c.dim, lineHeight: 1.4 }}>Tap to start tracking.</div>
               </>

@@ -50,7 +50,7 @@ const DEMO_INSIGHTS = [
     category: 'Recovery',
     severity: 'positive',
     headline: 'HRV rebounded 18% overnight',
-    body: 'Two consecutive nights of 7+ hours sleep restored your autonomic tone. You are primed for intensity today.',
+    body: 'Two consecutive nights of 7+ hours sleep restored your autonomic tone. You are ready for intensity today.',
     at: new Date(Date.now() - 2 * 3600000).toISOString(),
     delta: '+18%',
   },

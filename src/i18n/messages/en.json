@@ -1023,7 +1023,7 @@
     "completed": "Completed",
     "start_now": "Start now",
     "tracked": "Tracked",
-    "log_fuel": "Log fuel",
+    "log_fuel": "Log nutrition",
     "logged": "Logged",
     "scale_weight": "Scale weight",
     "view_trends": "View trends",
@@ -1444,7 +1444,7 @@
       "loadingReadiness": "Loading your readiness inputs...",
       "status": {
         "allDone": "System green. Full execution.",
-        "anchorsDone": "Anchors complete. Finish remaining actions.",
+        "anchorsDone": "Priority actions complete. Finish remaining actions.",
         "trainDoneProteinMissing": "Training complete. Protein still missing ({consumed}/{target}g).",
         "proteinDoneTrainPending": "Protein on track. Workout pending.",
         "started": "Execution started. Key actions pending.",
@@ -1483,10 +1483,10 @@
         "downtrend": "Downtrend detected"
       },
       "integrity": {
-        "stable": "System stable",
+        "stable": "On track",
         "ready": "System initializing — complete your first actions",
-        "degrading": "System degrading — restore consistency",
-        "broken": "System offline — start your anchors"
+        "degrading": "Falling behind — restore consistency",
+        "broken": "System offline — start your priority actions"
       }
     }
   },
@@ -1834,7 +1834,7 @@
     "profileLabel": "Profile",
     "profileAligned": "% aligned",
     "fieldsFilledDetail": "{filled} of {total} main fields filled.",
-    "dailyFuel": "Daily fuel",
+    "dailyFuel": "Daily nutrition",
     "loadingProfile": "Loading your profile",
     "loadingProfileDesc": "We're bringing your existing data to this new visual reading without interrupting the page.",
     "safeMode": "Profile in safe mode",
@@ -3863,7 +3863,7 @@
     },
     "home": {
       "train": "Train",
-      "fuel": "Fuel",
+      "fuel": "Nutrition",
       "momentum": "Momentum",
       "openWorkoutLibrary": "Open workout library",
       "readyWhenYouAre": "Ready when you are",
@@ -5685,7 +5685,7 @@
           "statSub": "sessions logged"
         },
         "fuel": {
-          "label": "Fuel",
+          "label": "Nutrition",
           "body": "Scan, snap, or speak. Fast nutrition logging without turning the app into a spreadsheet.",
           "statSub": "avg protein"
         },

@@ -129,7 +129,7 @@ function S2_Today_A({ dark }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
           <div style={{ padding: 18, background: c.card, borderRadius: ACRadii.card }}>
-            <ACLabel size={11} color={c.dim}>Fuel · today</ACLabel>
+            <ACLabel size={11} color={c.dim}>Nutrition · today</ACLabel>
             <div style={{ marginTop: 10 }}><ACNum size={34} color={c.fg}>1,842</ACNum></div>
             <div style={{ marginTop: 4 }}><ACLabel size={11} color={c.dim}>of 2,380 kcal</ACLabel></div>
             <div style={{ marginTop: 12, display: 'flex', height: 6, gap: 2, borderRadius: 3, overflow: 'hidden' }}>
@@ -429,7 +429,7 @@ function S4_Nutrition_A({ dark }) {
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '14px 22px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim}>Fuel · Sat 18 Apr</ACLabel>
+          <ACLabel size={11} color={c.dim}>Nutrition · Sat 18 Apr</ACLabel>
           <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
             Today's plate
           </div>

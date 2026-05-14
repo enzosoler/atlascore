@@ -118,7 +118,7 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, on
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim}>Fuel · {niceDateLabel(new Date())}</ACLabel>
+          <ACLabel size={11} color={c.dim}>Nutrition · {niceDateLabel(new Date())}</ACLabel>
           <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
             Today's plate
           </div>
@@ -229,7 +229,7 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, on
                   Nothing logged yet
                 </div>
                 <ACLabel size={12} color={c.dim}>
-                  Tap a capture button to start your day's fuel log.
+                  Tap a capture button to start your day's nutrition log.
                 </ACLabel>
               </div>
             );

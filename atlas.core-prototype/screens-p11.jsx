@@ -37,7 +37,7 @@ function S72_Notification_Prefs({ dark }) {
       title: 'Nutrition',
       items: [
         { label: 'Morning brief', desc: 'Daily plan and readiness summary at 7:00 AM', on: true },
-        { label: 'Fuel nudges', desc: 'Protein and calorie pacing throughout the day', on: false },
+        { label: 'Nutrition nudges', desc: 'Protein and calorie pacing throughout the day', on: false },
       ],
     },
     {

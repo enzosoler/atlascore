@@ -9,7 +9,7 @@ export default function S98_Nutrition_Search({ dark }) {
   return (
     <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
       <div style={{ padding:'14px 22px 10px', display:'flex', alignItems:'center', gap:10 }}>
-        <ACLabel size={13} color={c.dim}>← Fuel</ACLabel>
+        <ACLabel size={13} color={c.dim}>← Nutrition</ACLabel>
         <div style={{ flex:1 }} />
       </div>
 

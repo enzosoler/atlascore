@@ -520,8 +520,8 @@ function S22_Notifications({ dark }) {
           }}>
             {[
               { k: 'brief',   t: 'Morning brief',    d: '7:30 AM · your daily plan' },
-              { k: 'pr',      t: 'PR windows',       d: 'When your lifts look primed' },
-              { k: 'protein', t: 'Fuel nudges',      d: 'If you fall behind target pace' },
+              { k: 'pr',      t: 'PR windows',       d: 'When your lifts look ready' },
+              { k: 'protein', t: 'Nutrition nudges', d: 'If you fall behind target pace' },
               { k: 'labs',    t: 'Lab results',      d: 'New biomarkers in your inbox' },
               { k: 'sleep',   t: 'Sleep reminder',   d: 'Wind-down 30 min before bedtime' },
               { k: 'social',  t: 'Friends\' PRs',    d: 'When your crew hits a record' },
