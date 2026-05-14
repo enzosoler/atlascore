@@ -33,7 +33,7 @@ export default function V3AuthLogin() {
   const t = useT();
   const [email, setEmail] = useState(params.get('email') || '');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState(params.get('mode') === 'password' ? 'password' : 'magic');
+  const [mode, setMode] = useState(params.get('mode') === 'magic' ? 'magic' : 'password');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [rateLimitRemaining, setRateLimitRemaining] = useState(0);

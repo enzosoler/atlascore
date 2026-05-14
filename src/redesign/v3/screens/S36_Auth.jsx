@@ -178,13 +178,32 @@ export default function S36_Auth({
               }}
             />
           </div>
-          <ACLabel
-            size={10}
-            color={error ? '#c65b4b' : c.mute}
-            style={{ fontFamily: ACFonts.body, letterSpacing: 0.1, marginTop: 8, display: 'block' }}
-          >
-            {error || hint || t('auth.form.defaultHint')}
-          </ACLabel>
+          {error ? (
+            <div
+              style={{
+                marginTop: 10,
+                padding: '10px 14px',
+                background: 'rgba(198,91,75,0.12)',
+                borderLeft: '3px solid #c65b4b',
+                borderRadius: 6,
+                fontFamily: ACFonts.body,
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#c65b4b',
+                lineHeight: 1.4,
+              }}
+            >
+              {error}
+            </div>
+          ) : (
+            <ACLabel
+              size={10}
+              color={c.mute}
+              style={{ fontFamily: ACFonts.body, letterSpacing: 0.1, marginTop: 8, display: 'block' }}
+            >
+              {hint || t('auth.form.defaultHint')}
+            </ACLabel>
+          )}
         </div>
 
         {mode === 'password' ? (
