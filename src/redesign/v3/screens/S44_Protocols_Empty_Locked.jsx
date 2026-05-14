@@ -88,30 +88,52 @@ function S44_Protocols_Empty_Locked({
       <div style={{ flex: 1, minHeight: 0, padding: '0 20px', overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
         {tab === 'empty' ? (
           <div>
-            {/* Empty state -- first-run */}
-            <div style={{ padding: '28px 0 24px', textAlign: 'center' }}>
-              {/* Vial / capsule pictogram */}
-              <svg width="92" height="92" viewBox="0 0 92 92" style={{ display: 'block', margin: '0 auto 18px' }}>
-                <rect x="34" y="14" width="24" height="64" stroke={c.fg} strokeWidth="2.5" fill="none" />
-                <line x1="34" y1="40" x2="58" y2="40" stroke={c.fg} strokeWidth="2" />
-                <rect x="34" y="40" width="24" height="38" fill={c.fg} opacity="0.08" />
-                <circle cx="46" cy="58" r="3" fill={c.accent} />
-                <circle cx="46" cy="68" r="3" fill={c.accent} />
-                <line x1="14" y1="8" x2="22" y2="8" stroke={c.accent} strokeWidth="2" />
-                <line x1="70" y1="8" x2="78" y2="8" stroke={c.accent} strokeWidth="2" />
-              </svg>
+            {/* Empty state -- first-run with feature ad */}
+            <div style={{ padding: '20px 0 18px' }}>
               <div style={{
                 fontFamily: ACFonts.display, fontSize: 28, fontWeight: 700,
                 letterSpacing: -0.6, lineHeight: 1.05, color: c.fg,
               }}>
-                No protocols yet.
+                Track everything you cycle.
               </div>
               <div style={{
                 fontFamily: ACFonts.body, fontSize: 14, color: c.dim,
-                maxWidth: 260, margin: '10px auto 0', lineHeight: 1.5,
+                marginTop: 8, lineHeight: 1.55,
               }}>
-                Track supplements, peptides, and anything you're cycling. Cadence, dose, adherence — in one place.
+                Supplements, peptides, hormones — log the dose, set the cadence, and atlas.core tracks adherence and flags half-life overlaps.
               </div>
+            </div>
+
+            {/* Sample protocol cards — greyed out to signal "this is what it looks like" */}
+            <div style={{ marginBottom: 10 }}>
+              <ACMono size={9} color={c.dim} track={2}>SAMPLE · YOUR STACK WILL LOOK LIKE THIS</ACMono>
+            </div>
+            {[
+              { name: 'Creatine monohydrate', dose: '5 g', cadence: 'Daily', adh: 94, next: 'today' },
+              { name: 'Vitamin D3 + K2', dose: '5 000 IU', cadence: 'M / W / F', adh: 87, next: 'today' },
+              { name: 'Testosterone Enanthate', dose: '200 mg', cadence: 'Every 7 days', adh: 100, next: 'scheduled' },
+            ].map((sample, i) => (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '14px 16px', marginBottom: 6,
+                background: c.card, borderRadius: ACRadii.card,
+                opacity: 0.5,
+              }}>
+                <div>
+                  <div style={{ fontFamily: ACFonts.display, fontSize: 14, fontWeight: 700, letterSpacing: -0.2, color: c.fg }}>
+                    {sample.name}
+                  </div>
+                  <ACMono size={10} color={c.dim} style={{ marginTop: 2, display: 'block' }}>{sample.dose} · {sample.cadence}</ACMono>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <ACMono size={10} color={c.accent} style={{ fontWeight: 700 }}>{sample.adh}%</ACMono>
+                  <ACMono size={9} color={c.dim} style={{ display: 'block', marginTop: 2 }}>{sample.next}</ACMono>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ marginTop: 20, marginBottom: 14 }}>
+              <ACMono size={9} color={c.dim} track={2}>ADD YOUR FIRST PROTOCOL</ACMono>
             </div>
 
             {/* Quick-add templates */}

@@ -64,28 +64,97 @@ function S15_Labs_Inbox({
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 22px 20px' }}>
         {/* Summary card */}
         {isLocked ? (
-          <div style={{ padding: 18, background: c.card, borderRadius: ACRadii.card }}>
-            <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, letterSpacing: -0.6, color: c.fg }}>
-              Labs are locked.
+          <div>
+            <div style={{ padding: 18, background: c.card, borderRadius: ACRadii.card }}>
+              <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, letterSpacing: -0.6, color: c.fg }}>
+                Track your biology over time.
+              </div>
+              <div style={{ marginTop: 8, fontSize: 13.5, color: c.dim, lineHeight: 1.55 }}>
+                Upload lab PDFs — atlas.core parses every marker, flags outliers, and shows you what changed versus last time.
+              </div>
+              <button type="button" onClick={onUpgrade} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.accent, color: c.ink, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                Unlock with Pro →
+              </button>
             </div>
-            <div style={{ marginTop: 8, fontSize: 13.5, color: c.dim, lineHeight: 1.55 }}>
-              Upload panels, flag biomarkers, and track changes over time with Pro.
+            {/* Sample data preview to show what the feature looks like */}
+            <div style={{ marginTop: 16, padding: '8px 12px', borderRadius: 8, background: c.faint, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 5, height: 5, borderRadius: 999, background: c.dim, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: c.dim, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Sample panel · Comprehensive Metabolic</span>
             </div>
-            <button type="button" onClick={onUpgrade} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.accent, color: c.ink, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-              Unlock labs →
-            </button>
+            {[
+              { t: 'Testosterone (Total)', v: '621', u: 'ng/dL', d: 'In range · 264–916', flag: null },
+              { t: 'Free Testosterone', v: '11.4', u: 'pg/mL', d: 'Low · optimal >15', flag: 'low' },
+              { t: 'LDL Cholesterol', v: '148', u: 'mg/dL', d: 'Elevated · target <100', flag: 'high' },
+              { t: 'Vitamin D (25-OH)', v: '38', u: 'ng/mL', d: 'In range · optimal 40–60', flag: null },
+              { t: 'TSH (Thyroid)', v: '2.4', u: 'mIU/L', d: 'Optimal · 0.4–4.0', flag: null },
+            ].map((r, i) => {
+              const col = r.flag === 'high' ? c.accent : r.flag === 'low' ? '#e85a2f' : c.fg;
+              return (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0',
+                  borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
+                  borderBottom: `1px solid ${c.hair}`,
+                  opacity: 0.48,
+                  pointerEvents: 'none',
+                }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: col, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, color: c.fg }}>{r.t}</div>
+                    <ACLabel size={12} color={c.dim}>{r.d}</ACLabel>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <ACNum size={18} color={c.fg} weight={700}>{r.v}</ACNum>
+                    <span style={{ fontSize: 11, color: c.dim, marginLeft: 3 }}>{r.u}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : isEmpty ? (
-          <div style={{ padding: 18, background: c.card, borderRadius: ACRadii.card }}>
-            <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, letterSpacing: -0.6, color: c.fg }}>
-              No panels yet.
+          <div>
+            <div style={{ padding: '0 0 14px' }}>
+              <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, letterSpacing: -0.6, color: c.fg }}>
+                Your biology, tracked.
+              </div>
+              <div style={{ marginTop: 6, fontSize: 13.5, color: c.dim, lineHeight: 1.55 }}>
+                Upload a lab PDF and atlas.core parses every marker — flags outliers, tracks trends, and tells you what changed.
+              </div>
+              <button type="button" onClick={handleUpload} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.accent, color: c.ink, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                Upload your first panel →
+              </button>
             </div>
-            <div style={{ marginTop: 8, fontSize: 13.5, color: c.dim, lineHeight: 1.55 }}>
-              Upload your first lab PDF to turn this into a living biology inbox.
+            {/* Sample data preview — shows what it looks like with real data */}
+            <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 8, background: c.faint, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 6, height: 6, borderRadius: 999, background: c.dim, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: c.dim, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Sample · how your panels will look</span>
             </div>
-            <button type="button" onClick={handleUpload} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.fg, color: c.bg, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-              Upload panel →
-            </button>
+            {[
+              { t: 'Testosterone (Total)', v: '621', u: 'ng/dL', d: 'In range · 264–916 ng/dL', flag: null },
+              { t: 'Free Testosterone', v: '14.2', u: 'pg/mL', d: 'Borderline low · optimal >15', flag: 'low' },
+              { t: 'TSH (Thyroid)', v: '2.1', u: 'mIU/L', d: 'Optimal · 0.4–4.0 mIU/L', flag: null },
+              { t: 'LDL Cholesterol', v: '142', u: 'mg/dL', d: 'Elevated · target <100', flag: 'high' },
+              { t: 'Vitamin D (25-OH)', v: '38', u: 'ng/mL', d: 'In range · optimal 40–60', flag: null },
+            ].map((r, i) => {
+              const col = r.flag === 'high' ? c.accent : r.flag === 'low' ? '#e85a2f' : c.fg;
+              return (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0',
+                  borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
+                  borderBottom: `1px solid ${c.hair}`,
+                  opacity: 0.55,
+                }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: col, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, color: c.fg }}>{r.t}</div>
+                    <div style={{ fontSize: 12, color: c.dim, marginTop: 2 }}>{r.d}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700, color: c.fg }}>{r.v}</span>
+                    <span style={{ fontSize: 11, color: c.dim, marginLeft: 3 }}>{r.u}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div style={{ padding: 18, background: c.card, borderRadius: ACRadii.card }}>

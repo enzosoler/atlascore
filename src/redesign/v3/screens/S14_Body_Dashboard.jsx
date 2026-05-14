@@ -106,9 +106,6 @@ function S14_Body_Dashboard({
           <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
             Your signal
           </div>
-          <div style={{ marginTop: 8, fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: c.accent, fontWeight: 600 }}>
-            Updates readiness · composition tracking
-          </div>
         </div>
         {trendChip ? <ACChip accent dark={dark}>{trendChip}</ACChip> : null}
       </div>
@@ -136,17 +133,32 @@ function S14_Body_Dashboard({
           </div>
         </div>
 
-        {/* 3-up composition tiles — only render when at least one has real data */}
+        {/* Composition stat strip — horizontal scroll, Apple Fitness style */}
         {hasCompositionData ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
+          <div style={{
+            marginTop: 10,
+            display: 'flex',
+            gap: 8,
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: 4,
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}>
             {compositionRows.map((s, i) => (
-              <div key={i} style={{ padding: 14, background: c.card, borderRadius: ACRadii.card }}>
-                <ACLabel size={11} color={c.dim}>{s.l}</ACLabel>
-                <div style={{ marginTop: 8 }}>
-                  <ACNum size={22} color={c.fg} weight={700}>{s.v}</ACNum>
-                  {s.u && <span style={{ fontSize: 11, color: c.dim, marginLeft: 3 }}>{s.u}</span>}
+              <div key={i} style={{
+                flexShrink: 0,
+                minWidth: 100,
+                padding: '12px 14px',
+                background: c.card,
+                borderRadius: ACRadii.card,
+              }}>
+                <ACLabel size={10} color={c.dim}>{s.l}</ACLabel>
+                <div style={{ marginTop: 6 }}>
+                  <ACNum size={20} color={c.fg} weight={700}>{s.v}</ACNum>
+                  {s.u && <span style={{ fontSize: 10, color: c.dim, marginLeft: 2 }}>{s.u}</span>}
                 </div>
-                {s.d ? <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, marginTop: 2 }}>{s.d}</ACLabel> : null}
+                {s.d ? <ACLabel size={10} color={c.accent} style={{ fontWeight: 600, marginTop: 2 }}>{s.d}</ACLabel> : null}
               </div>
             ))}
           </div>

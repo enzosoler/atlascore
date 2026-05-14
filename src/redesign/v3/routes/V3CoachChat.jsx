@@ -6,9 +6,32 @@ import { useT } from '@/lib/i18nContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAIConsent } from '../lib/useAIConsent.js';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S12_Coach_Chat from '../screens/S12_Coach_Chat.jsx';
+
+const FREE_DAILY_CHAT_LIMIT = 1;
+const FREE_CHAT_KEY = 'atlas_free_chat_used';
+
+function getFreeChatsUsedToday() {
+  try {
+    const raw = localStorage.getItem(FREE_CHAT_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    const today = new Date().toISOString().slice(0, 10);
+    if (parsed.date !== today) return 0;
+    return parsed.count || 0;
+  } catch { return 0; }
+}
+
+function incrementFreeChatsUsed() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const current = getFreeChatsUsedToday();
+    localStorage.setItem(FREE_CHAT_KEY, JSON.stringify({ date: today, count: current + 1 }));
+  } catch {}
+}
 
 const COACH_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach-chat`;
 
@@ -17,9 +40,13 @@ export default function V3CoachChat() {
   const { theme } = useTheme();
   const t = useT();
   const { user } = useAuth();
+  const { can, showPaywall } = useSubscription();
   const [params] = useSearchParams();
   const ask = params.get('ask');
   const { consented, grant: grantConsent } = useAIConsent({ userId: user?.id, kind: 'coach_chat', provider: 'OpenAI' });
+  const hasCoachFull = can('coach_full');
+  const [freeChatsUsed, setFreeChatsUsed] = useState(() => getFreeChatsUsedToday());
+  const isFreeLimitReached = !hasCoachFull && freeChatsUsed >= FREE_DAILY_CHAT_LIMIT;
 
   // Daily state for context
   const { workoutDone, nutrition, checkin } = useDailyStateV2();
@@ -56,6 +83,12 @@ export default function V3CoachChat() {
 
   async function sendMessage(text) {
     if (!text?.trim()) return;
+
+    // Free-tier daily limit guard
+    if (!hasCoachFull && freeChatsUsed >= FREE_DAILY_CHAT_LIMIT) {
+      toast(t('coach.chat.limitReached'));
+      return;
+    }
 
     // Append user bubble immediately
     setMessages((prev) => [...prev, { mine: true, text }]);
@@ -105,6 +138,12 @@ export default function V3CoachChat() {
         ...prev,
         { text: reply, meta: t('coach.chat.runtime.justNowMeta') },
       ]);
+
+      // Track free-tier usage after a successful response
+      if (!hasCoachFull) {
+        incrementFreeChatsUsed();
+        setFreeChatsUsed(getFreeChatsUsedToday());
+      }
     } catch (err) {
       console.error('[V3CoachChat] send error:', err);
       const errMsg = err?.message ?? t('coach.chat.connectingToast');
@@ -187,9 +226,56 @@ export default function V3CoachChat() {
           // Route quick actions from AI suggestions as new messages
           sendMessage(label);
         }}
-        composerDisabled={loading}
-        draftPlaceholder={loading ? t('coach.chat.connectingPlaceholder') : t('coach.chat.placeholder')}
+        composerDisabled={loading || isFreeLimitReached}
+        draftPlaceholder={
+          isFreeLimitReached
+            ? 'Upgrade for unlimited chat'
+            : loading
+              ? t('coach.chat.connectingPlaceholder')
+              : t('coach.chat.placeholder')
+        }
         onSend={sendMessage}
+        freeLimitBanner={isFreeLimitReached ? (
+          <div
+            style={{
+              margin: '12px 16px',
+              padding: '14px 16px',
+              borderRadius: 16,
+              background: 'rgba(239,233,218,0.06)',
+              border: '1px dashed rgba(239,233,218,0.18)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>
+                1 free message used today
+              </div>
+              <div style={{ fontSize: 11, opacity: 0.6, marginTop: 3 }}>
+                Upgrade for unlimited chat + persistent memory
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => showPaywall()}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 999,
+                border: 'none',
+                background: 'rgba(239,233,218,0.9)',
+                color: '#111',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              Upgrade
+            </button>
+          </div>
+        ) : null}
       />
     </V3StandaloneLayout>
   );

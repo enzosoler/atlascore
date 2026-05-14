@@ -51,6 +51,7 @@ function S13_Coach_Brief({
   onStartToday,
   onAskCoach,
   onToggleMove,
+  upgradeChip = null,
 }) {
   const c = useACT(dark);
   const readinessHistory = Array.isArray(sparklineData) && sparklineData.length > 0 ? sparklineData : null;
@@ -222,6 +223,13 @@ function S13_Coach_Brief({
             );
           })}
         </div>
+
+        {/* Upgrade chip — shown to free users after the first move */}
+        {upgradeChip ? (
+          <div style={{ marginTop: 10, marginBottom: 4 }}>
+            {upgradeChip}
+          </div>
+        ) : null}
 
         {/* Signal trend — redesigned as horizontal pills with micro-sparks */}
         {signalRows.length > 0 && (

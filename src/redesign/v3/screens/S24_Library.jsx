@@ -5,7 +5,72 @@ import {
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
-function ProgramRow({ p, idx, c, active, onClick }) {
+function MatchSheet({ dark, c, onClose }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        background: 'rgba(0,0,0,0.55)',
+        display: 'flex', alignItems: 'flex-end',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', background: dark ? '#1a1a18' : '#f5f0e8',
+          borderRadius: '20px 20px 0 0',
+          padding: '28px 24px 40px',
+          maxHeight: '70vh', overflowY: 'auto',
+        }}
+      >
+        {/* Handle */}
+        <div style={{
+          width: 36, height: 4, borderRadius: 2,
+          background: 'rgba(239,233,218,0.2)',
+          margin: '0 auto 24px',
+        }} />
+
+        <ACLabel size={10} color={c.accent} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+          Match %
+        </ACLabel>
+        <div style={{
+          marginTop: 8,
+          fontFamily: ACFonts.display, fontSize: 24, fontWeight: 700,
+          letterSpacing: -0.6, lineHeight: 1.1, color: c.fg,
+        }}>
+          How we rank programs for you
+        </div>
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[
+            { label: 'Training age', detail: 'Years of consistent lifting — determines volume capacity and program complexity.' },
+            { label: 'Goal alignment', detail: 'What you said you want (strength, size, endurance) versus what the program delivers.' },
+            { label: 'Schedule fit', detail: 'How many days per week you can train versus the program\'s required frequency.' },
+            { label: 'Readiness trend', detail: 'Your 7-day adherence and recovery trend — high readiness unlocks higher-volume programs.' },
+            { label: 'Current phase', detail: 'Where you are in your current training cycle — accumulation, intensification, or deload.' },
+          ].map(({ label, detail }) => (
+            <div key={label} style={{ paddingBottom: 14, borderBottom: `1px solid ${dark ? 'rgba(239,233,218,0.08)' : 'rgba(0,0,0,0.08)'}` }}>
+              <div style={{
+                fontFamily: ACFonts.body, fontSize: 14, fontWeight: 600,
+                color: c.fg, marginBottom: 4,
+              }}>
+                {label}
+              </div>
+              <ACLabel size={12} color={c.dim} style={{ lineHeight: 1.5 }}>
+                {detail}
+              </ACLabel>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 20, fontSize: 12, color: c.mute, lineHeight: 1.6, fontStyle: 'italic' }}>
+          Match % is a guidance signal, not a hard gate. A 70% match on a program you commit to beats a 95% match on one you abandon.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgramRow({ p, idx, c, active, onClick, onMatchTap }) {
   return (
     <div
       onClick={onClick}
@@ -47,26 +112,34 @@ function ProgramRow({ p, idx, c, active, onClick }) {
         </div>
       </div>
       <div style={{ textAlign: 'right' }}>
-        {typeof p.fit === 'number' ? (
-          <>
+        {active ? (
+          <div style={{
+            padding: '4px 8px',
+            background: c.accent,
+            borderRadius: 999,
+            display: 'inline-block',
+          }}>
+            <ACLabel size={9} color={c.ink} style={{ fontFamily: ACFonts.body, letterSpacing: 0.3, fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              Powers daily plan
+            </ACLabel>
+          </div>
+        ) : typeof p.fit === 'number' ? (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onMatchTap?.(); }}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'right' }}
+          >
             <div style={{
               fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700,
-              color: active ? c.accent : (p.fit >= 85 ? c.accent : c.fg),
+              color: p.fit >= 85 ? c.accent : c.fg,
               lineHeight: 1, fontVariantNumeric: 'tabular-nums',
             }}>
-              {p.fit}<span style={{
-                fontSize: 10,
-                color: active ? 'rgba(239,233,218,0.55)' : c.dim,
-              }}>%</span>
+              {p.fit}<span style={{ fontSize: 10, color: c.dim }}>%</span>
             </div>
-            <ACLabel size={10} color={active ? 'rgba(239,233,218,0.55)' : c.mute} style={{ fontFamily: ACFonts.body, letterSpacing: 0.2, marginTop: 2 }}>
+            <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.body, letterSpacing: 0.2, marginTop: 2, textDecoration: 'underline', textDecorationStyle: 'dotted', textUnderlineOffset: 2 }}>
               MATCH
             </ACLabel>
-          </>
-        ) : active ? (
-          <ACLabel size={9} color={c.accent} style={{ fontFamily: ACFonts.body, letterSpacing: 0.2, fontWeight: 700 }}>
-            ACTIVE
-          </ACLabel>
+          </button>
         ) : null}
       </div>
     </div>
@@ -96,6 +169,7 @@ function S24_Library({
 }) {
   const c = useACT(dark);
   const [selectedCategory, setSelectedCategory] = React.useState('All');
+  const [showMatchSheet, setShowMatchSheet] = React.useState(false);
   const categories = ['All', 'Strength', 'Hypertrophy', 'Power', 'Endurance', 'Mobility'];
   const featured = featuredProgram || {
     name: '5/3/1 BBB',
@@ -123,10 +197,7 @@ function S24_Library({
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.25, textTransform: 'uppercase' }}>Library{rows.length > 0 ? ` · ${rows.length} program${rows.length === 1 ? '' : 's'}` : ''}</ACLabel>
-          <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
-            The canon
-          </div>
+          <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.25, textTransform: 'uppercase' }}>Train · {rows.length > 0 ? `${rows.length} program${rows.length === 1 ? '' : 's'}` : 'Library'}</ACLabel>
         </div>
         <button
           type="button"
@@ -219,14 +290,15 @@ function S24_Library({
               {usingMock ? 'Ranked for you' : 'Your routines'}
             </ACLabel>
             {usingMock ? (
-              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600 }}>Match ↓</ACLabel>
+              <button
+                type="button"
+                onClick={() => setShowMatchSheet(true)}
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              >
+                <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, textDecoration: 'underline', textDecorationStyle: 'dotted', textUnderlineOffset: 2 }}>Match ↓</ACLabel>
+              </button>
             ) : null}
           </div>
-          {!usingMock && (
-            <div style={{ marginTop: -4, marginBottom: 8, fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: c.accent, fontWeight: 600 }}>
-              Selected routine feeds daily training system
-            </div>
-          )}
 
           {isEmpty ? (
             // Empty state — paper-styled placeholder, no fake data.
@@ -286,6 +358,7 @@ function S24_Library({
                     c={c}
                     active={active}
                     onClick={handleClick}
+                    onMatchTap={() => setShowMatchSheet(true)}
                   />
                 );
               })}
@@ -324,6 +397,10 @@ function S24_Library({
       </div>
 
       {showTabBar ? <ACTabBar active="workout" dark={dark} HeartMarkComp={HeartMark} /> : null}
+
+      {showMatchSheet ? (
+        <MatchSheet dark={dark} c={c} onClose={() => setShowMatchSheet(false)} />
+      ) : null}
     </div>
   );
 }

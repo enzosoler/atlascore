@@ -170,6 +170,7 @@ const V3OnboardingGoal = lazyOnboardingRoute('V3OnboardingGoal');
 const V3OnboardingActivity = lazyOnboardingRoute('V3OnboardingActivity');
 const V3OnboardingPlan = lazyOnboardingRoute('V3OnboardingPlan');
 const V3OnboardingPermissions = lazyOnboardingRoute('V3OnboardingPermissions');
+const V3OnboardingHealthReveal = lazyOnboardingRoute('V3OnboardingHealthReveal');
 const V3OnboardingWorkout = lazyOnboardingRoute('V3OnboardingWorkout');
 const V3OnboardingHabits = lazyOnboardingRoute('V3OnboardingHabits');
 const V3OnboardingConstraints = lazyOnboardingRoute('V3OnboardingConstraints');
@@ -500,6 +501,7 @@ function AppRoutes() {
         <Route path="/onboarding/activity" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingActivity />} />
         <Route path="/onboarding/stats" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPlan />} />
         <Route path="/onboarding/diet" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPermissions />} />
+        <Route path="/onboarding/health-reveal" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingHealthReveal />} />
         <Route path="/onboarding/workout" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingWorkout />} />
         <Route path="/onboarding/habits" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingHabits />} />
         <Route path="/onboarding/constraints" element={hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingConstraints />} />

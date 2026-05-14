@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useT } from '@/lib/i18nContext';
-import { ACBtn, ACFonts, ACLabel, ACRadii, useACT } from '../lib/paper.jsx';
+import { ACBtn, ACFonts, ACLabel, ACMono, ACNum, ACRadii, useACT } from '../lib/paper.jsx';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S7_Onboard_Identity from '../screens/S7_Onboard_Identity.jsx';
 import S8_Onboard_Goal from '../screens/S8_Onboard_Goal.jsx';
@@ -385,9 +385,188 @@ export function V3OnboardingPermissions() {
         onChange={update}
         onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/stats')}
-        onContinue={() => navigate('/onboarding/workout')}
+        onContinue={() => navigate('/onboarding/health-reveal')}
         onSkip={() => navigate('/onboarding/workout')}
       />
+    </Wrap>
+  );
+}
+
+export function V3OnboardingHealthReveal() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const t = useT();
+  const dark = theme === 'dark';
+  const [healthData, setHealthData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  const { data: onboardingData } = useOnboardingState();
+  const healthGranted = onboardingData?.health === 'granted';
+
+  React.useEffect(() => {
+    if (!healthGranted) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchHealthData() {
+      try {
+        // Dynamically import healthKitService so this is a no-op on web
+        const hk = await import('@/services/healthKitService');
+        const today = new Date();
+        const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+
+        const [sleep, steps] = await Promise.all([
+          hk.getSleep(yesterday, today),
+          hk.getSteps(yesterday, today),
+        ]);
+
+        if (!cancelled) {
+          setHealthData({ sleep, steps });
+        }
+      } catch {
+        // Silent — not critical
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchHealthData();
+
+    return () => { cancelled = true; };
+  }, [healthGranted]);
+
+  const c = useACT(dark);
+
+  const sleepHours = healthData?.sleep?.totalHours;
+  const steps = healthData?.steps?.total;
+  const hasSleep = typeof sleepHours === 'number' && sleepHours > 0;
+  const hasSteps = typeof steps === 'number' && steps > 0;
+  const hasData = hasSleep || hasSteps;
+
+  return (
+    <Wrap>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg, minHeight: 0 }}>
+        {/* Header progress bar — step 6 of 10 */}
+        <div style={{ padding: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ flex: 1, display: 'flex', gap: 4 }}>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} style={{
+                flex: 1, height: 3, borderRadius: 2,
+                background: i < 6 ? c.accent : (i === 6 ? c.fg : c.faint),
+              }} />
+            ))}
+          </div>
+          <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600 }}>6/10</ACLabel>
+        </div>
+
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '32px 28px 24px' }}>
+          <ACLabel size={12} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>
+            {loading ? 'Reading your health data…' : hasData ? 'Your signals, live' : 'Apple Health connected'}
+          </ACLabel>
+
+          <div style={{ marginTop: 12, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700, letterSpacing: -1, lineHeight: 1.05, color: c.fg }}>
+            {loading
+              ? 'Pulling last night’s data.'
+              : hasData
+                ? 'Here’s what we see.'
+                : healthGranted
+                  ? 'Connected. No data yet.'
+                  : 'Ready to track.'}
+          </div>
+
+          <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.55 }}>
+            {loading
+              ? 'Checking Apple Health for recent sleep and activity…'
+              : hasData
+                ? 'atlas.core uses this to calibrate your readiness score every morning.'
+                : healthGranted
+                  ? 'As you wear your devices, data will appear here and power your daily readiness score.'
+                  : 'Connect Apple Health later in Settings to unlock real-time readiness scores.'}
+          </div>
+
+          {/* Data cards — shown when real data is available */}
+          {!loading && hasData && (
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {hasSleep && (
+                <div style={{
+                  padding: '18px 20px', background: c.card, borderRadius: ACRadii.card,
+                  borderLeft: `3px solid ${c.accent}`,
+                }}>
+                  <ACMono size={9} color={c.accent} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                    Last night · sleep
+                  </ACMono>
+                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <ACNum size={44} color={c.fg} weight={700}>{sleepHours.toFixed(1)}</ACNum>
+                    <ACLabel size={16} color={c.dim}>hours</ACLabel>
+                  </div>
+                  <div style={{ marginTop: 6, fontSize: 13, color: c.dim }}>
+                    {sleepHours >= 7.5
+                      ? 'Strong recovery window. Readiness will be high today.'
+                      : sleepHours >= 6
+                        ? 'Moderate sleep. Your readiness score will reflect this.'
+                        : 'Short sleep detected. Recovery priority recommended today.'}
+                  </div>
+                </div>
+              )}
+
+              {hasSteps && (
+                <div style={{
+                  padding: '18px 20px', background: c.card, borderRadius: ACRadii.card,
+                  borderLeft: `3px solid ${c.fg}`,
+                }}>
+                  <ACMono size={9} color={c.dim} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                    Yesterday · steps
+                  </ACMono>
+                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <ACNum size={44} color={c.fg} weight={700}>{steps.toLocaleString()}</ACNum>
+                    <ACLabel size={16} color={c.dim}>steps</ACLabel>
+                  </div>
+                  <div style={{ marginTop: 6, fontSize: 13, color: c.dim }}>
+                    {steps >= 10000
+                      ? 'Active day. This feeds into your training load estimate.'
+                      : steps >= 7000
+                        ? 'Moderate activity logged yesterday.'
+                        : 'Low step count. Could indicate a rest day.'}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Skeleton placeholder while loading */}
+          {loading && (
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[1, 2].map((i) => (
+                <div key={i} style={{
+                  padding: '18px 20px', background: c.card, borderRadius: ACRadii.card,
+                  animation: 'pulse 1.4s ease-in-out infinite',
+                }}>
+                  <div style={{ height: 10, width: 80, background: c.faint, borderRadius: 4 }} />
+                  <div style={{ marginTop: 12, height: 44, width: 120, background: c.faint, borderRadius: 6 }} />
+                  <div style={{ marginTop: 8, height: 10, width: '75%', background: c.faint, borderRadius: 4 }} />
+                </div>
+              ))}
+              <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }`}</style>
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: '14px 28px 26px', background: c.bg, flexShrink: 0 }}>
+          <ACBtn
+            primary
+            block
+            dark={dark}
+            size="lg"
+            pill
+            onClick={() => navigate('/onboarding/workout')}
+          >
+            {loading ? 'Continue →' : 'Continue →'}
+          </ACBtn>
+        </div>
+      </div>
     </Wrap>
   );
 }

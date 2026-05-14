@@ -4,9 +4,10 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { captureException } from '@/lib/sentry';
 import S13_Coach_Brief from '../screens/S13_Coach_Brief.jsx';
-import { ACFonts, useACT } from '../lib/paper.jsx';
+import { ACFonts, ACRadii, useACT } from '../lib/paper.jsx';
 
 function safeCount(value) {
   const next = Number(value);
@@ -224,29 +225,87 @@ function CoachTextFallback({
   );
 }
 
+// ─── Locked move chip ────────────────────────────────────────
+function LockedMoveChip({ dark, onUpgrade }) {
+  const c = useACT(dark);
+  return (
+    <button
+      type="button"
+      onClick={onUpgrade}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '14px 16px', width: '100%', textAlign: 'left',
+        background: c.card, borderRadius: ACRadii.button,
+        border: `1px dashed ${c.hair}`, cursor: 'pointer',
+        opacity: 0.82,
+      }}
+    >
+      <div style={{
+        width: 22, height: 22, borderRadius: 999,
+        border: `1.5px solid ${c.hair}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <svg width="9" height="11" viewBox="0 0 9 11" fill="none">
+          <rect x="1" y="4" width="7" height="6" rx="1.5" stroke={c.dim} strokeWidth="1.4"/>
+          <path d="M3 4V3a1.5 1.5 0 0 1 3 0v1" stroke={c.dim} strokeWidth="1.4" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: ACFonts.body, fontSize: 13.5, fontWeight: 600, color: c.dim }}>
+          Upgrade for full plan
+        </div>
+        <div style={{ fontSize: 11, color: c.mute, marginTop: 2 }}>
+          Unlock moves 2 & 3 + unlimited chat
+        </div>
+      </div>
+      <div style={{
+        padding: '5px 10px', borderRadius: 999,
+        background: c.accent, color: c.ink,
+        fontSize: 11, fontWeight: 700,
+      }}>
+        Pro →
+      </div>
+    </button>
+  );
+}
+
 export default function V3CoachHome() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useAuth();
   const { t, locale } = useI18n();
+  const { can, showPaywall } = useSubscription();
   const daily = useDailyStateV2();
+  const dark = theme === 'dark';
   const firstName = (user?.full_name || user?.email?.split('@')[0] || 'Athlete').split(' ')[0];
   const mealCount = safeCount(daily.todayMeals?.length);
   const streak = safeCount(daily.workoutStreak);
   const hasPlan = Boolean(daily.plan?.name);
-  const moves = buildMoves(daily, t);
+  const allMoves = buildMoves(daily, t);
+  const hasCoachFull = can('coach_full');
+
+  // Free tier: only first move visible; moves 2 & 3 replaced by an upsell chip
+  const moves = hasCoachFull
+    ? allMoves
+    : allMoves.slice(0, 1);
+
   const reasonText = hasPlan
     ? t('coach.home.activePlanReason', { plan: daily.plan.name })
     : t('coach.home.noPlanReason');
   const onClose = () => navigate('/app/today');
   const onStartToday = () => navigate('/app/workouts/active');
   const onAskCoach = () => navigate('/app/coach/chat');
+  const onUpgrade = () => showPaywall();
+
+  // Signal trend is a premium feature — only pass real data to pro users
+  const signals = hasCoachFull ? buildSignals(daily, t) : [];
 
   return (
     <CoachRouteErrorBoundary
       fallback={(
         <CoachTextFallback
-          dark={theme === 'dark'}
+          dark={dark}
           firstName={firstName}
           reasonText={reasonText}
           moves={moves}
@@ -256,30 +315,33 @@ export default function V3CoachHome() {
         />
       )}
     >
-      <S13_Coach_Brief
-        dark={theme === 'dark'}
-        timestampLabel={new Date().toLocaleDateString(locale || 'en-US', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
-        briefLabel={t('coach.home.dailyBrief')}
-        headlineLead={t('coach.home.youre', { name: firstName })}
-        headlineAccent={hasPlan ? t('coach.home.onTrack') : t('coach.home.building')}
-        metricLabel={t('coach.home.streakLabel')}
-        metricValue={String(streak)}
-        deltaLabel={t('coach.home.mealsToday')}
-        deltaValue={String(mealCount)}
-        timelineLabels={[t('coach.home.timelineStart'), t('coach.home.timelineRecent'), t('coach.home.timelineToday')]}
-        reasonText={reasonText}
-        movesLabel={t('coach.home.todayThreeMoves')}
-        movesProgressLabel={t('coach.home.movesProgress', { done: Math.min(3, (mealCount ? 1 : 0) + (hasPlan ? 1 : 0) + (streak > 0 ? 1 : 0)) })}
-        moves={moves}
-        signalLabel={t('coach.home.liveContext')}
-        signalStatus={t('coach.home.fromYourData')}
-        signals={buildSignals(daily, t)}
-        primaryActionLabel={t('coach.home.startTodayAction')}
-        secondaryActionLabel={t('coach.home.secondaryAction')}
-        onClose={onClose}
-        onStartToday={onStartToday}
-        onAskCoach={onAskCoach}
-      />
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <S13_Coach_Brief
+          dark={dark}
+          timestampLabel={new Date().toLocaleDateString(locale || 'en-US', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
+          briefLabel={t('coach.home.dailyBrief')}
+          headlineLead={t('coach.home.youre', { name: firstName })}
+          headlineAccent={hasPlan ? t('coach.home.onTrack') : t('coach.home.building')}
+          metricLabel={t('coach.home.streakLabel')}
+          metricValue={String(streak)}
+          deltaLabel={t('coach.home.mealsToday')}
+          deltaValue={String(mealCount)}
+          timelineLabels={[t('coach.home.timelineStart'), t('coach.home.timelineRecent'), t('coach.home.timelineToday')]}
+          reasonText={reasonText}
+          movesLabel={t('coach.home.todayThreeMoves')}
+          movesProgressLabel={t('coach.home.movesProgress', { done: Math.min(moves.length, (mealCount ? 1 : 0) + (hasPlan ? 1 : 0) + (streak > 0 ? 1 : 0)) })}
+          moves={moves}
+          signalLabel={t('coach.home.liveContext')}
+          signalStatus={hasCoachFull ? t('coach.home.fromYourData') : 'Pro only'}
+          signals={signals}
+          primaryActionLabel={t('coach.home.startTodayAction')}
+          secondaryActionLabel={t('coach.home.secondaryAction')}
+          onClose={onClose}
+          onStartToday={onStartToday}
+          onAskCoach={onAskCoach}
+          upgradeChip={!hasCoachFull ? <LockedMoveChip dark={dark} onUpgrade={onUpgrade} /> : null}
+        />
+      </div>
     </CoachRouteErrorBoundary>
   );
 }

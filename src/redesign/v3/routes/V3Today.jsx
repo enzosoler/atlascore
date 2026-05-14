@@ -685,9 +685,9 @@ function ReadinessReveal({ dark, readiness, onComplete }) {
   const [phase, setPhase] = React.useState('anticipation');
 
   React.useEffect(() => {
-    // Tighter timing: 700ms anticipation, 1300ms reveal = ~2s total
-    const t1 = setTimeout(() => setPhase('reveal'), 700);
-    const t2 = setTimeout(() => onComplete(), 2000);
+    // Fast timing: 300ms anticipation, 700ms reveal = ~1s total
+    const t1 = setTimeout(() => setPhase('reveal'), 300);
+    const t2 = setTimeout(() => onComplete(), 1000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onComplete]);
 
@@ -701,10 +701,14 @@ function ReadinessReveal({ dark, readiness, onComplete }) {
       : t('today.system.reveal.consequenceLow');
 
   return (
-    <div style={{
-      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', background: c.bg, color: c.fg, padding: 32,
-    }}>
+    <div
+      onClick={onComplete}
+      style={{
+        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', background: c.bg, color: c.fg, padding: 32,
+        cursor: 'pointer', userSelect: 'none', WebkitTapHighlightColor: 'transparent',
+      }}
+    >
       <style>{`
         @keyframes revealPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
         @keyframes revealFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }

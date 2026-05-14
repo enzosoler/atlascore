@@ -118,15 +118,7 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, on
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim}>Fuel · {niceDateLabel(new Date())}</ACLabel>
-          <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
-            Today's plate
-          </div>
-          {isRealData && (
-            <div style={{ marginTop: 8, fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: c.accent, fontWeight: 600 }}>
-              Feeds Today · protein tracking live
-            </div>
-          )}
+          <ACLabel size={11} color={c.dim}>Eat · {niceDateLabel(new Date())}</ACLabel>
         </div>
         {(statusLabel === 'Log first meal' || statusLabel === 'Set a target') ? (
           <button

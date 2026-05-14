@@ -105,6 +105,20 @@ export const FEATURE_LOCKS = {
     roles: ['clinician'],
   },
 
+  // AI Coach — tiered access
+  // Free (coach_lite): morning brief on Today + 1 move visible + 1 AI chat/day
+  // Pro  (coach_full): all 3 moves + unlimited chat + 14-day signal trend
+  coach_lite: {
+    label: 'Coach (free tier)',
+    minPlan: 'free',
+    description: 'Morning brief, first move, 1 AI chat message per day',
+  },
+  coach_full: {
+    label: 'Coach (full)',
+    minPlan: 'pro',
+    description: 'All 3 moves, unlimited chat, persistent memory, 14-day signal trend',
+  },
+
   // Admin
   admin_panel: {
     label: 'Admin Panel',

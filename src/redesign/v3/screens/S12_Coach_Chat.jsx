@@ -22,6 +22,7 @@ function S12_Coach_Chat({
   onSuggestionAction,
   onQuickAction,
   onSend,
+  freeLimitBanner = null,
 }) {
   const c = useACT(dark);
   const t = useT();
@@ -165,6 +166,8 @@ function S12_Coach_Chat({
           ))}
         </div>
       </div>
+
+      {freeLimitBanner}
 
       <div style={{ padding: '10px 16px 18px', borderTop: `1px solid ${c.hair}`, opacity: composerDisabled ? 0.5 : 1 }}>
         <div style={{
