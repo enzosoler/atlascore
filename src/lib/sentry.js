@@ -33,10 +33,10 @@ export async function initSentry() {
     Sentry.init({
       dsn: SENTRY_DSN,
       environment: import.meta.env.MODE || 'production',
-      // Keep sample rates conservative to stay within free tier
-      tracesSampleRate: 0.1,
+      tracesSampleRate: 0.2,
+      // Replay disabled — too heavy for mobile WebView
       replaysSessionSampleRate: 0,
-      replaysOnErrorSampleRate: 0.5,
+      replaysOnErrorSampleRate: 0,
       beforeSend(event) {
         if (event.user) {
           delete event.user.email;

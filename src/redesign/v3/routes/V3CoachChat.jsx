@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
@@ -12,25 +12,24 @@ import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S12_Coach_Chat from '../screens/S12_Coach_Chat.jsx';
 
 const FREE_DAILY_CHAT_LIMIT = 1;
-const FREE_CHAT_KEY = 'atlas_free_chat_used';
 
-function getFreeChatsUsedToday() {
+/** Query coach_messages to count how many 'user' role messages exist for today. */
+async function fetchFreeChatsUsedToday(userId) {
+  if (!userId) return 0;
   try {
-    const raw = localStorage.getItem(FREE_CHAT_KEY);
-    if (!raw) return 0;
-    const parsed = JSON.parse(raw);
     const today = new Date().toISOString().slice(0, 10);
-    if (parsed.date !== today) return 0;
-    return parsed.count || 0;
+    const todayStart = `${today}T00:00:00.000Z`;
+    const todayEnd = `${today}T23:59:59.999Z`;
+    const { count, error } = await supabase
+      .from('coach_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('role', 'user')
+      .gte('created_at', todayStart)
+      .lte('created_at', todayEnd);
+    if (error) return 0;
+    return count ?? 0;
   } catch { return 0; }
-}
-
-function incrementFreeChatsUsed() {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const current = getFreeChatsUsedToday();
-    localStorage.setItem(FREE_CHAT_KEY, JSON.stringify({ date: today, count: current + 1 }));
-  } catch {}
 }
 
 const COACH_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach-chat`;
@@ -45,8 +44,15 @@ export default function V3CoachChat() {
   const ask = params.get('ask');
   const { consented, grant: grantConsent } = useAIConsent({ userId: user?.id, kind: 'coach_chat', provider: 'OpenAI' });
   const hasCoachFull = can('coach_full');
-  const [freeChatsUsed, setFreeChatsUsed] = useState(() => getFreeChatsUsedToday());
+  // Start at 0; hydrated from Supabase on mount so reinstall does not reset the counter.
+  const [freeChatsUsed, setFreeChatsUsed] = useState(0);
   const isFreeLimitReached = !hasCoachFull && freeChatsUsed >= FREE_DAILY_CHAT_LIMIT;
+
+  // Hydrate free-chat count from Supabase on mount (persists across reinstalls).
+  useEffect(() => {
+    if (hasCoachFull) return; // paid users — no need to count
+    fetchFreeChatsUsedToday(user?.id).then(setFreeChatsUsed);
+  }, [hasCoachFull, user?.id]);
 
   // Daily state for context
   const { workoutDone, nutrition, checkin } = useDailyStateV2();
@@ -139,10 +145,11 @@ export default function V3CoachChat() {
         { text: reply, meta: t('coach.chat.runtime.justNowMeta') },
       ]);
 
-      // Track free-tier usage after a successful response
+      // Refresh free-tier count from Supabase after a successful response.
+      // The edge function inserts the user message into coach_messages, so
+      // re-querying gives the authoritative server-side count.
       if (!hasCoachFull) {
-        incrementFreeChatsUsed();
-        setFreeChatsUsed(getFreeChatsUsedToday());
+        fetchFreeChatsUsedToday(user?.id).then(setFreeChatsUsed);
       }
     } catch (err) {
       console.error('[V3CoachChat] send error:', err);

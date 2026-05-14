@@ -5,11 +5,16 @@ platform :ios do
   lane :beta do
     setup_ci if ENV["CI"]
 
+    # Key must be placed at: ~/.appstoreconnect/private_keys/AuthKey_DQ7XV2WJ9G.p8
     app_store_connect_api_key(
-      key_id: "9UYK82J243",
+      key_id: "DQ7XV2WJ9G",
       issuer_id: "38e294c4-9db6-4a74-9cdf-96d1da9a8413",
-      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_9UYK82J243.p8"),
+      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_DQ7XV2WJ9G.p8"),
       in_house: false
+    )
+
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1
     )
 
     build_app(

@@ -377,6 +377,14 @@ export function V3OnboardingPermissions() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { data, update } = useOnboardingState();
+
+  function handleContinue() {
+    // Only show health-reveal if the user actually granted HealthKit access.
+    // Denied, skipped, or unavailable all skip straight to workout.
+    const healthGranted = data?.health === 'granted';
+    navigate(healthGranted ? '/onboarding/health-reveal' : '/onboarding/workout');
+  }
+
   return (
     <Wrap>
       <S11_Onboard_Permissions
@@ -385,7 +393,7 @@ export function V3OnboardingPermissions() {
         onChange={update}
         onExit={() => navigate('/welcome')}
         onBack={() => navigate('/onboarding/stats')}
-        onContinue={() => navigate('/onboarding/health-reveal')}
+        onContinue={handleContinue}
         onSkip={() => navigate('/onboarding/workout')}
       />
     </Wrap>

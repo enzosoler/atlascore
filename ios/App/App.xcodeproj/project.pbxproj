@@ -31,7 +31,6 @@
 		CD0401E3F4647465FB3B6089 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33BF13DB96BE9E09764BAB62 /* Assets.xcassets */; };
 		D68D36E3E4E334CBF2BE24C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BFBC02226A1611F938F8262 /* Assets.xcassets */; };
 		E1B0A001EMBED0001WIDGETS /* AtlasCoreWidgetsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,13 +40,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = DC9EFA1C62A67FE9089819C3;
 			remoteInfo = AtlasCoreWidgets;
-		};
-		E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 93ECFAE2290E4FF00DFC8EAB;
-			remoteInfo = AtlasCoreWatch;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -61,17 +53,6 @@
 				E1B0A001EMBED0001WIDGETS /* AtlasCoreWidgetsExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E1B0A004EMBED0004WATCHZ /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -233,13 +214,11 @@
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
 				E1B0A003EMBED0003EXTPHZ /* Embed App Extensions */,
-				E1B0A004EMBED0004WATCHZ /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E1B0A005DEPEND001WIDGDP /* PBXTargetDependency */,
-				E1B0A006DEPEND002WATCHD /* PBXTargetDependency */,
 			);
 			name = atlas.core;
 			packageProductDependencies = (
@@ -411,11 +390,6 @@
 			isa = PBXTargetDependency;
 			target = DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */;
 			targetProxy = E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */;
-		};
-		E1B0A006DEPEND002WATCHD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 93ECFAE2290E4FF00DFC8EAB /* AtlasCoreWatch */;
-			targetProxy = E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
