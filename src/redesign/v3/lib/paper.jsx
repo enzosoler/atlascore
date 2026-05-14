@@ -553,21 +553,23 @@ export function ACBrandMark({ size = 18, dark, HeartMarkComp }) {
  */
 export function ACTabBar({ active = 'today', dark, onChange, HeartMarkComp }) {
   const c = useACT(dark);
+  // 5-tab layout: today · workouts · nutrition · body · profile (you)
+  // Legacy aliases kept so old call-sites don't break during transition.
   const normalizedActive = (
     {
       workout: 'workouts',
       train: 'workouts',
       eat: 'nutrition',
-      body: 'profile',
+      // coach tab is removed — no alias needed, falls through to 'today'
       you: 'profile',
     }[active] || active
   );
   const tabs = [
-    { k: 'today', label: 'Today', icon: 'home' },
-    { k: 'workouts', label: 'Workouts', icon: 'bars' },
-    { k: 'nutrition', label: 'Nutrition', icon: 'plate' },
-    { k: 'coach', label: 'Coach', icon: 'heart' },
-    { k: 'profile', label: 'Profile', icon: 'face' },
+    { k: 'today',     label: 'Today',  icon: 'home'  },
+    { k: 'workouts',  label: 'Train',  icon: 'bars'  },
+    { k: 'nutrition', label: 'Eat',    icon: 'plate' },
+    { k: 'body',      label: 'Body',   icon: 'body'  },
+    { k: 'profile',   label: 'You',    icon: 'face'  },
   ];
   const Icon = ({ k, on }) => {
     const col = on ? c.accent : c.dim;
@@ -597,10 +599,15 @@ export function ACTabBar({ active = 'today', dark, onChange, HeartMarkComp }) {
         </svg>
       );
     }
-    if (k === 'heart') {
-      return HeartMarkComp
-        ? <HeartMarkComp size={20} color={col} accent="transparent" />
-        : null;
+    // Body icon — silhouette figure (replaced Coach/heart)
+    if (k === 'body') {
+      return (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="5.5" r="2.5" stroke={col} strokeWidth={sw} />
+          <path d="M7 10.5 C7 9 9 8.5 11 8.5 C13 8.5 15 9 15 10.5 L14.5 15 L12.5 15 L12 19 H10 L9.5 15 L7.5 15 Z"
+            stroke={col} strokeWidth={sw} strokeLinejoin="round" fill="none" />
+        </svg>
+      );
     }
     if (k === 'face') {
       return (

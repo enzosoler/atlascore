@@ -4,6 +4,12 @@
  *
  * Platform gate delegated to the canonical PlatformGate component
  * (CLAUDE.md §12–15).
+ *
+ * Feature flag: NAV_5TAB
+ *   - Controlled via localStorage key 'atlas.flag.nav5tab' (set to '1' to enable)
+ *     or env VITE_FLAG_NAV_5TAB=1 at build time.
+ *   - When disabled, falls back to the legacy 6-tab layout (coach tab restored).
+ *   - Intended for A/B testing the 5-tab restructure.
  */
 
 import React from 'react';
@@ -15,15 +21,63 @@ import { PlatformGate } from '../lib/PlatformGate.jsx';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useT } from '@/lib/i18nContext';
 
-const TAB_ROUTES = {
-  today: '/app/today',
-  workouts: '/app/workouts',
+// ── Feature flag: 5-tab nav ───────────────────────────────────────────────────
+// Enable via: localStorage.setItem('atlas.flag.nav5tab', '1')  — or —
+// build with VITE_FLAG_NAV_5TAB=1 to hard-enable for a variant build.
+function isNav5TabEnabled() {
+  if (import.meta.env.VITE_FLAG_NAV_5TAB === '1') return true;
+  try {
+    return localStorage.getItem('atlas.flag.nav5tab') === '1';
+  } catch {
+    return false;
+  }
+}
+
+// ── 5-tab routing table ───────────────────────────────────────────────────────
+const TAB_ROUTES_5 = {
+  today:     '/app/today',
+  workouts:  '/app/workouts',
   nutrition: '/app/nutrition',
-  coach: '/app/coach',
-  profile: '/app/profile',
+  body:      '/app/body',
+  profile:   '/app/profile',
 };
 
-function tabFromPath(pathname) {
+// ── Legacy 6-tab routing table (kept for fallback) ───────────────────────────
+const TAB_ROUTES_6 = {
+  today:     '/app/today',
+  workouts:  '/app/workouts',
+  nutrition: '/app/nutrition',
+  coach:     '/app/coach',
+  profile:   '/app/profile',
+};
+
+function tabFromPath5(pathname) {
+  if (pathname === '/app' || pathname.startsWith('/app/today') || pathname.startsWith('/app/insights') || pathname.startsWith('/app/diary') || pathname.startsWith('/app/weekly')) return 'today';
+  if (pathname.startsWith('/app/workouts') || pathname.startsWith('/app/routines') || pathname.startsWith('/app/exercises')) return 'workouts';
+  if (pathname.startsWith('/app/nutrition')) return 'nutrition';
+  // body tab absorbs labs, protocols, sleep, watch
+  if (
+    pathname.startsWith('/app/body') ||
+    pathname.startsWith('/app/labs') ||
+    pathname.startsWith('/app/protocols') ||
+    pathname.startsWith('/app/sleep') ||
+    pathname.startsWith('/app/watch')
+  ) return 'body';
+  // coach routes no longer have a tab — today stays active
+  if (pathname.startsWith('/app/coach')) return 'today';
+  if (
+    pathname.startsWith('/app/profile') ||
+    pathname.startsWith('/app/settings') ||
+    pathname.startsWith('/app/social')
+  ) return 'profile';
+  if (pathname.startsWith('/app/v3/')) {
+    const legacy = pathname.replace('/app/v3/', '');
+    return ({ today: 'today', train: 'workouts', eat: 'nutrition', body: 'body', you: 'profile' }[legacy]) || 'today';
+  }
+  return 'today';
+}
+
+function tabFromPath6(pathname) {
   if (pathname === '/app' || pathname.startsWith('/app/today') || pathname.startsWith('/app/insights') || pathname.startsWith('/app/diary') || pathname.startsWith('/app/weekly')) return 'today';
   if (pathname.startsWith('/app/workouts') || pathname.startsWith('/app/routines') || pathname.startsWith('/app/exercises')) return 'workouts';
   if (pathname.startsWith('/app/nutrition')) return 'nutrition';
@@ -50,10 +104,14 @@ function V3ShellInner() {
   const { theme } = useTheme();
   const dark = theme === 'dark';
   const c = useACT(dark);
-  const active = tabFromPath(location.pathname);
   const isDesktop = typeof window !== 'undefined' ? window.innerWidth >= 768 : true;
   const { isOnline } = useOnlineStatus();
   const t = useT();
+
+  // Read flag once on mount (stable for the lifetime of the shell).
+  const nav5tab = React.useMemo(() => isNav5TabEnabled(), []);
+  const TAB_ROUTES = nav5tab ? TAB_ROUTES_5 : TAB_ROUTES_6;
+  const active = nav5tab ? tabFromPath5(location.pathname) : tabFromPath6(location.pathname);
 
   return (
     <div
@@ -120,7 +178,11 @@ function V3ShellInner() {
           HeartMarkComp={HeartMark}
           onChange={(k) => {
             const next = TAB_ROUTES[k];
-            if (next && location.pathname !== next) navigate(next);
+            if (!next) return;
+            // Per iOS platform convention: tapping an active tab resets its
+            // stack to root. Tapping a different tab also navigates to root
+            // of that tab (not into a sub-screen).
+            navigate(next, { replace: location.pathname === next });
           }}
         />
       </div>

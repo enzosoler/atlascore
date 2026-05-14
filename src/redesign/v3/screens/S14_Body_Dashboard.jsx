@@ -77,6 +77,7 @@ function S14_Body_Dashboard({
   labs,
   onOpenMeasurements,
   onOpenLabs,
+  extraSections,
 }) {
   const c = useACT(dark);
   const heroData = hero || MOCK_HERO;
@@ -209,7 +210,7 @@ function S14_Body_Dashboard({
           )}
         </div>
 
-        {/* Inbox teasers */}
+        {/* Labs teaser (compact; full Labs+Protocols sections injected via extraSections when nav5tab on) */}
         {Array.isArray(labsRows) && labsRows.length > 0 ? (
           <div style={{ marginTop: 22 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -240,6 +241,9 @@ function S14_Body_Dashboard({
             })}
           </div>
         ) : null}
+
+        {/* Extra sections injected by route (Labs + Protocols in 5-tab mode) */}
+        {extraSections || null}
       </div>
 
       {showTabBar ? <ACTabBar active="body" dark={dark} HeartMarkComp={HeartMark} /> : null}
