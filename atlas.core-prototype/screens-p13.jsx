@@ -398,7 +398,7 @@ function S95_System_Fuel_Signal({ dark }) {
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <SYSHeader step={6} total={15} dark={dark} />
       <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px 16px' }}>
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4 }}>Fuel signal</ACLabel>
+        <ACLabel size={12} color={c.accent} style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4 }}>Nutrition</ACLabel>
         <div style={{ marginTop: 10, fontFamily: ACFonts.display, fontSize: 31, fontWeight: 700, lineHeight: 1.05, letterSpacing: -1, color: c.fg }}>
           measure nutritional control.
         </div>
@@ -767,7 +767,7 @@ function S102_System_First_Week({ dark }) {
         <div style={{ marginTop: 22, display: 'grid', gap: 10 }}>
           {[
             ['Train', `${adaptiveState.trainingDays} sessions`, systemState.limitingFactor === 'recovery' ? 'reduced-fatigue split with capped volume' : 'split progression matched to your current load'],
-            ['Fuel', `${systemState.proteinFloor}g protein`, adaptiveState.goal === 'build' ? 'calories tuned for tissue gain' : 'calories tuned for recomposition'],
+            ['Nutrition', `${systemState.proteinFloor}g protein`, adaptiveState.goal === 'build' ? 'calories tuned for tissue gain' : 'calories tuned for recomposition'],
             ['Recover', adaptiveState.trainingWindow === 'am' ? 'sleep anchor 22:30' : 'sleep anchor 23:00', 'reduce readiness volatility'],
             ['Measure', adaptiveState.connectedSources.length >= 3 ? 'passive telemetry + 1 check-in' : '2 weigh-ins + 1 check-in', 'enough data to learn without noise'],
           ].map((item) => (
@@ -924,7 +924,7 @@ function S105_System_Today({ dark }) {
         </SYSPanel>
         <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <SYSPanel dark={dark}>
-            <ACLabel size={10} color={c.dim}>Fuel target</ACLabel>
+            <ACLabel size={10} color={c.dim}>Nutrition target</ACLabel>
             <div style={{ marginTop: 6 }}><ACNum size={28} color={c.fg}>{signals.recovery === 'low' ? '2,310' : '2,420'}</ACNum><span style={{ fontSize: 11, color: c.dim, marginLeft: 4 }}>kcal</span></div>
           </SYSPanel>
           <SYSPanel dark={dark}>

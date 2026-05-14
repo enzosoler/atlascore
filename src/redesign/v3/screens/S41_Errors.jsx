@@ -239,7 +239,7 @@ function ErrLimit({ c, dark, onNotifyReady }) {
         </ACLabel>
         <div style={{ marginTop: 10 }}>
           {[
-            'Log workouts and fuel',
+            'Log workouts and nutrition',
             'Read the daily brief',
             'Browse your labs + history',
             'Search the library',
@@ -269,7 +269,7 @@ function ErrLimit({ c, dark, onNotifyReady }) {
 const DEMO_QUEUE = [
   { t: 'Deadlift · set 4 · 415×1', at: '15:42' },
   { t: 'Deadlift · set 5 · 415×1', at: '15:47' },
-  { t: 'Fuel · chicken · 6 oz',    at: '12:41' },
+  { t: 'Nutrition · chicken · 6 oz',    at: '12:41' },
   { t: 'Bodyweight · 182.4 lb',     at: '08:02' },
   { t: 'Sleep sync · 7:42',         at: '07:00' },
 ];

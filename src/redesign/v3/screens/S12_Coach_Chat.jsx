@@ -43,7 +43,7 @@ function S12_Coach_Chat({
   const resolvedDraftPlaceholder = draftPlaceholder || t('coach.chat.placeholder');
   const rows = messages || [
     {
-      text: <>Good morning. HRV came back strong, <b style={{ color: c.accent }}>72 ms</b>, up 8 from your rolling average. Your body's primed for heavy lower today.</>,
+      text: <>Good morning. HRV came back strong, <b style={{ color: c.accent }}>72 ms</b>, up 8 from your rolling average. Your body's ready for heavy lower today.</>,
       meta: 'Coach · context: readiness 87, HRV 72ms',
     },
     {

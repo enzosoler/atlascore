@@ -37,7 +37,7 @@ const DEMO_INSIGHT = {
     { label: 'Readiness', value: '87', delta: '+11', positive: true },
   ],
   narrative:
-    'Your heart rate variability jumped from 52 to 62 ms after two consecutive nights of 7+ hours sleep and yesterday\'s active recovery session. This places you in the top 15% of your 90-day range. Your autonomic nervous system is primed for high-intensity work today.',
+    'Your heart rate variability jumped from 52 to 62 ms after two consecutive nights of 7+ hours sleep and yesterday\'s active recovery session. This places you in the top 15% of your 90-day range. Your autonomic nervous system is ready for high-intensity work today.',
   actions: [
     { label: 'Train heavy lower today', route: '/app/train/today' },
     { label: 'Hit 186g protein target', route: '/app/eat/today' },

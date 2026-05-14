@@ -1431,7 +1431,7 @@
       "loadingReadiness": "Carregando seus sinais de prontidão...",
       "status": {
         "allDone": "Sistema verde. Execução total.",
-        "anchorsDone": "Âncoras concluídas. Finalize as ações restantes.",
+        "anchorsDone": "Ações prioritárias concluídas. Finalize as ações restantes.",
         "trainDoneProteinMissing": "Treino concluído. Proteína ainda faltando ({consumed}/{target}g).",
         "proteinDoneTrainPending": "Proteína em dia. Treino pendente.",
         "started": "Execução iniciada. Ações-chave pendentes.",
@@ -1470,10 +1470,10 @@
         "downtrend": "Tendência de queda"
       },
       "integrity": {
-        "stable": "Sistema estável",
+        "stable": "Em dia",
         "ready": "Sistema inicializando — complete suas primeiras ações",
-        "degrading": "Sistema degradando — restaure a consistência",
-        "broken": "Sistema offline — inicie suas âncoras"
+        "degrading": "Ficando para trás — restaure a consistência",
+        "broken": "Sistema offline — inicie suas ações prioritárias"
       }
     }
   },
@@ -1821,7 +1821,7 @@
     "profileLabel": "Perfil",
     "profileAligned": "% alinhado",
     "fieldsFilledDetail": "{filled} de {total} campos principais preenchidos.",
-    "dailyFuel": "Combustível diário",
+    "dailyFuel": "Nutrição diária",
     "loadingProfile": "Carregando seu perfil",
     "loadingProfileDesc": "Estamos trazendo seus dados existentes para esta nova leitura visual sem interromper a página.",
     "safeMode": "Perfil em modo seguro",
@@ -3849,7 +3849,7 @@
     },
     "home": {
       "train": "Treinar",
-      "fuel": "Alimentar",
+      "fuel": "Nutrição",
       "momentum": "Momentum",
       "openWorkoutLibrary": "Abrir biblioteca de treinos",
       "readyWhenYouAre": "Pronto quando você estiver",
@@ -5663,7 +5663,7 @@
           "statSub": "sessões registradas"
         },
         "fuel": {
-          "label": "Combustível",
+          "label": "Nutrição",
           "body": "Escaneie, fotografe ou fale. Registro nutricional rápido sem transformar o app em planilha.",
           "statSub": "média de proteína"
         },

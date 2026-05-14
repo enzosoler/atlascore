@@ -467,7 +467,7 @@ function S12_Coach_Chat({ dark }) {
         </div>
 
         <Bubble meta="Coach · context: readiness 87, HRV 72ms">
-          Good morning. HRV came back strong — <b style={{ color: c.accent }}>72 ms</b>, up 8 from your rolling average. Your body's primed for heavy lower today.
+          Good morning. HRV came back strong — <b style={{ color: c.accent }}>72 ms</b>, up 8 from your rolling average. Your body's ready for heavy lower today.
         </Bubble>
 
         <Bubble>
@@ -557,7 +557,7 @@ function S13_Coach_Brief({ dark }) {
           textWrap: 'pretty',
         }}>
           You're<br/>
-          <span style={{ color: c.accent }}>primed</span><span style={{ color: c.accent }}>.</span>
+          <span style={{ color: c.accent }}>Ready</span><span style={{ color: c.accent }}>.</span>
         </div>
 
         {/* Readiness number, right-aligned, brutal */}
@@ -621,7 +621,7 @@ function S13_Coach_Brief({ dark }) {
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column' }}>
           {[
             { n: '01', t: 'Train', d: 'Heavy Lower · 58 min', meta: '4 PR attempts queued', lead: true },
-            { n: '02', t: 'Fuel', d: 'Hit 186g protein', meta: '148g tracked · 38g to go' },
+            { n: '02', t: 'Nutrition', d: 'Hit 186g protein', meta: '148g tracked · 38g to go' },
             { n: '03', t: 'Sleep', d: 'In bed by 10:30', meta: 'Shifted 42 min later this week' },
           ].map((r, i) => (
             <div key={i} style={{
@@ -661,7 +661,7 @@ function S13_Coach_Brief({ dark }) {
         {/* Signal trend — redesigned as horizontal pills with micro-sparks */}
         <div style={{ marginTop: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-            <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Signal trend · 14d</ACLabel>
+            <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Body trend · 14d</ACLabel>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 6, height: 6, borderRadius: 999, background: c.accent }} />
               <ACLabel size={11} color={c.accent} style={{ fontWeight: 600 }}>All green</ACLabel>

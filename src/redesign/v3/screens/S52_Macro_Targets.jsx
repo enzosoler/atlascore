@@ -134,7 +134,7 @@ export default function S52_Macro_Targets({
           marginTop: 8, fontFamily: ACFonts.display, fontSize: 24, fontWeight: 700,
           letterSpacing: -0.6, lineHeight: 1.1, color: c.fg,
         }}>
-          Set your daily fuel plan
+          Set your daily nutrition plan
         </div>
         <ACLabel size={12} color={c.dim} style={{ marginTop: 6, display: 'block', lineHeight: 1.45 }}>
           Pick a preset or adjust manually. atlas.core recalibrates weekly.

@@ -221,7 +221,7 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, on
                   Nothing logged yet
                 </div>
                 <ACLabel size={12} color={c.dim}>
-                  Tap a capture button to start your day's fuel log.
+                  Tap a capture button to start your day's nutrition log.
                 </ACLabel>
               </div>
             );
