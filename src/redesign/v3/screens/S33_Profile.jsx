@@ -270,35 +270,72 @@ export default function S33_Profile({
               <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.5, textTransform: 'uppercase' }}>
                 {text.moreFromProfile}
               </ACLabel>
-              <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {quickLinks.map((link) => (
-                  <button
-                    key={link.key || link.label}
-                    type="button"
-                    onClick={link.onClick}
-                    style={{
-                      padding: 12,
-                      background: c.card,
-                      borderRadius: ACRadii.card,
-                      border: 'none',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    <ACLabel size={10} color={link.meta ? c.accent : c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.35, textTransform: 'uppercase', fontWeight: 700 }}>
-                      {link.meta || text.open}
-                    </ACLabel>
-                    <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: c.fg }}>
-                      {link.label}
-                    </div>
-                    {link.description ? (
-                      <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.45, color: c.dim }}>
-                        {link.description}
+              {/* When all links are listItem=true, render as a flat list (5-tab You mode).
+                  Otherwise render the legacy 2x2 card grid. */}
+              {quickLinks.every((l) => l.listItem) ? (
+                <div style={{ marginTop: 8 }}>
+                  {quickLinks.map((link, i) => (
+                    <button
+                      key={link.key || link.label}
+                      type="button"
+                      onClick={link.onClick}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '100%',
+                        padding: '13px 0',
+                        background: 'transparent',
+                        border: 'none',
+                        borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
+                        borderBottom: `1px solid ${c.hair}`,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        gap: 12,
+                      }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: c.fg }}>{link.label}</div>
+                        {link.description ? (
+                          <div style={{ marginTop: 2, fontSize: 12, color: c.dim, lineHeight: 1.4 }}>{link.description}</div>
+                        ) : null}
                       </div>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
+                      <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
+                        <path d="M1 1l5 5-5 5" stroke={c.dim} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {quickLinks.map((link) => (
+                    <button
+                      key={link.key || link.label}
+                      type="button"
+                      onClick={link.onClick}
+                      style={{
+                        padding: 12,
+                        background: c.card,
+                        borderRadius: ACRadii.card,
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <ACLabel size={10} color={link.meta ? c.accent : c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.35, textTransform: 'uppercase', fontWeight: 700 }}>
+                        {link.meta || text.open}
+                      </ACLabel>
+                      <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: c.fg }}>
+                        {link.label}
+                      </div>
+                      {link.description ? (
+                        <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.45, color: c.dim }}>
+                          {link.description}
+                        </div>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : null}
 

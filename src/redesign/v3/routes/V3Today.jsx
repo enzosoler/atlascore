@@ -29,6 +29,139 @@ import {
 import { HeartMark } from '../lib/brandMarks.jsx';
 import OfflineBanner from '@/redesign/v3/components/states/OfflineBanner.jsx';
 
+// ── Feature flag check (mirrors V3AppShell) ───────────────────────────────────
+function isNav5TabEnabled() {
+  if (import.meta.env.VITE_FLAG_NAV_5TAB === '1') return true;
+  try { return localStorage.getItem('atlas.flag.nav5tab') === '1'; } catch { return false; }
+}
+
+// ── Morning brief hero card (inline on TODAY when coach tab is removed) ───────
+// Renders a compact version of the coach morning brief data at the top of Today.
+function MorningBriefCard({ dark, hasPlan, planName, streak, mealCount, firstName, onOpenChat }) {
+  const c = useACT(dark);
+  const t = useT();
+  const navigate = useNavigate();
+
+  const briefLabel = hasPlan ? t('coach.home.onTrack') : t('coach.home.building');
+
+  return (
+    <div style={{
+      marginBottom: 16,
+      padding: '14px 16px',
+      background: c.fg,
+      color: c.bg,
+      borderRadius: ACRadii.card,
+    }}>
+      {/* Top row: eyebrow + action */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <ACMono size={9} color={c.accent} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+          {t('coach.home.dailyBrief')}
+        </ACMono>
+        <button
+          type="button"
+          onClick={onOpenChat || (() => navigate('/app/coach/chat'))}
+          style={{
+            background: 'rgba(239,233,218,0.12)',
+            border: 'none',
+            borderRadius: 999,
+            padding: '4px 10px',
+            color: 'rgba(239,233,218,0.8)',
+            fontFamily: ACFonts.body,
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          {t('coach.home.askCoachAnything')}
+        </button>
+      </div>
+
+      {/* Headline */}
+      <div style={{
+        fontFamily: ACFonts.display,
+        fontSize: 22,
+        fontWeight: 700,
+        letterSpacing: -0.7,
+        lineHeight: 1.1,
+        color: 'rgba(239,233,218,0.95)',
+      }}>
+        {firstName ? `${firstName} — ` : ''}<span style={{ color: c.accent }}>{briefLabel}</span>
+      </div>
+
+      {/* Signal strip */}
+      <div style={{
+        marginTop: 10,
+        paddingTop: 10,
+        borderTop: '1px solid rgba(239,233,218,0.12)',
+        display: 'flex',
+        gap: 16,
+      }}>
+        <div>
+          <div style={{ fontFamily: ACFonts.mono, fontSize: 18, fontWeight: 700, color: 'rgba(239,233,218,0.95)', lineHeight: 1 }}>
+            {streak}
+          </div>
+          <div style={{ fontSize: 10, color: 'rgba(239,233,218,0.5)', fontFamily: ACFonts.body, marginTop: 2, letterSpacing: 0.3, textTransform: 'uppercase' }}>
+            {t('coach.home.signalDays')}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontFamily: ACFonts.mono, fontSize: 18, fontWeight: 700, color: 'rgba(239,233,218,0.95)', lineHeight: 1 }}>
+            {mealCount}
+          </div>
+          <div style={{ fontSize: 10, color: 'rgba(239,233,218,0.5)', fontFamily: ACFonts.body, marginTop: 2, letterSpacing: 0.3, textTransform: 'uppercase' }}>
+            {t('coach.home.signalMeals')}
+          </div>
+        </div>
+        {hasPlan && planName ? (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: ACFonts.body, fontSize: 12, fontWeight: 600, color: 'rgba(239,233,218,0.8)', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {planName}
+            </div>
+            <div style={{ fontSize: 10, color: 'rgba(239,233,218,0.5)', fontFamily: ACFonts.body, marginTop: 2, letterSpacing: 0.3, textTransform: 'uppercase' }}>
+              {t('coach.home.signalPlan')}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+// ── Coach FAB (Floating Action Button on TODAY) ───────────────────────────────
+// Renders in a position:fixed container so it floats above the tab bar.
+function CoachFAB({ dark }) {
+  const c = useACT(dark);
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      aria-label="Open coach chat"
+      onClick={() => navigate('/app/coach/chat')}
+      style={{
+        position: 'fixed',
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+        right: 20,
+        width: 52,
+        height: 52,
+        borderRadius: 999,
+        background: c.accent,
+        color: c.ink,
+        border: 'none',
+        boxShadow: dark
+          ? '0 6px 24px rgba(0,0,0,0.5)'
+          : '0 6px 24px rgba(40,30,20,0.25)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 40,
+      }}
+    >
+      <HeartMark size={22} color={c.ink} accent={c.ink} />
+    </button>
+  );
+}
+
 function timeOfDaySalute(hour, t) {
   if (hour < 12) return t('today.system.greeting.morning');
   if (hour < 17) return t('today.system.greeting.afternoon');
@@ -800,6 +933,7 @@ export default function V3Today() {
   const weather = useLiveWeather();
   const navigate = useNavigate();
   const dark = theme === 'dark';
+  const nav5tab = useMemo(() => isNav5TabEnabled(), []);
 
   const daily = useDailyStateV2() || { nutrition: null, todayMeals: [], recentSessions: [], workoutStreak: 0 };
 
@@ -911,22 +1045,46 @@ export default function V3Today() {
     );
   }
 
-  return (
-    <DailySystemScreen
+  // When nav5tab is on: morning brief card appears as hero section above the
+  // regular today content, and a FAB gives access to coach chat.
+  const morningBriefCard = nav5tab ? (
+    <MorningBriefCard
       dark={dark}
-      greeting={greeting}
-      weather={weather}
-      readiness={readiness}
-      actions={actions}
-      completions={system.completions}
-      adherence={system.adherence}
-      trend={system.trend}
-      momentum={system.momentum}
-      proteinConsumed={proteinConsumed}
-      proteinTarget={proteinTarget}
-      onToggle={system.toggleAction}
-      onNavigate={(route) => navigate(route)}
-      topContent={shouldShowOptionalCheckIn ? <OptionalCheckInCard dark={dark} onSubmit={handleCheckIn} /> : null}
+      hasPlan={Boolean(daily.plan?.name)}
+      planName={daily.plan?.name}
+      streak={daily.workoutStreak || 0}
+      mealCount={(daily.todayMeals || []).length}
+      firstName={name ? name.split(' ')[0] : null}
+      onOpenChat={() => navigate('/app/coach/chat')}
     />
+  ) : null;
+
+  const topContent = (
+    <>
+      {morningBriefCard}
+      {shouldShowOptionalCheckIn ? <OptionalCheckInCard dark={dark} onSubmit={handleCheckIn} /> : null}
+    </>
+  );
+
+  return (
+    <>
+      <DailySystemScreen
+        dark={dark}
+        greeting={greeting}
+        weather={weather}
+        readiness={readiness}
+        actions={actions}
+        completions={system.completions}
+        adherence={system.adherence}
+        trend={system.trend}
+        momentum={system.momentum}
+        proteinConsumed={proteinConsumed}
+        proteinTarget={proteinTarget}
+        onToggle={system.toggleAction}
+        onNavigate={(route) => navigate(route)}
+        topContent={topContent}
+      />
+      {nav5tab && <CoachFAB dark={dark} />}
+    </>
   );
 }

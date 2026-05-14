@@ -18,6 +18,12 @@ import { getMeasurementFieldValue } from '@/lib/measurementModel';
 import { listRoutines } from '@/lib/workoutsService';
 import S33_Profile from '../screens/S33_Profile.jsx';
 
+// ── Feature flag check (mirrors V3AppShell) ────────────────────────────────
+function isNav5TabEnabled() {
+  if (import.meta.env.VITE_FLAG_NAV_5TAB === '1') return true;
+  try { return localStorage.getItem('atlas.flag.nav5tab') === '1'; } catch { return false; }
+}
+
 function relativeAgeLabel(dateValue) {
   if (!dateValue) return '';
   const diff = Date.now() - new Date(dateValue).getTime();
@@ -66,6 +72,7 @@ export default function V3You() {
   const t = useT();
   const daily = useDailyStateV2();
   const navigate = useNavigate();
+  const nav5tab = useMemo(() => isNav5TabEnabled(), []);
 
   const { data: profileData } = useQuery({
     queryKey: ['v3-profile-data', user?.id],
@@ -187,7 +194,35 @@ export default function V3You() {
     total: 1,
     current: 1,
   };
-  const quickLinks = [
+  // 5-tab mode: body/labs/protocols live in the BODY tab, not here.
+  // YOU shows: identity info, recent activity, current program strip, PR grid,
+  // plus a flat list (not 2x2 grid) for Settings + Billing, and Social as one row.
+  const quickLinks = nav5tab ? [
+    {
+      key: 'social',
+      label: t('you.v3.links.social.label'),
+      meta: t('you.v3.links.social.meta'),
+      description: t('you.v3.links.social.description'),
+      onClick: () => navigate('/app/social'),
+      listItem: true,
+    },
+    {
+      key: 'settings',
+      label: t('you.v3.links.settings.label'),
+      meta: t('you.v3.links.settings.meta'),
+      description: t('you.v3.links.settings.description'),
+      onClick: () => navigate('/app/settings'),
+      listItem: true,
+    },
+    {
+      key: 'billing',
+      label: t('you.v3.links.billing.label'),
+      meta: t('you.v3.links.billing.meta'),
+      description: t('you.v3.links.billing.description'),
+      onClick: () => navigate('/webapp/billing'),
+      listItem: true,
+    },
+  ] : [
     {
       key: 'body',
       label: t('you.v3.links.body.label'),
